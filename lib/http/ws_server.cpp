@@ -11,12 +11,15 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file ws_server.cpp
+/// \brief Implementation of the WebSockets server.
+
 #include "pstore/http/ws_server.hpp"
 
 #include "pstore/support/unsigned_cast.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         auto ws_error_category::name () const noexcept -> gsl::czstring { return "ws-error"; }
 
@@ -108,5 +111,5 @@ namespace pstore {
             return return_type{in_place, payload};
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore

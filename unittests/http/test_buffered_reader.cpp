@@ -31,7 +31,7 @@ using pstore::error_or_n;
 using pstore::in_place;
 using pstore::maybe;
 using pstore::gsl::span;
-using pstore::httpd::make_buffered_reader;
+using pstore::http::make_buffered_reader;
 using testing::_;
 using testing::Invoke;
 
@@ -44,7 +44,7 @@ TEST (HttpdBufferedReader, Span) {
 
     constexpr auto buffer_size = std::size_t{0};
     constexpr auto requested_size = std::size_t{1};
-    auto br = pstore::httpd::make_buffered_reader<int> (refill, buffer_size);
+    auto br = pstore::http::make_buffered_reader<int> (refill, buffer_size);
 
     std::vector<std::uint8_t> v (requested_size, std::uint8_t{0xFF});
     pstore::error_or_n<int, byte_span> res = br.get_span (0, pstore::gsl::make_span (v));
@@ -224,7 +224,7 @@ TEST (HttpdBufferedReader, SomeCharactersThenAnError) {
 }
 
 TEST (HttpdBufferedReader, MaxLengthString) {
-    using pstore::httpd::max_string_length;
+    using pstore::http::max_string_length;
     std::string const max_length_string (max_string_length, 'a');
 
     refiller r;
@@ -242,7 +242,7 @@ TEST (HttpdBufferedReader, MaxLengthString) {
 }
 
 TEST (HttpdBufferedReader, StringTooLong) {
-    using pstore::httpd::max_string_length;
+    using pstore::http::max_string_length;
 
     refiller r;
     EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
@@ -252,5 +252,5 @@ TEST (HttpdBufferedReader, StringTooLong) {
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function (), max_string_length + 1U);
     error_or_n<int, maybe<std::string>> const s2 = br.gets (io);
-    EXPECT_EQ (s2.get_error (), make_error_code (pstore::httpd::error_code::string_too_long));
+    EXPECT_EQ (s2.get_error (), make_error_code (pstore::http::error_code::string_too_long));
 }

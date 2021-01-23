@@ -30,7 +30,7 @@
 #include "pstore/support/maybe.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         class request_info {
         public:
@@ -162,7 +162,7 @@ namespace pstore {
             };
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_REQUEST_HPP

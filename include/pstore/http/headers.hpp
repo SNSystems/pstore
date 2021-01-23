@@ -19,7 +19,7 @@
 #include "pstore/support/maybe.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         struct header_info {
             bool operator== (header_info const & rhs) const;
@@ -33,7 +33,7 @@ namespace pstore {
             header_info handler (std::string const & key, std::string const & value);
         };
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_HEADERS_HPP

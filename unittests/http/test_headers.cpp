@@ -17,7 +17,7 @@
 
 using namespace std::string_literals;
 using pstore::just;
-using pstore::httpd::header_info;
+using pstore::http::header_info;
 
 TEST (Headers, Conventional) {
     header_info const hi = header_info ()

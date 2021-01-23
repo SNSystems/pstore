@@ -24,7 +24,7 @@
 #include "pstore/support/assert.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         //*                               _        _            *
         //*  ___ ___ _ ___ _____ _ _   __| |_ __ _| |_ _  _ ___ *
@@ -78,7 +78,7 @@ namespace pstore {
             in_port_t port_;
         };
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_SERVER_STATUS_HPP

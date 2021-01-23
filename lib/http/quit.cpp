@@ -30,7 +30,7 @@
 #include "pstore/support/random.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         void quit (gsl::not_null<maybe<server_status> *> http_status) {
             if (!http_status->has_value ()) {
@@ -70,5 +70,5 @@ namespace pstore {
             }
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore

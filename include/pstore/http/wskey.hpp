@@ -27,7 +27,7 @@
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         class sha1 {
         public:
@@ -82,7 +82,7 @@ namespace pstore {
 
         std::string source_key (std::string const & k);
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_WSKEY_HPP

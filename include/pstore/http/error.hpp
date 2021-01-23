@@ -23,9 +23,9 @@
 
 #include "pstore/support/error.hpp"
 
-
 namespace pstore {
-    namespace httpd {
+    namespace http {
+
         // **************
         // * error code *
         // **************
@@ -59,7 +59,7 @@ namespace pstore {
         }
 
 
-        // get_last_error
+        // get last error
         // ~~~~~~~~~~~~~~
         inline std::error_code get_last_error () noexcept {
 #ifdef _WIN32
@@ -69,14 +69,14 @@ namespace pstore {
 #endif // !_WIN32
         }
 
-    } // namespace httpd
-} // namespace pstore
+    } // end namespace http
+} // end namespace pstore
 
 
 namespace std {
 
     template <>
-    struct is_error_code_enum<pstore::httpd::error_code> : std::true_type {};
+    struct is_error_code_enum<pstore::http::error_code> : std::true_type {};
 
 } // end namespace std
 

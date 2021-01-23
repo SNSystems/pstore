@@ -24,7 +24,7 @@
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         static constexpr auto crlf = "\r\n";
         static constexpr auto server_name = "pstore-http";
@@ -50,7 +50,7 @@ namespace pstore {
             return send (sender, io, as_bytes (gsl::make_span (&nv, 1)));
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_SEND_HPP

@@ -15,16 +15,16 @@
 #include <gtest/gtest.h>
 
 TEST (MediaType, Empty) {
-    EXPECT_STREQ (pstore::httpd::media_type_from_extension (""), "application/octet-stream");
-    EXPECT_STREQ (pstore::httpd::media_type_from_filename (""), "application/octet-stream");
+    EXPECT_STREQ (pstore::http::media_type_from_extension (""), "application/octet-stream");
+    EXPECT_STREQ (pstore::http::media_type_from_filename (""), "application/octet-stream");
 }
 
 TEST (MediaType, JSON) {
-    EXPECT_STREQ (pstore::httpd::media_type_from_extension (".json"), "application/json");
-    EXPECT_STREQ (pstore::httpd::media_type_from_filename ("foo.json"), "application/json");
+    EXPECT_STREQ (pstore::http::media_type_from_extension (".json"), "application/json");
+    EXPECT_STREQ (pstore::http::media_type_from_filename ("foo.json"), "application/json");
 }
 
 TEST (MediaType, Unknown) {
-    EXPECT_STREQ (pstore::httpd::media_type_from_extension (".foo"), "application/octet-stream");
-    EXPECT_STREQ (pstore::httpd::media_type_from_filename ("foo.foo"), "application/octet-stream");
+    EXPECT_STREQ (pstore::http::media_type_from_extension (".foo"), "application/octet-stream");
+    EXPECT_STREQ (pstore::http::media_type_from_filename ("foo.foo"), "application/octet-stream");
 }

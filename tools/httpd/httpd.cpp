@@ -71,13 +71,13 @@ int main (int argc, char * argv[]) {
         pstore::threads::set_name (ident);
         pstore::create_log_stream (ident);
 
-        pstore::httpd::server_status status{http_port.get ()};
+        pstore::http::server_status status{http_port.get ()};
         std::thread ([&status] () {
             static constexpr auto * const name = "http";
             pstore::threads::set_name (name);
             pstore::create_log_stream (name);
-            pstore::httpd::server (
-                fs, &status, pstore::httpd::channel_container{}, [] (in_port_t const port) {
+            pstore::http::server (
+                fs, &status, pstore::http::channel_container{}, [] (in_port_t const port) {
                     out_stream << NATIVE_TEXT ("Listening on port ") << port << std::endl;
                 });
         }).join ();

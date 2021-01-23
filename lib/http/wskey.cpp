@@ -11,6 +11,7 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file wskey.cpp
 /*
  *  sha1.c
  *
@@ -50,7 +51,7 @@
 #include "pstore/support/base64.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         constexpr std::array<std::uint32_t, sha1::hash_size / 4> sha1::initial_intermediate;
 
@@ -98,7 +99,7 @@ namespace pstore {
             return digest;
         }
 
-        // process_message_block
+        // process message block
         // ~~~~~~~~~~~~~~~~~~~~~
         void sha1::process_message_block () noexcept {
             // Constants defined in SHA-1.
@@ -169,7 +170,7 @@ namespace pstore {
             index_ = 0;
         }
 
-        // pad_message
+        // pad message
         // ~~~~~~~~~~~
         void sha1::pad_message () noexcept {
             // Note that many of the variable names in this code, especially the single character
@@ -212,7 +213,7 @@ namespace pstore {
             this->process_message_block ();
         }
 
-        // digest_to_base64 [static]
+        // digest to base64 [static]
         // ~~~~~~~~~~~~~~~~
         std::string sha1::digest_to_base64 (sha1::result_type const & digest) {
             std::string result;
@@ -221,7 +222,8 @@ namespace pstore {
         }
 
 
-
+        // source key
+        // ~~~~~~~~~~
         std::string source_key (std::string const & k) {
             sha1 hash;
 
@@ -248,5 +250,5 @@ namespace pstore {
             return sha1::digest_to_base64 (hash.result ());
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore

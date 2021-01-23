@@ -44,7 +44,7 @@ namespace pstore {
             /// \param scavenge_threshold  The time for which messages are
             ///   allowed to wait in the message queue before the scavenger will delete them.
             command_processor (unsigned num_read_threads,
-                               gsl::not_null<maybe<httpd::server_status> *> const http_status,
+                               gsl::not_null<maybe<http::server_status> *> const http_status,
                                gsl::not_null<std::atomic<bool> *> uptime_done,
                                std::chrono::seconds scavenge_threshold);
             // No copying or assignment.
@@ -101,7 +101,7 @@ namespace pstore {
             std::atomic<bool> commands_done_{false};
 
             /// A pointer to an object which can be used to tell the http server to exit.
-            gsl::not_null<maybe<httpd::server_status> *> const http_status_;
+            gsl::not_null<maybe<http::server_status> *> const http_status_;
             /// A pointer to a bool which, when set, will tell the uptime thread to exit.
             gsl::not_null<std::atomic<bool> *> uptime_done_;
             /// The time for which messages are allowed to wait in the message queue before the

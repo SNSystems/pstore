@@ -25,7 +25,7 @@
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         namespace details {
 
@@ -262,7 +262,7 @@ namespace pstore {
             return query_to_kvp (in.cbegin (), in.cend (), out);
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_QUERY_TO_KVP_HPP

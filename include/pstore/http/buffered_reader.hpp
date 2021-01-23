@@ -11,6 +11,9 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file buffered_reader.hpp
+/// \brief Provides buffered reading of a source stream.
+
 #ifndef PSTORE_HTTP_BUFFERED_READER_HPP
 #define PSTORE_HTTP_BUFFERED_READER_HPP
 
@@ -26,9 +29,8 @@
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
 
-
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         constexpr auto default_buffer_size = std::size_t{4096};
         constexpr auto max_string_length = std::size_t{256};
@@ -356,7 +358,7 @@ namespace pstore {
             return buffered_reader<IO, RefillFunction> (refiller, buffer_size);
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_BUFFERED_READER_HPP

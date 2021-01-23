@@ -23,7 +23,7 @@
 #include "pstore/support/error.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         //*                               _        _            *
         //*  ___ ___ _ ___ _____ _ _   __| |_ __ _| |_ _  _ ___ *
@@ -56,5 +56,5 @@ namespace pstore {
             return port_;
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore

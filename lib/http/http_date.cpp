@@ -30,7 +30,7 @@ namespace {
 } // end anonymous namespace
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         // Produce a date in http-date format (https://tools.ietf.org/html/rfc7231#page-65)
         std::string http_date (time_t const time) {
@@ -86,5 +86,5 @@ namespace pstore {
             return http_date (std::chrono::system_clock::to_time_t (time));
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore

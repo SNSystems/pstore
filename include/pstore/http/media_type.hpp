@@ -20,14 +20,14 @@
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         gsl::czstring PSTORE_NONNULL
         media_type_from_extension (gsl::czstring PSTORE_NONNULL extension);
 
         gsl::czstring PSTORE_NONNULL media_type_from_filename (std::string const & filename);
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_MEDIA_TYPE_HPP

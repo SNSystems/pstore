@@ -19,7 +19,7 @@
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
         namespace net {
 
             // refiller
@@ -32,7 +32,7 @@ namespace pstore {
                                                           gsl::span<std::uint8_t const> const & s);
 
         } // end namespace net
-    }     // end namespace httpd
+    }     // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_NET_TXRX_HPP

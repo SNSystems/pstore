@@ -64,7 +64,7 @@ namespace pstore {
         // ~~~~
         command_processor::command_processor (
             unsigned const num_read_threads,
-            gsl::not_null<maybe<httpd::server_status> *> const http_status,
+            gsl::not_null<maybe<http::server_status> *> const http_status,
             gsl::not_null<std::atomic<bool> *> const uptime_done,
             std::chrono::seconds const delete_threshold)
                 : http_status_{http_status}

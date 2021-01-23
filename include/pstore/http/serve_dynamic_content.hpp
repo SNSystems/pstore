@@ -40,7 +40,7 @@
 #include "pstore/support/array_elements.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         constexpr char dynamic_path[] = "/cmd/";
 
@@ -69,7 +69,7 @@ namespace pstore {
                << "Server: " << server_name << crlf                                 //
                << crlf // End of headers
                << version;
-            return pstore::httpd::send (sender, io, os.str ());
+            return pstore::http::send (sender, io, os.str ());
         }
 
 
@@ -131,7 +131,7 @@ namespace pstore {
             query_container arguments;
             if (it != std::end (uri)) {
                 it = query_to_kvp (it, std::end (uri),
-                                   pstore::httpd::make_insert_iterator (arguments));
+                                   pstore::http::make_insert_iterator (arguments));
             }
 
             // Do we know how to handle this command?
@@ -155,7 +155,7 @@ namespace pstore {
             return std::get<1> (*lb) (sender, io, arguments);
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_SERVE_DYNAMIC_CONTENT_HPP

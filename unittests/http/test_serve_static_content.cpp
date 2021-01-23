@@ -74,7 +74,7 @@ namespace {
             return eoint (io + 1);
         };
 
-        return pstore::httpd::serve_static_content (sender, 0, path, fs ()) >>= [&actual] (int) {
+        return pstore::http::serve_static_content (sender, 0, path, fs ()) >>= [&actual] (int) {
             return pstore::error_or<std::string>{pstore::in_place, actual};
         };
     }
@@ -91,7 +91,7 @@ namespace {
         decltype (auto) gets (state_type const start) {
             using result_type = pstore::error_or_n<state_type, pstore::maybe<std::string>>;
 
-            static auto const crlf = pstore::httpd::crlf;
+            static auto const crlf = pstore::http::crlf;
             static auto const crlf_len = std::strlen (crlf);
 
             PSTORE_ASSERT (start != std::string::npos);
@@ -117,7 +117,7 @@ TEST_F (ServeStaticContent, Simple) {
 
     reader r{*actual};
     auto const record_headers = [&r, &headers] (reader::state_type io,
-                                                pstore::httpd::request_info const &) {
+                                                pstore::http::request_info const &) {
         auto record_header = [&headers] (int io2, std::string const & key,
                                          std::string const & value) {
             // The date value will change according to when the test is run so we preserve its
@@ -126,11 +126,11 @@ TEST_F (ServeStaticContent, Simple) {
             return io2 + 1;
         };
 
-        return pstore::httpd::read_headers (r, io, record_header, 0);
+        return pstore::http::read_headers (r, io, record_header, 0);
     };
 
     pstore::error_or_n<std::string::size_type, int> const eo =
-        pstore::httpd::read_request (r, std::string::size_type{0}) >>= record_headers;
+        pstore::http::read_request (r, std::string::size_type{0}) >>= record_headers;
 
     ASSERT_TRUE (static_cast<bool> (eo));
     EXPECT_THAT (headers,

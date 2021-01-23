@@ -36,7 +36,7 @@
 #include "pstore/support/utf.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         constexpr bool log_frame_info = false;        // Log the frame header as it is received?
         constexpr bool log_received_messages = false; // Log the text of received messages?
@@ -67,19 +67,19 @@ namespace pstore {
 
         auto make_error_code (ws_error e) -> std::error_code;
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 namespace std {
 
     template <>
-    struct is_error_code_enum<pstore::httpd::ws_error> : std::true_type {};
+    struct is_error_code_enum<pstore::http::ws_error> : std::true_type {};
 
 } // end namespace std
 
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         // Frame format:
         //
@@ -620,7 +620,7 @@ namespace pstore {
             }
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_WS_SERVER_HPP

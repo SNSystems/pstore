@@ -11,10 +11,13 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file error.cpp
+/// \brief Implementation of the HTTP error category.
+
 #include "pstore/http/error.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         // ******************
         // * error category *
@@ -44,5 +47,5 @@ namespace pstore {
             return cat;
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore

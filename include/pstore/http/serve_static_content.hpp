@@ -26,7 +26,7 @@
 #include "pstore/romfs/romfs.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         namespace details {
 
@@ -67,7 +67,7 @@ namespace pstore {
                     os << "HTTP/1.0 200 OK" << crlf               //
                        << "Server: " << server_name << crlf       //
                        << "Content-length: " << stat.size << crlf //
-                       << "Content-type: " << pstore::httpd::media_type_from_filename (path)
+                       << "Content-type: " << pstore::http::media_type_from_filename (path)
                        << crlf //
                        << "Connection: close"
                        << crlf // TODO remove this when we support persistent connections
@@ -80,7 +80,7 @@ namespace pstore {
             };
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_SERVE_STATIC_CONTENT_HPP

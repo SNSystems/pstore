@@ -11,6 +11,8 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file block_for_input.hpp
+
 #ifndef PSTORE_HTTP_BLOCK_FOR_INPUT_HPP
 #define PSTORE_HTTP_BLOCK_FOR_INPUT_HPP
 
@@ -28,7 +30,7 @@
 #include "pstore/os/logging.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         struct inputs_ready {
             constexpr inputs_ready (bool const s, bool const c) noexcept
@@ -122,10 +124,9 @@ namespace pstore {
             return {isset (socket_fd.native_handle ()),
                     cv_fd != nullptr ? isset (cv_fd->native_handle ()) : false};
 #endif
-        } // namespace httpd
+        }
 
-
-    } // namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_BLOCK_FOR_INPUT_HPP

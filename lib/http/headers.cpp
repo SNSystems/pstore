@@ -23,7 +23,7 @@
 
 #include "pstore/support/ctype.hpp"
 
-using pstore::httpd::header_info;
+using pstore::http::header_info;
 
 namespace {
 
@@ -134,14 +134,14 @@ namespace {
 
 } // end anonymous namespace
 
-bool pstore::httpd::header_info::operator== (header_info const & rhs) const {
+bool pstore::http::header_info::operator== (header_info const & rhs) const {
     return upgrade_to_websocket == rhs.upgrade_to_websocket &&
            connection_upgrade == rhs.connection_upgrade && websocket_key == rhs.websocket_key &&
            websocket_version == rhs.websocket_version;
 }
 
-header_info pstore::httpd::header_info::handler (std::string const & key,
-                                                 std::string const & value) {
+header_info pstore::http::header_info::handler (std::string const & key,
+                                                std::string const & value) {
     static std::unordered_map<
         std::string, std::function<header_info (header_info, std::string const & value)>> const
         handlers = {

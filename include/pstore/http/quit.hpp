@@ -19,11 +19,11 @@
 #include "pstore/support/maybe.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         void quit (gsl::not_null<maybe<server_status> *> http_status);
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_QUIT_HPP

@@ -11,6 +11,8 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file server.cpp
+/// \brief Implements the top-level HTTP server functions.
 #include "pstore/http/server.hpp"
 
 // Standard library includes
@@ -41,8 +43,8 @@ namespace {
     pstore::error_or<IO> cerror (Sender sender, IO io, pstore::gsl::czstring const cause,
                                  unsigned const error_no, pstore::gsl::czstring const shortmsg,
                                  pstore::gsl::czstring const longmsg) {
-        static constexpr auto crlf = pstore::httpd::crlf;
-        static constexpr auto server_name = pstore::httpd::server_name;
+        static constexpr auto crlf = pstore::http::crlf;
+        static constexpr auto server_name = pstore::http::server_name;
 
         std::ostringstream content;
         content << "<!DOCTYPE html>\n"
@@ -70,7 +72,7 @@ namespace {
                    "</body>\n"
                    "</html>\n";
         std::string const & content_str = content.str ();
-        auto const now = pstore::httpd::http_date (std::chrono::system_clock::now ());
+        auto const now = pstore::http::http_date (std::chrono::system_clock::now ());
 
         std::ostringstream os;
         // clang-format off
@@ -84,7 +86,7 @@ namespace {
            << crlf
            << content_str;
         // clang-format on
-        return pstore::httpd::send (sender, io, os);
+        return pstore::http::send (sender, io, os);
     }
 
     // initialize_socket
@@ -95,13 +97,13 @@ namespace {
         log (pstore::logger::priority::info, "initializing on port: ", port_number);
         socket_descriptor fd{::socket (AF_INET, SOCK_STREAM, 0)};
         if (!fd.valid ()) {
-            return eo{pstore::httpd::get_last_error ()};
+            return eo{pstore::http::get_last_error ()};
         }
 
         int const optval = 1;
         if (::setsockopt (fd.native_handle (), SOL_SOCKET, SO_REUSEADDR,
                           reinterpret_cast<char const *> (&optval), sizeof (optval))) {
-            return eo{pstore::httpd::get_last_error ()};
+            return eo{pstore::http::get_last_error ()};
         }
 
         sockaddr_in server_addr{}; // server's addr.
@@ -110,12 +112,12 @@ namespace {
         server_addr.sin_port = htons (port_number);       // NOLINT
         if (::bind (fd.native_handle (), reinterpret_cast<sockaddr *> (&server_addr),
                     sizeof (server_addr)) < 0) {
-            return eo{pstore::httpd::get_last_error ()};
+            return eo{pstore::http::get_last_error ()};
         }
 
         // Get ready to accept connection requests.
         if (::listen (fd.native_handle (), 5) < 0) { // allow 5 requests to queue up.
-            return eo{pstore::httpd::get_last_error ()};
+            return eo{pstore::http::get_last_error ()};
         }
 
         return eo{std::move (fd)};
@@ -134,7 +136,7 @@ namespace {
             reinterpret_cast<sockaddr const *> (&client_addr), sizeof (client_addr),
             host_name.data (), static_cast<size_type> (size), nullptr, socklen_t{0}, 0 /*flags*/);
         if (gni_err != 0) {
-            return pstore::error_or<std::string>{pstore::httpd::get_last_error ()};
+            return pstore::error_or<std::string>{pstore::http::get_last_error ()};
         }
         host_name.back () = '\0'; // guarantee nul termination.
         return pstore::error_or<std::string>{std::string{host_name.data ()}};
@@ -142,10 +144,10 @@ namespace {
 
 
     // Here we bridge from the std::error_code world to HTTP status codes.
-    void report_error (std::error_code const error, pstore::httpd::request_info const & request,
+    void report_error (std::error_code const error, pstore::http::request_info const & request,
                        socket_descriptor & socket) {
-        static constexpr auto crlf = pstore::httpd::crlf;
-        static constexpr auto sender = pstore::httpd::net::network_sender;
+        static constexpr auto crlf = pstore::http::crlf;
+        static constexpr auto sender = pstore::http::net::network_sender;
 
         auto report = [&error, &request, &socket] (unsigned const code,
                                                    pstore::gsl::czstring const message) {
@@ -154,11 +156,11 @@ namespace {
         };
 
         log (pstore::logger::priority::error, "http error: ", error.message ());
-        if (error.category () == pstore::httpd::get_error_category ()) {
-            switch (static_cast<pstore::httpd::error_code> (error.value ())) {
-            case pstore::httpd::error_code::bad_request: report (400, "Bad request"); return;
+        if (error.category () == pstore::http::get_error_category ()) {
+            switch (static_cast<pstore::http::error_code> (error.value ())) {
+            case pstore::http::error_code::bad_request: report (400, "Bad request"); return;
 
-            case pstore::httpd::error_code::bad_websocket_version: {
+            case pstore::http::error_code::bad_websocket_version: {
                 // From rfc6455: "The |Sec-WebSocket-Version| header field in the client's handshake
                 // includes the version of the WebSocket Protocol with which the client is
                 // attempting to communicate. If this version does not match a version understood by
@@ -168,17 +170,17 @@ namespace {
                 // the server is capable of understanding."
                 std::ostringstream os;
                 os << "HTTP/1.1 426 OK" << crlf //
-                   << "Sec-WebSocket-Version: " << pstore::httpd::ws_version << crlf
-                   << "Server: pstore-httpd" << crlf //
+                   << "Sec-WebSocket-Version: " << pstore::http::ws_version << crlf
+                   << "Server: " << pstore::http::server_name << crlf //
                    << crlf;
                 std::string const & reply = os.str ();
                 sender (socket, as_bytes (pstore::gsl::make_span (reply)));
             }
                 return;
 
-            case pstore::httpd::error_code::not_implemented:
-            case pstore::httpd::error_code::string_too_long:
-            case pstore::httpd::error_code::refill_out_of_range: break;
+            case pstore::http::error_code::not_implemented:
+            case pstore::http::error_code::string_too_long:
+            case pstore::http::error_code::refill_out_of_range: break;
             }
         } else if (error.category () == pstore::romfs::get_romfs_error_category ()) {
             switch (static_cast<pstore::romfs::error_code> (error.value ())) {
@@ -198,9 +200,9 @@ namespace {
 
     template <typename Reader, typename IO>
     pstore::error_or<std::unique_ptr<std::thread>>
-    upgrade_to_ws (Reader & reader, IO io, pstore::httpd::request_info const & request,
-                   pstore::httpd::header_info const & header_contents,
-                   pstore::httpd::channel_container const & channels) {
+    upgrade_to_ws (Reader & reader, IO io, pstore::http::request_info const & request,
+                   pstore::http::header_info const & header_contents,
+                   pstore::http::channel_container const & channels) {
         using return_type = pstore::error_or<std::unique_ptr<std::thread>>;
         using priority = pstore::logger::priority;
         PSTORE_ASSERT (header_contents.connection_upgrade && header_contents.upgrade_to_websocket);
@@ -209,13 +211,13 @@ namespace {
         // Validate the request headers
         if (!header_contents.websocket_key || !header_contents.websocket_version) {
             log (priority::error, "Missing WebSockets upgrade key or version header.");
-            return return_type{pstore::httpd::error_code::bad_request};
+            return return_type{pstore::http::error_code::bad_request};
         }
 
 
-        if (*header_contents.websocket_version != pstore::httpd::ws_version) {
+        if (*header_contents.websocket_version != pstore::http::ws_version) {
             log (priority::error, "Bad Websocket version number requested");
-            return return_type{pstore::httpd::error_code::bad_websocket_version};
+            return return_type{pstore::http::error_code::bad_websocket_version};
         }
 
 
@@ -223,22 +225,22 @@ namespace {
         auto const accept_ws_connection = [&header_contents, &io] () {
             log (priority::info, "Accepting WebSockets upgrade");
 
-            static constexpr auto crlf = pstore::httpd::crlf;
-            std::string const date = pstore::httpd::http_date (std::chrono::system_clock::now ());
+            static constexpr auto crlf = pstore::http::crlf;
+            std::string const date = pstore::http::http_date (std::chrono::system_clock::now ());
             std::ostringstream os;
             // clang-format off
             os << "HTTP/1.1 101 Switching Protocols" << crlf
-               << "Server: pstore-httpd" << crlf
+               << "Server: " << pstore::http::server_name << crlf
                << "Upgrade: WebSocket" << crlf
                << "Connection: Upgrade" << crlf
-               << "Sec-WebSocket-Accept: " << pstore::httpd::source_key (*header_contents.websocket_key) << crlf
+               << "Sec-WebSocket-Accept: " << pstore::http::source_key (*header_contents.websocket_key) << crlf
                << "Date: " << date << crlf
                << "Last-Modified: " << date << crlf
                << crlf;
             // clang-format on
 
             // Here I assume that the send() IO param is the same as the Reader's IO parameter.
-            return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
+            return pstore::http::send (pstore::http::net::network_sender, std::ref (io), os);
         };
 
         auto server_loop_thread = [&channels] (Reader && reader2, socket_descriptor io2,
@@ -251,7 +253,7 @@ namespace {
                 log (priority::info, "Started WebSockets session");
 
                 PSTORE_ASSERT (io2.valid ());
-                ws_server_loop (std::move (reader2), pstore::httpd::net::network_sender,
+                ws_server_loop (std::move (reader2), pstore::http::net::network_sender,
                                 std::ref (io2), uri, channels);
 
                 log (priority::info, "Ended WebSockets session");
@@ -317,14 +319,14 @@ namespace {
                                             reinterpret_cast<struct sockaddr *> (&client_addr),
                                             &clientlen)};
         if (!childfd.valid ()) {
-            return return_type{pstore::httpd::get_last_error ()};
+            return return_type{pstore::http::get_last_error ()};
         }
 
         // Determine who sent the message.
         PSTORE_ASSERT (clientlen == static_cast<socklen_t> (sizeof (client_addr)));
         pstore::error_or<std::string> ename = get_client_name (client_addr);
         if (!ename) {
-            return return_type{pstore::httpd::get_last_error ()};
+            return return_type{pstore::http::get_last_error ()};
         }
         log (priority::info, "Connection from ", ename.get ());
         return return_type{std::move (childfd)};
@@ -333,7 +335,7 @@ namespace {
 } // end anonymous namespace
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         int server (romfs::romfs & file_system, gsl::not_null<server_status *> const status,
                     channel_container const & channels,
@@ -385,7 +387,7 @@ namespace pstore {
 
                 // We only currently support the GET method.
                 if (request.method () != "GET") {
-                    cerror (pstore::httpd::net::network_sender, std::ref (childfd),
+                    cerror (pstore::http::net::network_sender, std::ref (childfd),
                             request.method ().c_str (), 501, "Not Implemented",
                             "httpd does not implement this method");
                     continue;
@@ -407,13 +409,13 @@ namespace pstore {
                     }
 
                     if (!details::starts_with (request.uri (), dynamic_path)) {
-                        return serve_static_content (pstore::httpd::net::network_sender,
+                        return serve_static_content (pstore::http::net::network_sender,
                                                      std::ref (io2), request.uri (), file_system)
                             .get_error ();
                     }
 
-                    return serve_dynamic_content (pstore::httpd::net::network_sender,
-                                                  std::ref (io2), request.uri ())
+                    return serve_dynamic_content (pstore::http::net::network_sender, std::ref (io2),
+                                                  request.uri ())
                         .get_error ();
                 };
 
@@ -441,5 +443,5 @@ namespace pstore {
             return 0;
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore

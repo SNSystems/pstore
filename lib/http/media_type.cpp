@@ -42,7 +42,7 @@ namespace {
 } // end anonymous namespace
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         gsl::czstring PSTORE_NONNULL
         media_type_from_extension (gsl::czstring const PSTORE_NONNULL extension) {
@@ -71,5 +71,5 @@ namespace pstore {
                 filename.c_str () + (dot_pos == std::string::npos ? filename.length () : dot_pos));
         }
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore

@@ -26,11 +26,11 @@
 #include "pstore/support/maybe.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         class server_status;
 
-    } // end namespace httpd
+    } // end namespace http
 
     namespace broker {
 
@@ -42,7 +42,7 @@ namespace pstore {
 
         void shutdown (command_processor * const cp, scavenger * const scav, int const signum,
                        unsigned const num_read_threads,
-                       gsl::not_null<maybe<httpd::server_status> *> const http_status,
+                       gsl::not_null<maybe<http::server_status> *> const http_status,
                        gsl::not_null<std::atomic<bool> *> const uptime_done);
 
         /// Wakes up the quit thread to start the process of shutting down the server.
@@ -50,7 +50,7 @@ namespace pstore {
 
         std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
                                         std::weak_ptr<scavenger> scav, unsigned num_read_threads,
-                                        gsl::not_null<maybe<httpd::server_status> *> http_status,
+                                        gsl::not_null<maybe<http::server_status> *> http_status,
                                         gsl::not_null<std::atomic<bool> *> uptime_done);
     } // end namespace broker
 } // end namespace pstore

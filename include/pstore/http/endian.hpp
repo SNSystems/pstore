@@ -11,6 +11,9 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file endian.hpp
+/// \brief Network/host byte swapping.
+
 #ifndef PSTORE_HTTP_ENDIAN_HPP
 #define PSTORE_HTTP_ENDIAN_HPP
 
@@ -31,7 +34,7 @@
 #endif
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         template <typename T>
         T network_to_host (T x) noexcept;
@@ -59,7 +62,6 @@ namespace pstore {
         }
 
 
-
         template <typename T>
         T host_to_network (T x) noexcept;
         template <>
@@ -85,8 +87,7 @@ namespace pstore {
 #endif     // PSTORE_IS_BIG_ENDIAN
         }
 
-
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_ENDIAN_HPP

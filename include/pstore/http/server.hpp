@@ -11,6 +11,8 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file server.hpp
+/// \brief Top-level entry point for the HTTP server.
 
 #ifndef PSTORE_HTTP_SERVER_HPP
 #define PSTORE_HTTP_SERVER_HPP
@@ -19,7 +21,7 @@
 #include "pstore/romfs/romfs.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         class server_status;
 
@@ -29,7 +31,7 @@ namespace pstore {
 
         void quit (in_port_t port_number);
 
-    } // end namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_SERVER_HPP

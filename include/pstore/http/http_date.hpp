@@ -11,6 +11,8 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file http_date.hpp
+/// \brief Functions to return a dated formatted for HTTP.
 #ifndef PSTORE_HTTP_HTTP_DATE_HPP
 #define PSTORE_HTTP_HTTP_DATE_HPP
 
@@ -19,12 +21,12 @@
 #include <string>
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         std::string http_date (std::chrono::system_clock::time_point time);
         std::string http_date (std::time_t time);
 
-    } // namespace httpd
+    } // end namespace http
 } // end namespace pstore
 
 #endif // PSTORE_HTTP_HTTP_DATE_HPP

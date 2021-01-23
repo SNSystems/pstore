@@ -46,7 +46,7 @@ namespace {
 
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
         namespace net {
 
             // refiller
@@ -92,5 +92,5 @@ namespace pstore {
             }
 
         } // end namespace net
-    }     // end namespace httpd
+    }     // end namespace http
 } // end namespace pstore
