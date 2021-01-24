@@ -20,8 +20,6 @@
 
 #include "pstore/support/portab.hpp"
 
-#ifndef NDEBUG
-
 namespace pstore {
 
     PSTORE_NO_RETURN
@@ -29,6 +27,7 @@ namespace pstore {
 
 } // end namespace pstore
 
+#ifndef NDEBUG
 #    define PSTORE_ASSERT(expr)                                                                    \
         ((expr) ? static_cast<void> (0) : ::pstore::assert_failed (#expr, __FILE__, __LINE__))
 #else

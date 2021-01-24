@@ -11,6 +11,9 @@
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
+/// \file assert.hpp
+/// \brief Defines assert_failed() which is required by PSTORE_ASSERT.
+
 #include "pstore/support/assert.hpp"
 
 #include <array>
@@ -24,8 +27,6 @@
 #include "pstore/support/gsl.hpp"
 
 #include "backtrace.hpp"
-
-#ifndef NDEBUG
 
 namespace {
 
@@ -64,5 +65,3 @@ namespace pstore {
     }
 
 } // end namespace pstore
-
-#endif // NDEBUG
