@@ -182,9 +182,11 @@ namespace pstore {
                 return os;
             }
 
-            /// Writes an array of values given by the range \p first to \p last to the output
+            /// Writes an array of value given by the range \p first to \p last to the output
             /// stream \p os. The output follows the JSON syntax of "[ a, b ]" except that each
-            /// object is written on a new line.
+            /// object is written on a new line. The function \p fn should return an indirect-string
+            /// address the value of which, if enabled by the user, will also be written to the
+            /// output as a comment.
             ///
             /// \tparam OStream  An output stream type to which values can be written using the '<<'
             ///     operator.
@@ -198,6 +200,7 @@ namespace pstore {
             /// \param ind  The indentation to be applied to each member of the array.
             /// \param first  The start of the range denoting array elements to be emitted.
             /// \param last  The end of the range denoting array elements to be emitted.
+            /// \param comments  Emit comments with a string for each array element?
             /// \param fn  A function which is called to emit the contents of each object in the
             ///    iterator range denoted by [first, last).
             template <typename OStream, typename InputIt, typename Function>

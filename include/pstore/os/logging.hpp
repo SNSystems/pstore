@@ -54,7 +54,7 @@ namespace pstore {
             };
 
             logger () = default;
-            virtual ~logger () = default;
+            virtual ~logger () noexcept = default;
 
             void set_priority (priority const p) noexcept { priority_ = p; }
             priority get_priority () const noexcept { return priority_; }
