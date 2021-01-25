@@ -279,6 +279,8 @@ function (add_pstore_library)
         ARCHIVE
             DESTINATION "${CMAKE_INSTALL_LIBDIR}/pstore"
             COMPONENT pstore
+        INCLUDES
+            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     )
     add_dependencies (install-pstore ${arg_TARGET})
 
