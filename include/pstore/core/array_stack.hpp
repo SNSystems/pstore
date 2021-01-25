@@ -10,6 +10,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 /// \file array_stack.hpp
 /// \brief array_stack is a simple container which provides an interface very

@@ -10,6 +10,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 /// \file gc_win32.cpp
 /// \brief Waits for garbage-collection processes to exit. On exit, a process is removed from the

@@ -10,6 +10,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 /// \file error_or.hpp
 /// \brief error_or<T> holds either an instance of T or a std:error.

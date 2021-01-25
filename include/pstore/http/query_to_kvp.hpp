@@ -10,6 +10,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 /// \file query_to_kvp.hpp
 /// \brief Functions for converting key/value pairs to and from the query component of a URI.

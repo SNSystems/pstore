@@ -10,6 +10,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 /// \file recorder.cpp
 /// \brief Implements record and playback of messages. The recorded messages can be used

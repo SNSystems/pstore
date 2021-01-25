@@ -16,6 +16,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 /// \file memory_mapper_posix.cpp
 /// \brief POSIX implementation of the platform-independent memory-mapped file

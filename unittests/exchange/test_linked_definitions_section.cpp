@@ -16,6 +16,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 #include "pstore/exchange/import_linked_definitions_section.hpp"
 #include "pstore/exchange/export_section.hpp"

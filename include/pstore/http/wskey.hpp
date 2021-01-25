@@ -10,6 +10,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 /// This is the header file for code which implements the Secure Hashing Algorithm 1 as defined in
 /// FIPS PUB 180-1 published April 17, 1995.

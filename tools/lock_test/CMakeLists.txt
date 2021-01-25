@@ -10,6 +10,7 @@
 # See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 # information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
 #===----------------------------------------------------------------------===//
 add_pstore_executable (pstore-lock-test lock_test.cpp)
 target_link_libraries (pstore-lock-test PUBLIC pstore-core pstore-command-line)

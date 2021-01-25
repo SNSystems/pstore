@@ -11,6 +11,7 @@
 #  See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 #  information.
 #  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
 # ===----------------------------------------------------------------------===//
 
 """A test which runs pstore broker and its "broker poker" utility to fire

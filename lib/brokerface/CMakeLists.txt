@@ -10,6 +10,7 @@
 # See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 # information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
 #===----------------------------------------------------------------------===//
 
 set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/brokerface")

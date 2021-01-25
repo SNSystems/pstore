@@ -16,6 +16,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_DUMP_MCDEBUGLINE_VALUE_HPP
 #define PSTORE_DUMP_MCDEBUGLINE_VALUE_HPP

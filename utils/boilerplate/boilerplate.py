@@ -11,6 +11,7 @@
 #  See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 #  information.
 #  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
 # ===----------------------------------------------------------------------===//
 
 """
@@ -38,14 +39,18 @@ SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 def strip_lines(lines, index, comment_str):
     """Removes leading and trailing comment lines from the file."""
 
+    is_blank = lambda x: x == '' or x == '\n';
+
     # Remove blank lines
-    while len(lines) > 0 and (lines[index] == '' or lines[index] == '\n'):
+    while len(lines) > 0 and is_blank(lines[index]):
         del lines[index]
 
     # Remove comment lines.
     stop_str = comment_str + comment_str[0]
-    while len(lines) > 0 and lines[index].startswith(comment_str) and not lines[index].startswith(stop_str):
+    is_deletable = lambda x: x.startswith(comment_str)
+    while len(lines) > 0 and is_deletable(lines[index]) and not lines[index].startswith(stop_str):
         del lines[index]
+
     return lines
 
 
@@ -87,7 +92,8 @@ def split_extension(path):
 
 def tu_name_from_path(path):
     name = split_extension(os.path.basename(path))[0]
-    name = remove_string_prefix(name, 'test_')
+    name = remove_string_prefix(name, 'test_') # pstore-style snake_case
+    name = remove_string_prefix(name, 'Test') # LLVM-style CamelCase.
     name = remove_string_suffix(name, '_win32')
     name = remove_string_suffix(name, '_posix')
     return name.replace('_', ' ')
@@ -111,7 +117,7 @@ def get_path_line(path, comment_char):
 
 
 def get_license(comment_char):
-    license = [comment_char + ' ' + l for l in license_text.splitlines(False)]
+    license = [comment_char + ' ' + l for l in (license_text + '\n').splitlines(False)]
     license = [l.rstrip(' ') + '\n' for l in license]
     return license
 

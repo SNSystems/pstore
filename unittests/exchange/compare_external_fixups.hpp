@@ -16,6 +16,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_UNITTESTS_EXCHANGE_COMPARE_EXTERNAL_FIXUPS_HPP
 #define PSTORE_UNITTESTS_EXCHANGE_COMPARE_EXTERNAL_FIXUPS_HPP

@@ -10,6 +10,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 /// \file test_utf_win32.cpp
 /// \brief A small number of tests for the Win32-only utf-16 <-> utf-8 conversion utilities.

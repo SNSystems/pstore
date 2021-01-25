@@ -16,6 +16,7 @@
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
 // information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 //===----------------------------------------------------------------------===//
 /// \file linked_definitions_section.hpp
 /// \brief Contains declarations for the "linked-definition" section type.
