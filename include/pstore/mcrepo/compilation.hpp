@@ -152,10 +152,10 @@ namespace pstore {
             /// \brief Returns a pointer to an in-pstore compilation instance.
             ///
             /// \param db  The database from which the compilation should be loaded.
-            /// \param extent  An extent describing the compilation location in the store.
+            /// \param location  An extent describing the compilation location in the store.
             /// \result  A pointer to the compilation in-store memory.
             static std::shared_ptr<compilation const> load (database const & db,
-                                                            extent<compilation> const & extent);
+                                                            extent<compilation> const & location);
             ///@}
 
             /// \name Element access
