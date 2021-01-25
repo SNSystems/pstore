@@ -200,7 +200,7 @@ endfunction(add_pstore_additional_compiler_flags)
 
 
 ####################
-# add_pstore_library
+# add pstore library
 ####################
 
 # HEADER_DIR - The path of the directory containing the library's include files.
@@ -269,6 +269,7 @@ function (add_pstore_library)
 
     install (
         TARGETS ${arg_TARGET}
+        EXPORT pstore
         PUBLIC_HEADER
             DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pstore/${arg_NAME}"
             COMPONENT pstore
@@ -284,8 +285,9 @@ function (add_pstore_library)
     set_target_properties (${arg_TARGET} PROPERTIES FOLDER "pstore libraries")
     target_include_directories (${arg_TARGET} PUBLIC
         $<BUILD_INTERFACE:${PSTORE_ROOT_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDE_DIR}>
     )
+
 endfunction (add_pstore_library)
 
 
@@ -316,7 +318,7 @@ endfunction (add_pstore_executable)
 
 
 #################
-# add_pstore_tool
+# add pstore tool
 #################
 # add_pstore_tool is a wrapper for add_pstore_executable which also creates an
 # install target. Call this instead of add_pstore_executable to create a target
@@ -327,6 +329,7 @@ function (add_pstore_tool name)
 
     install (
         TARGETS ${name}
+        EXPORT pstore
         RUNTIME
             DESTINATION "${CMAKE_INSTALL_BINDIR}"
             COMPONENT pstore
@@ -336,7 +339,7 @@ endfunction (add_pstore_tool)
 
 
 ####################
-# add_pstore_example
+# add pstore example
 ####################
 
 function (add_pstore_example name)

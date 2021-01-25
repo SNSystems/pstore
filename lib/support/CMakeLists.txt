@@ -236,7 +236,11 @@ configure_file (
     "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
     ESCAPE_QUOTES
 )
-
+install (FILES
+    "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pstore/config"
+    COMPONENT pstore
+)
 set (CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}")
 
 #
@@ -250,7 +254,7 @@ configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/backtrace.hpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/backtrace.hpp"
     ESCAPE_QUOTES
-    )
+)
 
 include (add_pstore)
 include (clang_tidy)
