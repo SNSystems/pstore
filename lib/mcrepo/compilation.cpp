@@ -39,7 +39,7 @@ namespace {
     /// \tparam Bitfield  A bitfield<> instance.
     /// \param init  The member values of the enumeration.
     template <typename Enum, typename Bitfield>
-    void assert_enum_field_width (std::initializer_list<Enum> init) noexcept {
+    constexpr void assert_enum_field_width (std::initializer_list<Enum> init) noexcept {
         (void) init;
         PSTORE_ASSERT (
             pstore::round_to_power_of_2 (
