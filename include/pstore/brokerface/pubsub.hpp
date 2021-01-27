@@ -14,6 +14,7 @@
 //===----------------------------------------------------------------------===//
 /// \file pubsub.hpp
 /// \brief A simple publish-and-subscribe mechanism.
+///
 /// This module provides a means for one part of a program to "publish" information to which other
 /// parts can subscribe. There can be multiple "channels" of information representing different
 /// groups of data.
@@ -151,6 +152,9 @@ namespace pstore {
             /// Called when a subscriber is destructed to remove it from the subscribers list.
             void remove (subscriber_type * sub) noexcept;
 
+            /// Is anyone subscribed to this channel?
+            bool have_listeners () const;
+
             mutable std::mutex mut_;
             mutable gsl::not_null<ConditionVariable *> cv_;
 
@@ -165,8 +169,8 @@ namespace pstore {
         //* /__/\_,_|_.__/__/\__|_| |_|_.__/\___|_|   *
         //*                                           *
 
-        // dtor
-        // ~~~~
+        // (dtor)
+        // ~~~~~~
         template <typename ConditionVariable>
         subscriber<ConditionVariable>::~subscriber () noexcept {
             owner_->remove (this);
@@ -205,14 +209,14 @@ namespace pstore {
         //* \__|_||_\__,_|_||_|_||_\___|_| *
         //*                                *
 
-        // ctor
-        // ~~~~
+        // (ctor)
+        // ~~~~~~
         template <typename ConditionVariable>
         channel<ConditionVariable>::channel (gsl::not_null<ConditionVariable *> cv)
                 : cv_{cv} {}
 
-        // dtor
-        // ~~~~
+        // (dtor)
+        // ~~~~~~
         template <typename ConditionVariable>
         channel<ConditionVariable>::~channel () noexcept {
             // Check that this channel has no subscribers.
@@ -233,12 +237,7 @@ namespace pstore {
         template <typename ConditionVariable>
         template <typename MessageFunction, typename... Args>
         void channel<ConditionVariable>::publish (MessageFunction f, Args &&... args) {
-            bool render = false;
-            {
-                std::lock_guard<std::mutex> const lock{mut_};
-                render = !subscribers_.empty ();
-            }
-            if (render) {
+            if (this->have_listeners ()) {
                 // Note that f() is called without the lock held.
                 std::string const message = f (std::forward<Args> (args)...);
 
@@ -248,6 +247,14 @@ namespace pstore {
                 }
                 cv_->notify_all ();
             }
+        }
+
+        // have listeners
+        // ~~~~~~~~~~~~~~
+        template <typename ConditionVariable>
+        bool channel<ConditionVariable>::have_listeners () const {
+            std::lock_guard<std::mutex> const lock{mut_};
+            return !subscribers_.empty ();
         }
 
         // cancel
@@ -278,7 +285,7 @@ namespace pstore {
             return nothing<std::string> ();
         }
 
-        // new_subscriber
+        // new subscriber
         // ~~~~~~~~~~~~~~
         template <typename ConditionVariable>
         auto channel<ConditionVariable>::new_subscriber () -> subscriber_pointer {

@@ -57,7 +57,7 @@ namespace {
 
     class received_base {
     public:
-        virtual ~received_base () = default;
+        virtual ~received_base () noexcept = default;
         virtual void call (std::string const & message) const = 0;
     };
 
@@ -100,4 +100,28 @@ TEST (PubSub, PubSub) {
     received_counter.wait_for_value (2);
     sub->cancel ();
     thread.join ();
+}
+
+namespace {
+
+    class int_message_base {
+    public:
+        virtual ~int_message_base () noexcept = default;
+        virtual std::string call (int a) const {}
+    };
+
+    class int_message : public int_message_base {
+    public:
+        MOCK_METHOD1 (call, std::string (int));
+    };
+
+} // end anonymous namespace
+
+TEST (PubSub, PublishWithNooneListening) {
+    using testing::_;
+    int_message fn;
+    EXPECT_CALL (fn, call (_)).Times (0);
+    std::condition_variable cv;
+    pstore::brokerface::channel<decltype (cv)> chan{&cv};
+    chan.publish ([&fn] (int a) { return fn.call (a); }, 7);
 }
