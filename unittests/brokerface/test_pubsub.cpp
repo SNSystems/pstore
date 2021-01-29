@@ -107,12 +107,12 @@ namespace {
     class int_message_base {
     public:
         virtual ~int_message_base () noexcept = default;
-        virtual std::string call (int a) const {}
+        virtual std::string call (int a) const = 0;
     };
 
     class int_message : public int_message_base {
     public:
-        MOCK_METHOD1 (call, std::string (int));
+        MOCK_CONST_METHOD1 (call, std::string (int));
     };
 
 } // end anonymous namespace
