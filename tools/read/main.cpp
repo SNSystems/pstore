@@ -96,7 +96,7 @@ namespace {
             std::shared_ptr<char const> ptr = db.getro (r);
 
             std::ostream & out = std::cout;
-            out.exceptions (std::ofstream::failbit | std::ofstream::badbit);
+            out.exceptions (std::ostream::failbit | std::ostream::badbit);
 
             std::uint64_t size = r.size;
             constexpr auto stream_size_max = std::numeric_limits<std::streamsize>::max ();
