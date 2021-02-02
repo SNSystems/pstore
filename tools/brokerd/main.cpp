@@ -5,41 +5,12 @@
 //* |_| |_| |_|\__,_|_|_| |_| *
 //*                           *
 //===- tools/brokerd/main.cpp ---------------------------------------------===//
-// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-// All rights reserved.
 //
-// Developed by:
-//   Toolchain Team
-//   SN Systems, Ltd.
-//   www.snsystems.com
+// Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+// information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal with the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// - Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimers.
-//
-// - Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimers in the
-//   documentation and/or other materials provided with the distribution.
-//
-// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-//   Inc. nor the names of its contributors may be used to endorse or
-//   promote products derived from this Software without specific prior
-//   written permission.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
 // Standard includes
@@ -121,30 +92,30 @@ namespace {
     // create http worker thread
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
     void create_http_worker_thread (gsl::not_null<std::vector<std::future<void>> *> const futures,
-                                    gsl::not_null<maybe<httpd::server_status> *> http_status,
+                                    gsl::not_null<maybe<http::server_status> *> http_status,
                                     bool announce_port) {
         if (!http_status->has_value ()) {
             return;
         }
         futures->push_back (create_thread (
-            [announce_port] (maybe<httpd::server_status> * const status) {
+            [announce_port] (maybe<http::server_status> * const status) {
                 thread_init ("http");
                 PSTORE_ASSERT (status->has_value ());
 
-                httpd::channel_container channels{
+                http::channel_container channels{
                     {"commits",
-                     httpd::channel_container_entry{&broker::commits_channel, &broker::commits_cv}},
+                     http::channel_container_entry{&broker::commits_channel, &broker::commits_cv}},
                     {"uptime",
-                     httpd::channel_container_entry{&broker::uptime_channel, &broker::uptime_cv}},
+                     http::channel_container_entry{&broker::uptime_channel, &broker::uptime_cv}},
                 };
 
-                httpd::server (
-                    fs, &status->value (), channels, [announce_port] (in_port_t const port) {
-                        if (announce_port) {
-                            std::lock_guard<decltype (broker::iomut)> lock{broker::iomut};
-                            std::cout << "HTTP listening on port " << port << std::endl;
-                        }
-                    });
+                http::server (fs, &status->value (), channels,
+                              [announce_port] (in_port_t const port) {
+                                  if (announce_port) {
+                                      std::lock_guard<decltype (broker::iomut)> lock{broker::iomut};
+                                      std::cout << "HTTP listening on port " << port << std::endl;
+                                  }
+                              });
             },
             http_status.get ()));
     }
@@ -187,9 +158,9 @@ namespace {
     /// Create an HTTP server_status object which reflects the user's choice of port.
     decltype (auto) get_http_server_status (maybe<in_port_t> const & port) {
         if (port.has_value ()) {
-            return maybe<httpd::server_status>{in_place, *port};
+            return maybe<http::server_status>{in_place, *port};
         }
-        return nothing<httpd::server_status> ();
+        return nothing<http::server_status> ();
     }
 
 } // end anonymous namespace
@@ -237,7 +208,7 @@ int main (int argc, char * argv[]) {
         std::vector<std::future<void>> futures;
         std::thread quit;
 
-        maybe<httpd::server_status> http_status = get_http_server_status (opt.http_port);
+        maybe<http::server_status> http_status = get_http_server_status (opt.http_port);
         std::atomic<bool> uptime_done{false};
 
         log (priority::notice, "starting threads");

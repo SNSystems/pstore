@@ -5,41 +5,12 @@
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| *
 //*                                                   *
 //===- include/pstore/broker/command.hpp ----------------------------------===//
-// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-// All rights reserved.
 //
-// Developed by:
-//   Toolchain Team
-//   SN Systems, Ltd.
-//   www.snsystems.com
+// Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+// information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal with the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// - Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimers.
-//
-// - Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimers in the
-//   documentation and/or other materials provided with the distribution.
-//
-// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-//   Inc. nor the names of its contributors may be used to endorse or
-//   promote products derived from this Software without specific prior
-//   written permission.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file command.hpp
 
@@ -74,7 +45,7 @@ namespace pstore {
             /// \param scavenge_threshold  The time for which messages are
             ///   allowed to wait in the message queue before the scavenger will delete them.
             command_processor (unsigned num_read_threads,
-                               gsl::not_null<maybe<httpd::server_status> *> const http_status,
+                               gsl::not_null<maybe<http::server_status> *> const http_status,
                                gsl::not_null<std::atomic<bool> *> uptime_done,
                                std::chrono::seconds scavenge_threshold);
             // No copying or assignment.
@@ -131,7 +102,7 @@ namespace pstore {
             std::atomic<bool> commands_done_{false};
 
             /// A pointer to an object which can be used to tell the http server to exit.
-            gsl::not_null<maybe<httpd::server_status> *> const http_status_;
+            gsl::not_null<maybe<http::server_status> *> const http_status_;
             /// A pointer to a bool which, when set, will tell the uptime thread to exit.
             gsl::not_null<std::atomic<bool> *> uptime_done_;
             /// The time for which messages are allowed to wait in the message queue before the

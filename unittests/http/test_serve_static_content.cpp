@@ -11,41 +11,12 @@
 //*  \___\___/|_| |_|\__\___|_| |_|\__| *
 //*                                     *
 //===- unittests/http/test_serve_static_content.cpp -----------------------===//
-// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-// All rights reserved.
 //
-// Developed by:
-//   Toolchain Team
-//   SN Systems, Ltd.
-//   www.snsystems.com
+// Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+// information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal with the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// - Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimers.
-//
-// - Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimers in the
-//   documentation and/or other materials provided with the distribution.
-//
-// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-//   Inc. nor the names of its contributors may be used to endorse or
-//   promote products derived from this Software without specific prior
-//   written permission.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/http/serve_static_content.hpp"
 
@@ -104,7 +75,7 @@ namespace {
             return eoint (io + 1);
         };
 
-        return pstore::httpd::serve_static_content (sender, 0, path, fs ()) >>= [&actual] (int) {
+        return pstore::http::serve_static_content (sender, 0, path, fs ()) >>= [&actual] (int) {
             return pstore::error_or<std::string>{pstore::in_place, actual};
         };
     }
@@ -118,15 +89,17 @@ namespace {
         explicit reader (std::string const & src) noexcept
                 : src_{src} {}
 
-        pstore::error_or_n<state_type, pstore::maybe<std::string>> gets (state_type const start) {
-            static auto const crlf = pstore::httpd::crlf;
+        decltype (auto) gets (state_type const start) {
+            using result_type = pstore::error_or_n<state_type, pstore::maybe<std::string>>;
+
+            static auto const crlf = pstore::http::crlf;
             static auto const crlf_len = std::strlen (crlf);
 
             PSTORE_ASSERT (start != std::string::npos);
             auto const pos = src_.find (crlf, start);
             PSTORE_ASSERT (pos != std::string::npos);
-            return {pstore::in_place, pos + crlf_len,
-                    pstore::just (src_.substr (start, pos - start))};
+            return result_type{pstore::in_place, pos + crlf_len,
+                               pstore::just (src_.substr (start, pos - start))};
         }
 
     private:
@@ -145,7 +118,7 @@ TEST_F (ServeStaticContent, Simple) {
 
     reader r{*actual};
     auto const record_headers = [&r, &headers] (reader::state_type io,
-                                                pstore::httpd::request_info const &) {
+                                                pstore::http::request_info const &) {
         auto record_header = [&headers] (int io2, std::string const & key,
                                          std::string const & value) {
             // The date value will change according to when the test is run so we preserve its
@@ -154,11 +127,11 @@ TEST_F (ServeStaticContent, Simple) {
             return io2 + 1;
         };
 
-        return pstore::httpd::read_headers (r, io, record_header, 0);
+        return pstore::http::read_headers (r, io, record_header, 0);
     };
 
     pstore::error_or_n<std::string::size_type, int> const eo =
-        pstore::httpd::read_request (r, std::string::size_type{0}) >>= record_headers;
+        pstore::http::read_request (r, std::string::size_type{0}) >>= record_headers;
 
     ASSERT_TRUE (static_cast<bool> (eo));
     EXPECT_THAT (headers,
@@ -166,7 +139,7 @@ TEST_F (ServeStaticContent, Simple) {
                      string_pair{"content-length", "28"}, string_pair{"content-type", "text/html"},
                      string_pair{"date", ""}, string_pair{"connection", "close"},
                      string_pair{"last-modified", "Tue, 23 Apr 2019 09:10:27 GMT"},
-                     string_pair{"server", "pstore-httpd"}));
+                     string_pair{"server", "pstore-http"}));
     EXPECT_EQ ((std::string{*actual, std::get<0> (eo)}), index_html);
 }
 

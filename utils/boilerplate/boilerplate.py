@@ -6,41 +6,12 @@
 # * |_.__/ \___/|_|_|\___|_|  | .__/|_|\__,_|\__\___| *
 # *                           |_|                     *
 # ===- utils/boilerplate/boilerplate.py -----------------------------------===//
-#  Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-#  All rights reserved.
 #
-#  Developed by:
-#    Toolchain Team
-#    SN Systems, Ltd.
-#    www.snsystems.com
+#  Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+#  See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+#  information.
+#  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
-#  Permission is hereby granted, free of charge, to any person obtaining a
-#  copy of this software and associated documentation files (the
-#  "Software"), to deal with the Software without restriction, including
-#  without limitation the rights to use, copy, modify, merge, publish,
-#  distribute, sublicense, and/or sell copies of the Software, and to
-#  permit persons to whom the Software is furnished to do so, subject to
-#  the following conditions:
-#
-#  - Redistributions of source code must retain the above copyright notice,
-#    this list of conditions and the following disclaimers.
-#
-#  - Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimers in the
-#    documentation and/or other materials provided with the distribution.
-#
-#  - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-#    Inc. nor the names of its contributors may be used to endorse or
-#    promote products derived from this Software without specific prior
-#    written permission.
-#
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-#  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-#  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#  IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-#  ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-#  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-#  SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 # ===----------------------------------------------------------------------===//
 
 """
@@ -57,55 +28,29 @@ import subprocess
 import sys
 
 license_text = \
-'''Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-All rights reserved.
-
-Developed by:
-  Toolchain Team
-  SN Systems, Ltd.
-  www.snsystems.com
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the
-"Software"), to deal with the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-- Redistributions of source code must retain the above copyright notice,
-  this list of conditions and the following disclaimers.
-
-- Redistributions in binary form must reproduce the above copyright
-  notice, this list of conditions and the following disclaimers in the
-  documentation and/or other materials provided with the distribution.
-
-- Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-  Inc. nor the names of its contributors may be used to endorse or
-  promote products derived from this Software without specific prior
-  written permission.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
+'''
+Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license 
+information.
+SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 '''
 
 
 def strip_lines(lines, index, comment_str):
     """Removes leading and trailing comment lines from the file."""
 
+    is_blank = lambda x: x == '' or x == '\n';
+
     # Remove blank lines
-    while len(lines) > 0 and (lines[index] == '' or lines[index] == '\n'):
+    while len(lines) > 0 and is_blank(lines[index]):
         del lines[index]
 
     # Remove comment lines.
     stop_str = comment_str + comment_str[0]
-    while len(lines) > 0 and lines[index].startswith(comment_str) and not lines[index].startswith(stop_str):
+    is_deletable = lambda x: x.startswith(comment_str)
+    while len(lines) > 0 and is_deletable(lines[index]) and not lines[index].startswith(stop_str):
         del lines[index]
+
     return lines
 
 
@@ -147,7 +92,8 @@ def split_extension(path):
 
 def tu_name_from_path(path):
     name = split_extension(os.path.basename(path))[0]
-    name = remove_string_prefix(name, 'test_')
+    name = remove_string_prefix(name, 'test_') # pstore-style snake_case
+    name = remove_string_prefix(name, 'Test') # LLVM-style CamelCase.
     name = remove_string_suffix(name, '_win32')
     name = remove_string_suffix(name, '_posix')
     return name.replace('_', ' ')
@@ -171,7 +117,7 @@ def get_path_line(path, comment_char):
 
 
 def get_license(comment_char):
-    license = [comment_char + ' ' + l for l in license_text.splitlines(False)]
+    license = [comment_char + ' ' + l for l in (license_text + '\n').splitlines(False)]
     license = [l.rstrip(' ') + '\n' for l in license]
     return license
 

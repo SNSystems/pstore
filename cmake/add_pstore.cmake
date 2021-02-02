@@ -5,41 +5,12 @@
 #*  \__,_|\__,_|\__,_| | .__/|___/\__\___/|_|  \___| *
 #*                     |_|                           *
 #===- cmake/add_pstore.cmake ----------------------------------------------===//
-# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-# All rights reserved.
 #
-# Developed by:
-#   Toolchain Team
-#   SN Systems, Ltd.
-#   www.snsystems.com
+# Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+# information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the
-# "Software"), to deal with the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-#
-# - Redistributions of source code must retain the above copyright notice,
-#   this list of conditions and the following disclaimers.
-#
-# - Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimers in the
-#   documentation and/or other materials provided with the distribution.
-#
-# - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-#   Inc. nor the names of its contributors may be used to endorse or
-#   promote products derived from this Software without specific prior
-#   written permission.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-# ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-# SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 include (CheckCSourceCompiles)
 include (CheckCXXCompilerFlag)
@@ -229,7 +200,7 @@ endfunction(add_pstore_additional_compiler_flags)
 
 
 ####################
-# add_pstore_library
+# add pstore library
 ####################
 
 # HEADER_DIR - The path of the directory containing the library's include files.
@@ -298,6 +269,7 @@ function (add_pstore_library)
 
     install (
         TARGETS ${arg_TARGET}
+        EXPORT pstore
         PUBLIC_HEADER
             DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pstore/${arg_NAME}"
             COMPONENT pstore
@@ -307,14 +279,17 @@ function (add_pstore_library)
         ARCHIVE
             DESTINATION "${CMAKE_INSTALL_LIBDIR}/pstore"
             COMPONENT pstore
+        INCLUDES
+            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     )
     add_dependencies (install-pstore ${arg_TARGET})
 
     set_target_properties (${arg_TARGET} PROPERTIES FOLDER "pstore libraries")
     target_include_directories (${arg_TARGET} PUBLIC
         $<BUILD_INTERFACE:${PSTORE_ROOT_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDE_DIR}>
     )
+
 endfunction (add_pstore_library)
 
 
@@ -345,7 +320,7 @@ endfunction (add_pstore_executable)
 
 
 #################
-# add_pstore_tool
+# add pstore tool
 #################
 # add_pstore_tool is a wrapper for add_pstore_executable which also creates an
 # install target. Call this instead of add_pstore_executable to create a target
@@ -356,6 +331,7 @@ function (add_pstore_tool name)
 
     install (
         TARGETS ${name}
+        EXPORT pstore
         RUNTIME
             DESTINATION "${CMAKE_INSTALL_BINDIR}"
             COMPONENT pstore
@@ -365,7 +341,7 @@ endfunction (add_pstore_tool)
 
 
 ####################
-# add_pstore_example
+# add pstore example
 ####################
 
 function (add_pstore_example name)

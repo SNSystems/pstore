@@ -5,42 +5,15 @@
 //* |_|  \___|\__, |\__,_|\___||___/\__| *
 //*              |_|                     *
 //===- include/pstore/http/request.hpp ------------------------------------===//
-// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-// All rights reserved.
 //
-// Developed by:
-//   Toolchain Team
-//   SN Systems, Ltd.
-//   www.snsystems.com
+// Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+// information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal with the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// - Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimers.
-//
-// - Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimers in the
-//   documentation and/or other materials provided with the distribution.
-//
-// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-//   Inc. nor the names of its contributors may be used to endorse or
-//   promote products derived from this Software without specific prior
-//   written permission.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file request.hpp
+/// \brief Parses HTTP request strings.
 
 #ifndef PSTORE_HTTP_REQUEST_HPP
 #define PSTORE_HTTP_REQUEST_HPP
@@ -58,7 +31,7 @@
 #include "pstore/support/maybe.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace http {
 
         class request_info {
         public:
@@ -67,11 +40,12 @@ namespace pstore {
                     , uri_{std::move (u)}
                     , version_{std::move (v)} {}
             request_info (request_info const &) = default;
-            request_info (request_info &&) = default;
-            ~request_info () = default;
+            request_info (request_info &&) noexcept = default;
+
+            ~request_info () noexcept = default;
 
             request_info & operator= (request_info const &) = delete;
-            request_info & operator= (request_info &&) = delete;
+            request_info & operator= (request_info &&) noexcept = delete;
 
             std::string const & method () const { return method_; }
             std::string const & version () const { return version_; }
@@ -89,6 +63,15 @@ namespace pstore {
                 // TODO: we're returning that we ran out of data. Is there a more suitable
                 // error?
                 return std::make_error_code (std::errc::not_connected);
+            }
+
+            inline decltype (auto) skip_leading_ws (std::string const & s,
+                                                    std::string::size_type pos) noexcept {
+                auto const length = s.length ();
+                while (pos < length && std::isspace (s[pos])) {
+                    ++pos;
+                }
+                return pos;
             }
 
         } // end namespace details
@@ -143,20 +126,19 @@ namespace pstore {
         /// \param reader  An instance of Reader: a buffered_reader<> from which data is read.
         /// \param reader_state  The state passed to the reader's refill function.
         /// \param handler  A function called for each HTTP header. It is passed a state value, the
-        /// key (lower-cased to ensure case insensitivity) and the associate value.
+        /// key (lower-cased to ensure case insensitivity) and the associated value.
         /// \param handler_state  The state passed to handler.
         template <typename Reader, typename HandleFn, typename IO>
         error_or_n<typename Reader::state_type, IO>
         read_headers (Reader & reader, typename Reader::state_type reader_state, HandleFn handler,
                       IO handler_state) {
+            using return_type = error_or_n<typename Reader::state_type, IO>;
             return reader.gets (reader_state) >>=
-                   [
-                       &reader, &handler, &handler_state
-                   ](typename Reader::state_type state2,
-                     maybe<std::string> const & ms) -> error_or_n<typename Reader::state_type, IO> {
+                   [&reader, &handler,
+                    &handler_state] (typename Reader::state_type state2,
+                                     maybe<std::string> const & ms) -> return_type {
                 if (!ms || ms->length () == 0) {
-                    return error_or<std::pair<typename Reader::state_type, IO>>{
-                        pstore::in_place, state2, handler_state};
+                    return return_type{in_place, state2, handler_state};
                 }
 
                 std::string key;
@@ -168,24 +150,20 @@ namespace pstore {
                 } else {
                     key = ms->substr (0, pos);
                     // HTTP header names are case-insensitive so convert to lower-case here.
-                    std::transform (key.begin (), key.end (), key.begin (),
+                    std::transform (std::begin (key), std::end (key), std::begin (key),
                                     [] (unsigned char const c) {
                                         return static_cast<char> (std::tolower (c));
                                     });
-
-                    ++pos; // skip the colon
-                    // skip optional whitespace before the value string.
-                    while (pos < ms->length () && std::isspace ((*ms)[pos])) {
-                        ++pos;
-                    }
-                    value = ms->substr (pos);
+                    ++pos; // Skip the colon.
+                    // Skip optional whitespace before the value string.
+                    value = ms->substr (details::skip_leading_ws (*ms, pos));
                 }
 
                 return read_headers (reader, state2, handler, handler (handler_state, key, value));
             };
         }
 
-    } // namespace httpd
-} // namespace pstore
+    } // end namespace http
+} // end namespace pstore
 
 #endif // PSTORE_HTTP_REQUEST_HPP

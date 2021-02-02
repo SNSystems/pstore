@@ -5,41 +5,12 @@
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| *
 //*                                                   *
 //===- unittests/broker/test_command.cpp ----------------------------------===//
-// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-// All rights reserved.
 //
-// Developed by:
-//   Toolchain Team
-//   SN Systems, Ltd.
-//   www.snsystems.com
+// Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+// information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal with the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// - Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimers.
-//
-// - Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimers in the
-//   documentation and/or other materials provided with the distribution.
-//
-// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-//   Inc. nor the names of its contributors may be used to endorse or
-//   promote products derived from this Software without specific prior
-//   written permission.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
 #include "pstore/broker/command.hpp"
@@ -59,7 +30,7 @@ namespace {
     class mock_cp : public pstore::broker::command_processor {
     public:
         explicit mock_cp (unsigned const num_read_threads,
-                          pstore::maybe<pstore::httpd::server_status> * const http_status,
+                          pstore::maybe<pstore::http::server_status> * const http_status,
                           std::atomic<bool> * const uptime_done)
                 : command_processor (num_read_threads, http_status, uptime_done, 4h) {}
 
@@ -99,7 +70,7 @@ namespace {
         static constexpr std::uint16_t num_parts = 1;
 
     private:
-        pstore::maybe<pstore::httpd::server_status> http_status_;
+        pstore::maybe<pstore::http::server_status> http_status_;
         std::atomic<bool> uptime_done_;
 
         mock_cp cp_;

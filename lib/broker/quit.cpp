@@ -5,41 +5,12 @@
 //*  \__, |\__,_|_|\__| *
 //*     |_|             *
 //===- lib/broker/quit.cpp ------------------------------------------------===//
-// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-// All rights reserved.
 //
-// Developed by:
-//   Toolchain Team
-//   SN Systems, Ltd.
-//   www.snsystems.com
+// Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+// information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal with the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// - Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimers.
-//
-// - Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimers in the
-//   documentation and/or other materials provided with the distribution.
-//
-// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-//   Inc. nor the names of its contributors may be used to endorse or
-//   promote products derived from this Software without specific prior
-//   written permission.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file broker/quit.cpp
 
@@ -96,7 +67,7 @@ namespace pstore {
         // ~~~~~~~~
         void shutdown (command_processor * const cp, scavenger * const scav, int const signum,
                        unsigned const num_read_threads,
-                       not_null<maybe<pstore::httpd::server_status> *> const http_status,
+                       not_null<maybe<pstore::http::server_status> *> const http_status,
                        not_null<std::atomic<bool> *> const uptime_done) {
 
             // Set the global "done" flag unless we're already shutting down. The latter condition
@@ -122,7 +93,7 @@ namespace pstore {
                     push (cp, command_loop_quit_command);
                 }
 
-                pstore::httpd::quit (http_status);
+                pstore::http::quit (http_status);
                 *uptime_done = true;
 
                 log (priority::info, "shutdown requests complete");
@@ -198,7 +169,7 @@ namespace {
     void quit_thread (std::weak_ptr<pstore::broker::command_processor> const cp,
                       std::weak_ptr<pstore::broker::scavenger> const scav,
                       unsigned const num_read_threads,
-                      not_null<pstore::maybe<pstore::httpd::server_status> *> http_status,
+                      not_null<pstore::maybe<pstore::http::server_status> *> http_status,
                       not_null<std::atomic<bool> *> const uptime_done) {
         try {
             pstore::threads::set_name ("quit");
@@ -249,16 +220,16 @@ namespace {
 namespace pstore {
     namespace broker {
 
-        // notify_quit_thread
+        // notify quit thread
         // ~~~~~~~~~~~~~~~~~~
         void notify_quit_thread () { quit_info.notify_all (sig_self_quit); }
 
-        // create_quit_thread
+        // create quit thread
         // ~~~~~~~~~~~~~~~~~~
         std::thread
         create_quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
                             unsigned num_read_threads,
-                            gsl::not_null<maybe<pstore::httpd::server_status> *> http_status,
+                            gsl::not_null<maybe<pstore::http::server_status> *> http_status,
                             gsl::not_null<std::atomic<bool> *> uptime_done) {
             std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads,
                               http_status, uptime_done);
@@ -273,5 +244,5 @@ namespace pstore {
             return quit;
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore

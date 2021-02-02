@@ -5,44 +5,16 @@
 //* | .__/ \__,_|_.__/|___/\__,_|_.__/  *
 //* |_|                                 *
 //===- include/pstore/brokerface/pubsub.hpp -------------------------------===//
-// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
-// All rights reserved.
 //
-// Developed by:
-//   Toolchain Team
-//   SN Systems, Ltd.
-//   www.snsystems.com
+// Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+// information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal with the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// - Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimers.
-//
-// - Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimers in the
-//   documentation and/or other materials provided with the distribution.
-//
-// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
-//   Inc. nor the names of its contributors may be used to endorse or
-//   promote products derived from this Software without specific prior
-//   written permission.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file pubsub.hpp
 /// \brief A simple publish-and-subscribe mechanism.
+///
 /// This module provides a means for one part of a program to "publish" information to which other
 /// parts can subscribe. There can be multiple "channels" of information representing different
 /// groups of data.
@@ -180,6 +152,9 @@ namespace pstore {
             /// Called when a subscriber is destructed to remove it from the subscribers list.
             void remove (subscriber_type * sub) noexcept;
 
+            /// Is anyone subscribed to this channel?
+            bool have_listeners () const;
+
             mutable std::mutex mut_;
             mutable gsl::not_null<ConditionVariable *> cv_;
 
@@ -194,8 +169,8 @@ namespace pstore {
         //* /__/\_,_|_.__/__/\__|_| |_|_.__/\___|_|   *
         //*                                           *
 
-        // dtor
-        // ~~~~
+        // (dtor)
+        // ~~~~~~
         template <typename ConditionVariable>
         subscriber<ConditionVariable>::~subscriber () noexcept {
             owner_->remove (this);
@@ -234,14 +209,14 @@ namespace pstore {
         //* \__|_||_\__,_|_||_|_||_\___|_| *
         //*                                *
 
-        // ctor
-        // ~~~~
+        // (ctor)
+        // ~~~~~~
         template <typename ConditionVariable>
         channel<ConditionVariable>::channel (gsl::not_null<ConditionVariable *> cv)
                 : cv_{cv} {}
 
-        // dtor
-        // ~~~~
+        // (dtor)
+        // ~~~~~~
         template <typename ConditionVariable>
         channel<ConditionVariable>::~channel () noexcept {
             // Check that this channel has no subscribers.
@@ -262,12 +237,7 @@ namespace pstore {
         template <typename ConditionVariable>
         template <typename MessageFunction, typename... Args>
         void channel<ConditionVariable>::publish (MessageFunction f, Args &&... args) {
-            bool render = false;
-            {
-                std::lock_guard<std::mutex> const lock{mut_};
-                render = !subscribers_.empty ();
-            }
-            if (render) {
+            if (this->have_listeners ()) {
                 // Note that f() is called without the lock held.
                 std::string const message = f (std::forward<Args> (args)...);
 
@@ -277,6 +247,14 @@ namespace pstore {
                 }
                 cv_->notify_all ();
             }
+        }
+
+        // have listeners
+        // ~~~~~~~~~~~~~~
+        template <typename ConditionVariable>
+        bool channel<ConditionVariable>::have_listeners () const {
+            std::lock_guard<std::mutex> const lock{mut_};
+            return !subscribers_.empty ();
         }
 
         // cancel
@@ -307,7 +285,7 @@ namespace pstore {
             return nothing<std::string> ();
         }
 
-        // new_subscriber
+        // new subscriber
         // ~~~~~~~~~~~~~~
         template <typename ConditionVariable>
         auto channel<ConditionVariable>::new_subscriber () -> subscriber_pointer {
