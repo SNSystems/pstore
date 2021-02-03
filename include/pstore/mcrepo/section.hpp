@@ -21,6 +21,8 @@
 #include <iosfwd>
 #include <type_traits>
 
+#include "pstore/support/assert.hpp"
+
 namespace pstore {
     namespace repo {
 

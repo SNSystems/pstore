@@ -43,6 +43,13 @@ namespace pstore {
                 }
                 return *this;
             }
+            ostream & ostream::write (std::int64_t const v) {
+                std::fprintf (os_, "%" PRId64, v);
+                if (ferror (os_)) {
+                    raise (error_code::write_failed);
+                }
+                return *this;
+            }
             ostream & ostream::write (std::uint64_t const v) {
                 std::fprintf (os_, "%" PRIu64, v);
                 if (ferror (os_)) {

@@ -13,7 +13,8 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file value.hpp
-
+/// \brief Declares the dump 'value' type and functions to instantiate the basic concrete
+/// subclasses.
 #ifndef PSTORE_DUMP_VALUE_HPP
 #define PSTORE_DUMP_VALUE_HPP
 
@@ -600,6 +601,9 @@ namespace pstore {
         }
         inline value_ptr make_value (std::uint32_t const & v) {
             return std::static_pointer_cast<value, number_ulong> (make_number (v));
+        }
+        inline value_ptr make_value (std::int64_t const & v) {
+            return std::static_pointer_cast<value, number_long> (make_number (v));
         }
         inline value_ptr make_value (std::uint64_t const & v) {
             return std::static_pointer_cast<value, number_ulong> (make_number (v));

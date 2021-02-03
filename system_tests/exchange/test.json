@@ -34,13 +34,13 @@
                 "name":2, //"puts"
                 "type":4,
                 "offset":7,
-                "addend":18446744073709551612
+                "addend":-4
               },
               {
                 "name":9, //"foo"
                 "type":4,
                 "offset":17,
-                "addend":18446744073709551612
+                "addend":-4
               },
               {
                 "name":6, //".str.1"
@@ -52,7 +52,7 @@
                 "name":4, //"printf"
                 "type":4,
                 "offset":31,
-                "addend":18446744073709551612
+                "addend":-4
               }
             ]
           },

@@ -39,6 +39,7 @@ namespace pstore {
                 ostream & write (char c);
                 ostream & write (std::uint16_t v);
                 ostream & write (std::uint32_t v);
+                ostream & write (std::int64_t v);
                 ostream & write (std::uint64_t v);
                 ostream & write (gsl::czstring str);
                 ostream & write (std::string const & str);
@@ -68,6 +69,9 @@ namespace pstore {
                 return os.write (v);
             }
             inline ostream & operator<< (ostream & os, std::uint64_t const v) {
+                return os.write (v);
+            }
+            inline ostream & operator<< (ostream & os, std::int64_t const v) {
                 return os.write (v);
             }
             inline ostream & operator<< (ostream & os, gsl::czstring const str) {
