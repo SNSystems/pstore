@@ -576,7 +576,7 @@ namespace {
             using namespace pstore::file;
             file_.open (file_handle::temporary{}, file_handle::get_temporary_directory ());
         }
-        ~NativeFile () noexcept {
+        ~NativeFile () noexcept override {
             pstore::no_ex_escape ([this] () { file_.close (); });
         }
 

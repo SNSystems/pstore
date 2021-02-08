@@ -193,7 +193,7 @@ namespace {
     class BasicLoggerThreadNameFixture : public testing::Test {
     public:
         BasicLoggerThreadNameFixture ();
-        ~BasicLoggerThreadNameFixture ();
+        ~BasicLoggerThreadNameFixture () override;
 
     private:
         std::string old_name_;

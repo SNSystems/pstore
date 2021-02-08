@@ -59,7 +59,7 @@ namespace {
         no_debug_line_header_index,
     };
 
-    class dump_error_category : public std::error_category {
+    class dump_error_category final : public std::error_category {
     public:
         // The need for this constructor was removed by CWG defect 253 but Clang (prior to 3.9.0)
         // and GCC (before 4.6.4) require its presence.

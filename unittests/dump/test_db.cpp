@@ -27,15 +27,17 @@
 #include "split.hpp"
 
 namespace {
+
     class Address : public ::testing::Test {
     public:
         Address ()
                 : old_expanded_{::pstore::dump::address::get_expanded ()} {}
-        ~Address () { ::pstore::dump::address::set_expanded (old_expanded_); }
+        ~Address () override { ::pstore::dump::address::set_expanded (old_expanded_); }
 
     private:
         bool old_expanded_;
     };
+
 } // namespace
 
 TEST_F (Address, ExpandedNull) {

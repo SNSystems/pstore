@@ -48,11 +48,11 @@ namespace {
         empty_name_component = 1,
     };
 
-    class error_category : public std::error_category {
+    class error_category final : public std::error_category {
     public:
         error_category () {}
-        char const * name () const noexcept { return "pstore genromfs category"; }
-        std::string message (int error) const {
+        char const * name () const noexcept override { return "pstore genromfs category"; }
+        std::string message (int error) const override {
             static_assert (
                 std::is_same<std::underlying_type<genromfs_erc>::type, decltype (error)>::value,
                 "base type of genromfs_erc must be int to permit safe static cast");

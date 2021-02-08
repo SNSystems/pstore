@@ -38,7 +38,7 @@ public:
 
 class mock_json_callbacks : public json_callbacks_base {
 public:
-    ~mock_json_callbacks ();
+    ~mock_json_callbacks () override;
 
     MOCK_METHOD1 (string_value, std::error_code (std::string const &));
     MOCK_METHOD1 (int64_value, std::error_code (std::int64_t));

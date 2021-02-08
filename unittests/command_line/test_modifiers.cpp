@@ -39,7 +39,7 @@ namespace {
 
     class Modifiers : public testing::Test {
     public:
-        ~Modifiers () { option::reset_container (); }
+        ~Modifiers () override { option::reset_container (); }
     };
 
 } // end anonymous namespace
@@ -70,7 +70,7 @@ namespace {
                       values (literal{"a", static_cast<int> (enumeration::a), "a description"},
                               literal{"b", static_cast<int> (enumeration::b), "b description"},
                               literal{"c", static_cast<int> (enumeration::c), "c description"})} {}
-        ~EnumerationParse () { option::reset_container (); }
+        ~EnumerationParse () override { option::reset_container (); }
 
     protected:
         opt<enumeration> enum_opt_;

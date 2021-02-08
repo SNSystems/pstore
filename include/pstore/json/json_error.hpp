@@ -42,7 +42,7 @@ namespace pstore {
         // ******************
         // * error category *
         // ******************
-        class error_category : public std::error_category {
+        class error_category final : public std::error_category {
         public:
             error_category () noexcept;
             char const * name () const noexcept override;
