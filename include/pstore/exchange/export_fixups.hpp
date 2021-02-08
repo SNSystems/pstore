@@ -12,10 +12,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file export_fixups.hpp
+/// \brief Code to emit internal- and external-fixups for export.
+
 #ifndef PSTORE_EXCHANGE_EXPORT_FIXUPS_HPP
 #define PSTORE_EXCHANGE_EXPORT_FIXUPS_HPP
 
-#include "pstore/exchange/export_ostream.hpp"
 #include "pstore/exchange/export_names.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
 
