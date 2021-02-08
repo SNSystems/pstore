@@ -13,6 +13,7 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file wskey.cpp
+/// \brief Generation of the key used in the HTTP/WebSockets handshake.
 /*
  *  sha1.c
  *
@@ -230,9 +231,11 @@ namespace pstore {
 
             auto first = std::string::size_type{0};
             auto const length = k.length ();
+            // Strip leading whitespace.
             while (first < length && std::isspace (static_cast<unsigned char> (k[first]))) {
                 ++first;
             }
+            // Strip trailing whitespace.
             auto last = length;
             while (last > 0 && std::isspace (static_cast<unsigned char> (k[last - 1]))) {
                 --last;
@@ -241,13 +244,17 @@ namespace pstore {
             hash.input (gsl::make_span (reinterpret_cast<std::uint8_t const *> (&k[first]),
                                         reinterpret_cast<std::uint8_t const *> (&k[last])));
 
-            static char const magic[] = {'2', '5', '8', 'E', 'A', 'F', 'A', '5', '-',
-                                         'E', '9', '1', '4', '-', '4', '7', 'D', 'A',
-                                         '-', '9', '5', 'C', 'A', '-', 'C', '5', 'A',
-                                         'B', '0', 'D', 'C', '8', '5', 'B', '1', '1'};
-            hash.input (gsl::make_span (reinterpret_cast<std::uint8_t const *> (magic),
-                                        array_elements (magic)));
-
+            static std::array<std::uint8_t const, 36> const magic = {{
+                UINT8_C ('2'), UINT8_C ('5'), UINT8_C ('8'), UINT8_C ('E'), UINT8_C ('A'),
+                UINT8_C ('F'), UINT8_C ('A'), UINT8_C ('5'), UINT8_C ('-'), UINT8_C ('E'),
+                UINT8_C ('9'), UINT8_C ('1'), UINT8_C ('4'), UINT8_C ('-'), UINT8_C ('4'),
+                UINT8_C ('7'), UINT8_C ('D'), UINT8_C ('A'), UINT8_C ('-'), UINT8_C ('9'),
+                UINT8_C ('5'), UINT8_C ('C'), UINT8_C ('A'), UINT8_C ('-'), UINT8_C ('C'),
+                UINT8_C ('5'), UINT8_C ('A'), UINT8_C ('B'), UINT8_C ('0'), UINT8_C ('D'),
+                UINT8_C ('C'), UINT8_C ('8'), UINT8_C ('5'), UINT8_C ('B'), UINT8_C ('1'),
+                UINT8_C ('1'),
+            }};
+            hash.input (gsl::make_span (magic));
             return sha1::digest_to_base64 (hash.result ());
         }
 
