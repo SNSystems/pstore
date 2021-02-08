@@ -12,6 +12,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file import_fixups.cpp
+/// \brief  Implements the rules for importing internal- and external-fixup records.
 #include "pstore/exchange/import_fixups.hpp"
 
 namespace pstore {
@@ -73,7 +75,7 @@ namespace pstore {
                 }
                 if (k == "addend") {
                     seen_[addend] = true;
-                    return this->push<uint64_rule> (&addend_);
+                    return this->push<int64_rule> (&addend_);
                 }
                 return error::unrecognized_ifixup_key;
             }
@@ -126,7 +128,7 @@ namespace pstore {
                 }
                 if (k == "addend") {
                     seen_[addend] = true;
-                    return this->push<uint64_rule> (&addend_);
+                    return this->push<int64_rule> (&addend_);
                 }
                 return error::unrecognized_xfixup_key;
             }

@@ -12,6 +12,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file import_fixups.hpp
+/// \brief  Declares the rules for importing internal- and external-fixup records.
 #ifndef PSTORE_EXCHANGE_IMPORT_FIXUPS_HPP
 #define PSTORE_EXCHANGE_IMPORT_FIXUPS_HPP
 
@@ -90,7 +92,7 @@ namespace pstore {
                 repo::section_kind section_ = repo::section_kind::last;
                 std::uint64_t type_ = 0;
                 std::uint64_t offset_ = 0;
-                std::uint64_t addend_ = 0;
+                std::int64_t addend_ = 0;
             };
 
 
@@ -127,7 +129,7 @@ namespace pstore {
                 std::uint64_t name_ = 0;
                 std::uint64_t type_ = 0;
                 std::uint64_t offset_ = 0;
-                std::uint64_t addend_ = 0;
+                std::int64_t addend_ = 0;
             };
 
             //*   __ _                        _     _        _    *

@@ -12,6 +12,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file generic_section.hpp
+/// \brief  Declares the generic section. This is used for many of the fragment sections and holds a
+/// BLOB and collections of internal- and external-fixups.
 #ifndef PSTORE_MCREPO_GENERIC_SECTION_HPP
 #define PSTORE_MCREPO_GENERIC_SECTION_HPP
 
@@ -41,7 +44,7 @@ namespace pstore {
         struct internal_fixup {
             constexpr internal_fixup (section_kind const section_, relocation_type const type_,
                                       std::uint64_t const offset_,
-                                      std::uint64_t const addend_) noexcept
+                                      std::int64_t const addend_) noexcept
                     : section{section_}
                     , type{type_}
                     , offset{offset_}
@@ -65,7 +68,7 @@ namespace pstore {
             std::uint16_t padding1 = 0;
             std::uint32_t padding2 = 0;
             std::uint64_t offset;
-            std::uint64_t addend;
+            std::int64_t addend;
         };
 
 
@@ -97,7 +100,7 @@ namespace pstore {
         struct external_fixup {
             constexpr external_fixup (typed_address<indirect_string> const name_,
                                       relocation_type const type_, std::uint64_t const offset_,
-                                      std::uint64_t const addend_) noexcept
+                                      std::int64_t const addend_) noexcept
                     : name{name_}
                     , type{type_}
                     , offset{offset_}
@@ -122,7 +125,7 @@ namespace pstore {
             std::uint16_t padding2 = 0;
             std::uint32_t padding3 = 0;
             std::uint64_t offset;
-            std::uint64_t addend;
+            std::int64_t addend;
         };
 
         static_assert (std::is_standard_layout<external_fixup>::value,

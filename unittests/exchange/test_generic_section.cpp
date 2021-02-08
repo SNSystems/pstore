@@ -130,18 +130,18 @@ TEST_F (GenericSection, RoundTripForPopulated) {
             return static_cast<decltype (exported_content.data)::value_type> (value++);
         });
     }
-    exported_content.ifixups.emplace_back (
-        pstore::repo::section_kind::data, pstore::repo::relocation_type{3},
-        std::uint64_t{5} /*offset*/, std::uint64_t{7} /*addend*/);
+    exported_content.ifixups.emplace_back (pstore::repo::section_kind::data,
+                                           pstore::repo::relocation_type{3},
+                                           std::uint64_t{5} /*offset*/, std::int64_t{7} /*addend*/);
     exported_content.ifixups.emplace_back (
         pstore::repo::section_kind::read_only, pstore::repo::relocation_type{11},
-        std::uint64_t{13} /*offset*/, std::uint64_t{17} /*addend*/);
+        std::uint64_t{13} /*offset*/, std::int64_t{17} /*addend*/);
     exported_content.xfixups.emplace_back (indir_strings[name1], pstore::repo::relocation_type{19},
                                            std::uint64_t{23} /*offset*/,
-                                           std::uint64_t{29} /*addend*/);
+                                           std::int64_t{29} /*addend*/);
     exported_content.xfixups.emplace_back (indir_strings[name2], pstore::repo::relocation_type{31},
                                            std::uint64_t{37} /*offset*/,
-                                           std::uint64_t{41} /*addend*/);
+                                           std::int64_t{41} /*addend*/);
 
 
     std::string const exported_json =

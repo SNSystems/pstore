@@ -1,5 +1,7 @@
 #include "pstore/exchange/export_ostream.hpp"
 
+#include <sstream>
+
 #include <gmock/gmock.h>
 
 using namespace std::string_literals;
@@ -162,3 +164,124 @@ TEST (OStream, LargeSpan) {
     str.write (pstore::gsl::make_span (v));
     str.flush ();
 }
+
+namespace {
+
+    class ostringstream final : public pstore::exchange::export_ns::ostream_base {
+    public:
+        ostringstream ()
+                : ostream_base{} {}
+        ostringstream (ostringstream const &) = delete;
+        ostringstream (ostringstream &&) = delete;
+
+        ~ostringstream () noexcept override = default;
+
+        ostringstream & operator= (ostringstream const &) = delete;
+        ostringstream & operator= (ostringstream &&) = delete;
+
+        std::string const & str () {
+            this->flush ();
+            return str_;
+        }
+
+    private:
+        std::string str_;
+
+        void flush_buffer (std::vector<char> const & buffer, std::size_t size) override {
+            assert (size < std::numeric_limits<std::string::size_type>::max ());
+            str_.append (buffer.data (), size);
+        }
+    };
+
+    // This function is the heart of the integer write tests. It works by comparing the output of
+    // a stream type derived from pstore::exchange::export_ns::ostream_base with the output from
+    // std::ostringstream and expecting that both produce the same result.
+    template <typename T>
+    void check (T const t) {
+        ostringstream os;
+        os << t;
+        std::ostringstream stdos;
+        stdos << t;
+        EXPECT_EQ (os.str (), stdos.str ());
+    }
+
+} // end anonymous namespace
+
+
+class UnsignedShort : public testing::TestWithParam<unsigned short> {};
+TEST_P (UnsignedShort, UnsignedTest) {
+    SCOPED_TRACE ("UnsignedShort");
+    check (GetParam ());
+}
+INSTANTIATE_TEST_SUITE_P (UnsignedShort, UnsignedShort,
+                          testing::Values (static_cast<unsigned short> (0),
+                                           static_cast<unsigned short> (1),
+                                           std::numeric_limits<unsigned short>::max ()));
+
+
+class SignedShort : public testing::TestWithParam<short> {};
+TEST_P (SignedShort, Signed) {
+    SCOPED_TRACE ("SignedShort");
+    check (GetParam ());
+}
+INSTANTIATE_TEST_SUITE_P (SignedShort, SignedShort,
+                          testing::Values (std::numeric_limits<short>::min (),
+                                           static_cast<short> (-1), static_cast<short> (0),
+                                           static_cast<short> (1),
+                                           std::numeric_limits<short>::max ()));
+
+
+
+class UnsignedInt : public testing::TestWithParam<unsigned> {};
+TEST_P (UnsignedInt, Unsigned) {
+    SCOPED_TRACE ("UnsignedInt");
+    check (GetParam ());
+}
+INSTANTIATE_TEST_SUITE_P (UnsignedInt, UnsignedInt,
+                          testing::Values (0U, 1U, std::numeric_limits<unsigned>::max ()));
+
+class SignedInt : public testing::TestWithParam<int> {};
+TEST_P (SignedInt, Signed) {
+    SCOPED_TRACE ("SignedInt");
+    check (GetParam ());
+}
+INSTANTIATE_TEST_SUITE_P (SignedInt, SignedInt,
+                          testing::Values (std::numeric_limits<int>::min (), -1, 0, 1,
+                                           std::numeric_limits<int>::max ()));
+
+
+
+class UnsignedLong : public testing::TestWithParam<unsigned long> {};
+TEST_P (UnsignedLong, Unsigned) {
+    SCOPED_TRACE ("UnsignedLong");
+    check (GetParam ());
+}
+INSTANTIATE_TEST_SUITE_P (UnsignedLong, UnsignedLong,
+                          testing::Values (0UL, 1UL, std::numeric_limits<unsigned long>::max ()));
+
+class SignedLong : public testing::TestWithParam<long> {};
+TEST_P (SignedLong, Signed) {
+    SCOPED_TRACE ("SignedLong");
+    check (GetParam ());
+}
+INSTANTIATE_TEST_SUITE_P (SignedLong, SignedLong,
+                          testing::Values (std::numeric_limits<long>::min (), -1L, 0L, 1L,
+                                           std::numeric_limits<long>::max ()));
+
+class UnsignedLongLong : public testing::TestWithParam<unsigned long long> {};
+TEST_P (UnsignedLongLong, Unsigned) {
+    SCOPED_TRACE ("UnsignedLongLong");
+    check (GetParam ());
+}
+INSTANTIATE_TEST_SUITE_P (UnsignedLongLong, UnsignedLongLong,
+                          testing::Values (0ULL, 1ULL,
+                                           std::numeric_limits<unsigned long long>::max ()));
+
+class SignedLongLong : public testing::TestWithParam<long long> {};
+TEST_P (SignedLongLong, Signed) {
+    SCOPED_TRACE ("SignedLong");
+    check (GetParam ());
+}
+INSTANTIATE_TEST_SUITE_P (SignedLongLong, SignedLongLong,
+                          testing::Values (std::numeric_limits<long long>::min (), -1LL, 0LL, 1LL,
+                                           std::numeric_limits<long long>::max ()));

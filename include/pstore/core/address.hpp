@@ -166,6 +166,7 @@ namespace pstore {
         }
     };
 
+    static_assert (alignof (address) == 8, "address should be 8 byte aligned");
     static_assert (sizeof (address) == 8, "address should be 8 bytes wide");
     static_assert (std::is_standard_layout<address>::value, "address is not standard layout");
 

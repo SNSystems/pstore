@@ -12,6 +12,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file import_terminals.hpp
+/// \brief Declares rules for the handling of terminals in the grammer (e.g. integers and
+/// strings).
 #ifndef PSTORE_EXCHANGE_IMPORT_TERMINALS_HPP
 #define PSTORE_EXCHANGE_IMPORT_TERMINALS_HPP
 
@@ -20,6 +23,20 @@
 namespace pstore {
     namespace exchange {
         namespace import {
+
+            class int64_rule final : public rule {
+            public:
+                int64_rule (not_null<context *> const ctxt,
+                            not_null<std::int64_t *> const v) noexcept
+                        : rule (ctxt)
+                        , v_{v} {}
+                std::error_code int64_value (std::int64_t v) override;
+                std::error_code uint64_value (std::uint64_t v) override;
+                gsl::czstring name () const noexcept override;
+
+            private:
+                not_null<std::int64_t *> const v_;
+            };
 
             class uint64_rule final : public rule {
             public:

@@ -12,6 +12,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file import_error.cpp
+/// \brief Implements the error type for the exchange import library.
 #include "pstore/exchange/import_error.hpp"
 
 #include <string>
@@ -116,6 +118,8 @@ namespace pstore {
                 case error::debug_line_header_digest_not_found:
                     result = "debug line header digest was not found";
                     break;
+
+                case error::number_too_large: result = "number too large"; break;
                 }
                 return result;
             }

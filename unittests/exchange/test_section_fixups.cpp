@@ -85,12 +85,12 @@ TEST_F (ExchangeSectionFixups, RoundTripInternalCollection) {
     // Start with a small collection of internal fixups.
     internal_fixup_collection ifixups;
     ifixups.emplace_back (pstore::repo::section_kind::text, pstore::repo::relocation_type{17},
-                          std::uint64_t{19} /*offset */, std::uint64_t{23} /*addend*/);
+                          std::uint64_t{19} /*offset */, std::int64_t{23} /*addend*/);
     ifixups.emplace_back (pstore::repo::section_kind::text, pstore::repo::relocation_type{29},
-                          std::uint64_t{31} /*offset */, std::uint64_t{37} /*addend*/);
+                          std::uint64_t{31} /*offset */, std::int64_t{37} /*addend*/);
     ifixups.emplace_back (pstore::repo::section_kind::thread_data,
                           pstore::repo::relocation_type{41}, std::uint64_t{43} /*offset */,
-                          std::uint64_t{47} /*addend*/);
+                          std::int64_t{47} /*addend*/);
 
     // Export the internal fixup array to the 'os' string-stream.
     std::ostringstream os;
@@ -164,7 +164,7 @@ TEST_P (InternalFixupSectionNames, SectionName) {
     auto const & ns = GetParam ();
     std::ostringstream os;
     os << R"({ "section" : ")" << std::get<pstore::gsl::czstring> (ns)
-       << R"(", "type":17, "offset":19, "addend":23 })";
+       << R"(", "type":17, "offset":19, "addend":-23 })";
 
     internal_fixup_collection fixups;
     auto const & parser = this->parse (os.str (), &fixups);
@@ -174,7 +174,7 @@ TEST_P (InternalFixupSectionNames, SectionName) {
     EXPECT_EQ (fixups[0].section, std::get<pstore::repo::section_kind> (ns));
     EXPECT_EQ (fixups[0].type, 17U);
     EXPECT_EQ (fixups[0].offset, 19U);
-    EXPECT_EQ (fixups[0].addend, 23U);
+    EXPECT_EQ (fixups[0].addend, -23);
 }
 
 #define X(x) name_section_pair{#x, pstore::repo::section_kind::x},
@@ -187,7 +187,7 @@ INSTANTIATE_TEST_SUITE_P (InternalFixupSectionNames, InternalFixupSectionNames,
 #endif
 #undef X
 
-TEST_F (InternalFixupMembersImport, MissingSection) {
+TEST_F (InternalFixupMembersImport, SectionErrors) {
     // Section key is missing.
     {
         auto const & parser1 = this->parse (R"({ "type":17, "offset":19, "addend":23 })");
@@ -213,7 +213,7 @@ TEST_F (InternalFixupMembersImport, MissingSection) {
     }
 }
 
-TEST_F (InternalFixupMembersImport, Type) {
+TEST_F (InternalFixupMembersImport, TypeErrors) {
     // The type key is missing altogether.
     {
         auto const & parser1 = this->parse (R"({ "section":"text", "offset":19, "addend":23 })");
@@ -231,7 +231,7 @@ TEST_F (InternalFixupMembersImport, Type) {
     }
 }
 
-TEST_F (InternalFixupMembersImport, Offset) {
+TEST_F (InternalFixupMembersImport, OffsetErrors) {
     // The offset key is missing altogether.
     {
         auto const & parser1 = this->parse (R"({ "section":"text", "type":17, "addend":23 })");
@@ -257,7 +257,7 @@ TEST_F (InternalFixupMembersImport, Offset) {
     }
 }
 
-TEST_F (InternalFixupMembersImport, Addend) {
+TEST_F (InternalFixupMembersImport, AddendErrors) {
     {
         auto const & parser1 = this->parse (R"({ "section":"text", "type":17, "offset":19 })");
         EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";

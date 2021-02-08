@@ -75,7 +75,7 @@ namespace pstore {
             class ostream_base {
             public:
                 /// \param buffer_size  The number of characters in the output buffer.
-                explicit ostream_base (std::size_t buffer_size);
+                explicit ostream_base (std::size_t buffer_size = 4 * 1024);
 
                 ostream_base (ostream_base const &) = delete;
                 ostream_base (ostream_base &&) = delete;
@@ -96,7 +96,26 @@ namespace pstore {
                 /// Writes an unsigned numeric value to the output.
                 template <typename Unsigned,
                           typename = typename std::enable_if_t<std::is_unsigned<Unsigned>::value>>
-                ostream_base & write (Unsigned v);
+                ostream_base & write (Unsigned const v) {
+                    details::base10storage<Unsigned> str{{}};
+                    auto res = details::to_characters (v, &str);
+                    return this->write (gsl::make_span (res.first, res.second));
+                }
+
+                /// Writes an signed numeric value to the output.
+                template <typename Signed, typename Unused = void,
+                          typename = typename std::enable_if_t<!std::is_unsigned<Signed>::value>>
+                ostream_base & write (Signed const v) {
+                    using unsigned_type = typename std::make_unsigned<Signed>::type;
+                    if (v < 0) {
+                        this->write ('-');
+                        if (v == std::numeric_limits<Signed>::min ()) {
+                            return this->write (static_cast<unsigned_type> (v));
+                        }
+                        return this->write (static_cast<unsigned_type> (-v));
+                    }
+                    return this->write (static_cast<unsigned_type> (v));
+                }
 
                 /// Writes a span of characters to the output.
                 template <std::ptrdiff_t Extent>
@@ -118,13 +137,6 @@ namespace pstore {
                 char * ptr_ = nullptr;
                 char * end_ = nullptr;
             };
-
-            template <typename Unsigned, typename>
-            ostream_base & ostream_base::write (Unsigned const v) {
-                details::base10storage<Unsigned> str{{}};
-                auto res = details::to_characters (v, &str);
-                return this->write (gsl::make_span (res.first, res.second));
-            }
 
             template <std::ptrdiff_t Extent>
             ostream_base & ostream_base::write (gsl::span<char const, Extent> const s) {
@@ -157,16 +169,9 @@ namespace pstore {
                 return *this;
             }
 
-            inline ostream_base & operator<< (ostream_base & os, char const c) {
-                return os.write (c);
-            }
-            inline ostream_base & operator<< (ostream_base & os, std::uint16_t const v) {
-                return os.write (v);
-            }
-            inline ostream_base & operator<< (ostream_base & os, std::uint32_t const v) {
-                return os.write (v);
-            }
-            inline ostream_base & operator<< (ostream_base & os, std::uint64_t const v) {
+            template <typename T,
+                      typename = typename std::enable_if_t<std::numeric_limits<T>::is_integer>>
+            inline ostream_base & operator<< (ostream_base & os, T const v) {
                 return os.write (v);
             }
             inline ostream_base & operator<< (ostream_base & os, gsl::czstring const str) {

@@ -75,6 +75,14 @@ TYPED_TEST (Number, N0ExplicitBase10) {
     EXPECT_EQ (expected, actual);
 }
 
+TYPED_TEST (Number, NegativeExplicitBase10) {
+    const auto value = std::numeric_limits<long long>::min ();
+    pstore::dump::number_long v (value, 10);
+    v.write (this->out_);
+    auto const & expected = convert<TypeParam> (std::to_string (value).c_str ());
+    EXPECT_EQ (expected, this->out_.str ());
+}
+
 TYPED_TEST (Number, N0ExplicitBase16) {
     pstore::dump::number_long v (0, 16);
     v.write (this->out_);

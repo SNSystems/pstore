@@ -12,6 +12,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file import_error.hpp
+/// \brief  Declares the errors that can be issued by the exchange import library.
 #ifndef PSTORE_EXCHANGE_IMPORT_ERROR_HPP
 #define PSTORE_EXCHANGE_IMPORT_ERROR_HPP
 
@@ -67,6 +69,7 @@ namespace pstore {
                 unknown_section_name,
                 index_out_of_range,
                 debug_line_header_digest_not_found,
+                number_too_large,
             };
 
 
