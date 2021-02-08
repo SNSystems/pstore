@@ -110,7 +110,7 @@ namespace pstore {
                     , addend{addend_} {}
 #endif // PSTORE_IS_INSIDE_LLVM
             constexpr external_fixup (typed_address<indirect_string> const name_,
-                                      relocation_type const type_, bool is_weak_,
+                                      relocation_type const type_, bool const is_weak_,
                                       std::uint64_t const offset_,
                                       std::int64_t const addend_) noexcept
                     : name{name_}
