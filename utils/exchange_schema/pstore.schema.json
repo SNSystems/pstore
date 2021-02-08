@@ -23,8 +23,18 @@
                 "description": "An external (extra-fragment) fixup",
                 "type": "object",
                 "properties": {
-                    "name": { "type": "number" },
-                    "type": { "type": "number" },
+                    "name": {
+                        "description": "The index of the name referenced by this fixup",
+                        "type": "number"
+                    },
+                    "type": {
+                        "description": "The (platform-dependent) relocation to be applied when resolving this fixup",
+                        "type": "number"
+                    },
+                    "is_weak": {
+                        "description": "True if the fixup can be resolved if the target symbol is undefined (false is assumed if the field is missing)",
+                        "type": "boolean"
+                    },
                     "offset": { "type": "number" },
                     "addend": { "type": "number" }
                 },
@@ -65,7 +75,10 @@
                             "linked_definitions"
                         ]
                     },
-                    "type": { "type": "number" },
+                    "type": {
+                        "description": "The (platform-dependent) relocation to be applied when resolving this fixup",
+                        "type": "number"
+                    },
                     "offset": { "type": "number" },
                     "addend": { "type": "number" }
                 },

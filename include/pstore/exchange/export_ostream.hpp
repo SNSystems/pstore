@@ -36,6 +36,7 @@ namespace pstore {
                 ostream & operator= (ostream const &) = delete;
                 ostream & operator= (ostream &&) = delete;
 
+                ostream & write (bool b);
                 ostream & write (char c);
                 ostream & write (std::uint16_t v);
                 ostream & write (std::uint32_t v);
@@ -61,6 +62,7 @@ namespace pstore {
                 FILE * os_;
             };
 
+            inline ostream & operator<< (ostream & os, bool const b) { return os.write (b); }
             inline ostream & operator<< (ostream & os, char const c) { return os.write (c); }
             inline ostream & operator<< (ostream & os, std::uint16_t const v) {
                 return os.write (v);

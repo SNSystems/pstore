@@ -15,6 +15,7 @@
 #ifndef PSTORE_EXCHANGE_EXPORT_FIXUPS_HPP
 #define PSTORE_EXCHANGE_EXPORT_FIXUPS_HPP
 
+#include "pstore/exchange/export_ostream.hpp"
 #include "pstore/exchange/export_names.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
 
@@ -46,8 +47,11 @@ namespace pstore {
                                              [&] (OStream & os1, repo::external_fixup const & xfx) {
                                                  os1 << R"({"name":)" << names.index (xfx.name)
                                                      << R"(,"type":)"
-                                                     << static_cast<unsigned> (xfx.type)
-                                                     << R"(,"offset":)" << xfx.offset
+                                                     << static_cast<unsigned> (xfx.type);
+                                                 if (xfx.is_weak) {
+                                                     os1 << R"(,"is_weak":)" << xfx.is_weak;
+                                                 }
+                                                 os1 << R"(,"offset":)" << xfx.offset
                                                      << R"(,"addend":)" << xfx.addend << '}';
                                                  return xfx.name;
                                              });
