@@ -154,7 +154,8 @@ namespace pstore {
             parser & input (gsl::czstring const src) {
                 std::size_t const len = std::strlen (src);
                 using index_type = gsl::span<char>::index_type;
-                PSTORE_ASSERT (len <= std::numeric_limits<index_type>::max ());
+                PSTORE_ASSERT (len <= static_cast<std::make_unsigned_t<index_type>> (
+                                          std::numeric_limits<index_type>::max ()));
                 return this->input (gsl::make_span (src, static_cast<index_type> (len)));
             }
 
