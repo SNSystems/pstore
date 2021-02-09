@@ -152,7 +152,11 @@ namespace pstore {
             ///     input (gsl::make_span (src, std::strlen (src)))
             /// \param src The data to be parsed.
             parser & input (gsl::czstring const src) {
-                return this->input (gsl::make_span (src, std::strlen (src)));
+                std::size_t const len = std::strlen (src);
+                using index_type = gsl::span<char>::index_type;
+                PSTORE_ASSERT (len <= static_cast<std::make_unsigned_t<index_type>> (
+                                          std::numeric_limits<index_type>::max ()));
+                return this->input (gsl::make_span (src, static_cast<index_type> (len)));
             }
 
             /// \param span The span of UTF-8 code units to be parsed.

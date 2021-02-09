@@ -59,7 +59,7 @@ namespace {
         no_debug_line_header_index,
     };
 
-    class dump_error_category : public std::error_category {
+    class dump_error_category final : public std::error_category {
     public:
         // The need for this constructor was removed by CWG defect 253 but Clang (prior to 3.9.0)
         // and GCC (before 4.6.4) require its presence.
@@ -332,9 +332,8 @@ int main (int argc, char * argv[]) {
         }
 
         if (opt.show_all) {
-            opt.show_contents = opt.show_all_fragments = opt.show_all_compilations =
-                opt.show_header = opt.show_indices = opt.show_log =
-                    opt.show_all_debug_line_headers = true;
+            opt.show_all_fragments = opt.show_all_compilations = opt.show_header =
+                opt.show_indices = opt.show_log = opt.show_all_debug_line_headers = true;
         }
 
         if (opt.hex) {
@@ -357,11 +356,6 @@ int main (int argc, char * argv[]) {
             file.emplace_back ("file",
                                make_value (object::container{{"path", make_value (path)},
                                                              {"size", make_value (db.size ())}}));
-
-            if (opt.show_contents) {
-                file.emplace_back (
-                    "contents", pstore::dump::make_contents (db, db.footer_pos (), opt.no_times));
-            }
 
             show_index<pstore::trailer::indices::fragment, dump_error_code::fragment_not_found,
                        dump_error_code::no_fragment_index> (

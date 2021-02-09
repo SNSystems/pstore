@@ -27,7 +27,7 @@ using namespace std::chrono_literals;
 
 namespace {
 
-    class mock_cp : public pstore::broker::command_processor {
+    class mock_cp final : public pstore::broker::command_processor {
     public:
         explicit mock_cp (unsigned const num_read_threads,
                           pstore::maybe<pstore::http::server_status> * const http_status,
@@ -50,8 +50,8 @@ namespace {
 
         // Replace the log message with an implementation that does nothing at all. We don't really
         // want to be writing logs from the unit tests.
-        virtual void log (pstore::broker::broker_command const &) const {}
-        virtual void log (pstore::gsl::czstring) const {}
+        void log (pstore::broker::broker_command const &) const override {}
+        void log (pstore::gsl::czstring) const override {}
     };
 
     class Command : public ::testing::Test {

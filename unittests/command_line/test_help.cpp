@@ -36,7 +36,7 @@ namespace {
                                                         "overview", output, errors);
         }
 
-        ~Help () { option::reset_container (); }
+        ~Help () override { option::reset_container (); }
     };
 
 } // end anonymous namespace

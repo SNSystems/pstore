@@ -29,7 +29,7 @@ namespace {
     class ClCommandLine : public ::testing::Test {
     public:
         ClCommandLine ();
-        ~ClCommandLine ();
+        ~ClCommandLine () override;
 
     protected:
 #if defined(_WIN32) && defined(_UNICODE)

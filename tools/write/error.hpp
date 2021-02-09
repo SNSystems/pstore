@@ -28,7 +28,7 @@ enum class write_error_code : int { unrecognized_compaction_mode = 1 };
 // ************************
 // * write error category *
 // ************************
-class write_error_category : public std::error_category {
+class write_error_category final : public std::error_category {
 public:
     // The need for this constructor was removed by CWG defect 253 but Clang (prior to 3.9.0) and
     // GCC (before 4.6.4) require its presence.

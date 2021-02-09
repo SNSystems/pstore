@@ -26,7 +26,6 @@
 
 struct switches {
     bool show_all = false;
-    bool show_contents = false;
 
     /// A list of the individual fragment digests from the command-line.
     std::list<pstore::index::digest> fragments;

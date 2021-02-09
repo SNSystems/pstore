@@ -12,6 +12,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file uint128.hpp
+/// \brief Declares a portable 128-bit integer type.
 
 #ifndef PSTORE_SUPPORT_UINT128_HPP
 #define PSTORE_SUPPORT_UINT128_HPP

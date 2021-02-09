@@ -32,7 +32,7 @@ namespace {
     public:
         Number ()
                 : base_{pstore::dump::number_base::default_base ()} {}
-        ~Number () {
+        ~Number () override {
             using namespace ::pstore::dump;
             switch (base_) {
             case 8: number_base::oct (); break;
