@@ -98,6 +98,9 @@ namespace pstore {
         //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                  |_|    *
         struct external_fixup {
+            // TODO: remove. This ctor is retained to avoid breaking the downstream API in (very)
+            // short term.
+#ifdef PSTORE_IS_INSIDE_LLVM
             constexpr external_fixup (typed_address<indirect_string> const name_,
                                       relocation_type const type_, std::uint64_t const offset_,
                                       std::int64_t const addend_) noexcept
@@ -105,14 +108,25 @@ namespace pstore {
                     , type{type_}
                     , offset{offset_}
                     , addend{addend_} {}
+#endif // PSTORE_IS_INSIDE_LLVM
+            constexpr external_fixup (typed_address<indirect_string> const name_,
+                                      relocation_type const type_, bool const is_weak_,
+                                      std::uint64_t const offset_,
+                                      std::int64_t const addend_) noexcept
+                    : name{name_}
+                    , type{type_}
+                    , is_weak{is_weak_}
+                    , offset{offset_}
+                    , addend{addend_} {}
+
             external_fixup (external_fixup const &) noexcept = default;
             external_fixup (external_fixup &&) noexcept = default;
             external_fixup & operator= (external_fixup const &) noexcept = default;
             external_fixup & operator= (external_fixup &&) noexcept = default;
 
             bool operator== (external_fixup const & rhs) const noexcept {
-                return name == rhs.name && type == rhs.type && offset == rhs.offset &&
-                       addend == rhs.addend;
+                return name == rhs.name && type == rhs.type && is_weak == rhs.is_weak &&
+                       offset == rhs.offset && addend == rhs.addend;
             }
             bool operator!= (external_fixup const & rhs) const noexcept {
                 return !operator== (rhs);
@@ -120,10 +134,10 @@ namespace pstore {
 
             typed_address<indirect_string> name;
             relocation_type type;
+            bool is_weak = false;
             // TODO: much padding here.
-            std::uint8_t padding1 = 0;
-            std::uint16_t padding2 = 0;
-            std::uint32_t padding3 = 0;
+            std::uint16_t padding1 = 0;
+            std::uint32_t padding2 = 0;
             std::uint64_t offset;
             std::int64_t addend;
         };
@@ -134,16 +148,17 @@ namespace pstore {
                        "name offset differs from expected value");
         static_assert (offsetof (external_fixup, type) == 8,
                        "type offset differs from expected value");
-        static_assert (offsetof (external_fixup, padding1) == 9,
+        static_assert (offsetof (external_fixup, is_weak) == 9,
+                       "is_weak offset differs from expected value");
+        static_assert (offsetof (external_fixup, padding1) == 10,
                        "padding1 offset differs from expected value");
-        static_assert (offsetof (external_fixup, padding2) == 10,
+        static_assert (offsetof (external_fixup, padding2) == 12,
                        "padding2 offset differs from expected value");
-        static_assert (offsetof (external_fixup, padding3) == 12,
-                       "padding3 offset differs from expected value");
         static_assert (offsetof (external_fixup, offset) == 16,
                        "offset offset differs from expected value");
         static_assert (offsetof (external_fixup, addend) == 24,
                        "addend offset differs from expected value");
+        static_assert (alignof (external_fixup) == 8, "external_fixup alignment should be 8");
         static_assert (sizeof (external_fixup) == 32,
                        "external_fixup size differs from expected value");
 

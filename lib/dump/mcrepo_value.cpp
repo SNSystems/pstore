@@ -55,6 +55,7 @@ namespace pstore {
             return make_value (object::container{
                 {"name", make_value (indirect_string::read (db, xfx.name))},
                 {"type", make_value (static_cast<std::uint64_t> (xfx.type))},
+                {"is_weak", make_value (xfx.is_weak)},
                 {"offset", make_value (xfx.offset)},
                 {"addend", make_value (xfx.addend)},
             });

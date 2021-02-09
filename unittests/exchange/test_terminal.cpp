@@ -28,9 +28,9 @@ using namespace pstore::exchange::import;
 
 namespace {
 
-    class ImportInt64 : public testing::Test {
+    class RuleTest : public testing::Test {
     public:
-        ImportInt64 ()
+        RuleTest ()
                 : db_storage_{}
                 , db_{db_storage_.file ()} {
             db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
@@ -38,10 +38,48 @@ namespace {
 
     private:
         InMemoryStore db_storage_;
-
     protected:
         pstore::database db_;
+    };
 
+    class ImportBool : public RuleTest {
+    public:
+        ImportBool () = default;
+
+        decltype (auto) make_json_bool_parser (pstore::gsl::not_null<bool *> v) {
+            return pstore::json::make_parser (callbacks::make<bool_rule> (&db_, v));
+        }
+    };
+
+} // end anonymous namespace
+
+TEST_F (ImportBool, True) {
+    bool v = false;
+    auto parser = make_json_bool_parser (&v);
+    parser.input ("true");
+    parser.eof ();
+
+    // Check the result.
+    ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
+    EXPECT_EQ (v, true);
+}
+
+TEST_F (ImportBool, False) {
+    bool v = true;
+    auto parser = make_json_bool_parser (&v);
+    parser.input ("false");
+    parser.eof ();
+
+    // Check the result.
+    ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
+    EXPECT_EQ (v, false);
+}
+
+namespace {
+
+    class ImportInt64 : public RuleTest {
+    public:
+        ImportInt64 () = default;
         decltype (auto) make_json_int64_parser (pstore::gsl::not_null<std::int64_t *> v) {
             return pstore::json::make_parser (callbacks::make<int64_rule> (&db_, v));
         }

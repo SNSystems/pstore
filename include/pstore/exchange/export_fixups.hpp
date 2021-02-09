@@ -12,6 +12,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file export_fixups.hpp
+/// \brief Code to emit internal- and external-fixups for export.
+
 #ifndef PSTORE_EXCHANGE_EXPORT_FIXUPS_HPP
 #define PSTORE_EXCHANGE_EXPORT_FIXUPS_HPP
 
@@ -46,8 +49,11 @@ namespace pstore {
                                              [&] (OStream & os1, repo::external_fixup const & xfx) {
                                                  os1 << R"({"name":)" << names.index (xfx.name)
                                                      << R"(,"type":)"
-                                                     << static_cast<unsigned> (xfx.type)
-                                                     << R"(,"offset":)" << xfx.offset
+                                                     << static_cast<unsigned> (xfx.type);
+                                                 if (xfx.is_weak) {
+                                                     os1 << R"(,"is_weak":)" << xfx.is_weak;
+                                                 }
+                                                 os1 << R"(,"offset":)" << xfx.offset
                                                      << R"(,"addend":)" << xfx.addend << '}';
                                                  return xfx.name;
                                              });

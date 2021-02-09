@@ -71,6 +71,7 @@ std::string export_section (pstore::database const & db,
 
     // Now export it.
     std::ostringstream os;
+    os << std::boolalpha;
     using namespace pstore::exchange::export_ns;
     emit_section<Kind> (os, indent{}, db, exported_names, *section, comments);
     return os.str ();

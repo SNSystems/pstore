@@ -121,13 +121,14 @@ namespace pstore {
                 std::error_code end_object () override;
 
             private:
-                enum { name_index, type, offset, addend };
+                enum { name_index, type, is_weak, offset, addend };
                 std::bitset<addend + 1> seen_;
                 not_null<name_mapping const *> names_;
                 fixups_pointer const fixups_;
 
                 std::uint64_t name_ = 0;
                 std::uint64_t type_ = 0;
+                bool is_weak_ = false;
                 std::uint64_t offset_ = 0;
                 std::int64_t addend_ = 0;
             };

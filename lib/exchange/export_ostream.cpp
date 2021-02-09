@@ -22,6 +22,7 @@ namespace pstore {
 
             // write
             // ~~~~~
+            ostream & ostream::write (bool const b) { return this->write (b ? "true" : "false"); }
             ostream & ostream::write (char const c) {
                 std::fputc (c, os_);
                 if (ferror (os_)) {
