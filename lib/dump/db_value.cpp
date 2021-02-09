@@ -122,17 +122,5 @@ namespace pstore {
             });
         }
 
-        value_ptr make_contents (database const & db, typed_address<trailer> const footer_pos,
-                                 bool const no_times) {
-            array::container array;
-            std::for_each (
-                generation_iterator (&db, footer_pos),
-                generation_iterator (&db, typed_address<trailer>::null ()),
-                [&db, &array, no_times] (pstore::typed_address<pstore::trailer> const fp) {
-                    array.emplace_back (make_generation (db, fp, no_times));
-                });
-            return make_value (std::move (array));
-        }
-
     } // end namespace dump
 } // end namespace pstore

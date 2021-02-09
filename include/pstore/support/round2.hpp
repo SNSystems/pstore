@@ -12,18 +12,20 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file round2.hpp
+/// \brief Defines a function which rounds up to the next highest power of 2.
+///
+/// The implementation of these functions is based on code published in the "Bit Twiddling Hacks"
+/// web page by Sean Eron Anderson (seander@cs.stanford.edu) found at
+/// <https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2>. The original code is
+/// public domain.
+
 #ifndef PSTORE_SUPPORT_ROUND2_HPP
 #define PSTORE_SUPPORT_ROUND2_HPP
 
 #include <cstdint>
 
 namespace pstore {
-
-    // The implementation of these functions is based on code published in the "Bit Twiddling Hacks"
-    // web page by Sean Eron Anderson (seander@cs.stanford.edu) found at
-    // <https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2>. The original code is
-    // public domain.
-
 
     inline std::uint8_t round_to_power_of_2 (std::uint8_t v) noexcept {
         --v;

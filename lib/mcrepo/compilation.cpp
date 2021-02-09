@@ -12,6 +12,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file compilation.cpp
+/// \brief Definitions for the compilation data structure.
+
 #include "pstore/mcrepo/compilation.hpp"
 
 #include "pstore/mcrepo/repo_error.hpp"

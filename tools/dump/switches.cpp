@@ -55,10 +55,6 @@ namespace {
 
     option_category what_cat{"Options controlling what is dumped"};
 
-    opt<bool> contents{"contents", desc{"Emit a raw dump of the transaction contents"},
-                       cat (what_cat)};
-    alias contents2{"c", desc{"Alias for --contents"}, aliasopt{contents}};
-
     list<pstore::dump::digest_opt> fragment{"fragment",
                                             desc{"Dump the contents of a specific fragment"},
                                             comma_separated, cat (what_cat)};
@@ -91,10 +87,10 @@ namespace {
     opt<bool> log_opt{"log", desc{"List the generations"}, cat (what_cat)};
     alias log2{"l", desc{"Alias for --log"}, aliasopt{log_opt}};
 
-    opt<bool> all{
-        "all",
-        desc{"Show store-related output. Equivalent to: --contents --header --indices --log"},
-        cat (what_cat)};
+    opt<bool> all{"all",
+                  desc{"Show store-related output. Equivalent to: --all-compilations "
+                       "--all-debug-line-headers --all-fragments --header --indices --log"},
+                  cat (what_cat)};
     alias all2{"a", desc{"Alias for --all"}, aliasopt{all}};
 
     opt<bool> shared_memory{"shared-memory", desc{"Dumps the shared-memory block"}, cat (what_cat)};
@@ -129,7 +125,6 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     parse_command_line_options (argc, argv, "pstore dump utility\n");
 
     switches result;
-    result.show_contents = contents.get ();
 
     auto const get_digest_from_opt = [] (pstore::dump::digest_opt const & d) {
         return pstore::index::digest{d};

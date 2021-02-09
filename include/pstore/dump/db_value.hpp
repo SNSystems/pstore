@@ -106,8 +106,6 @@ namespace pstore {
         }
 
         value_ptr make_blob (database const & db, pstore::address begin, std::uint64_t size);
-        value_ptr make_contents (database const & db,
-                                 pstore::typed_address<pstore::trailer> footer_pos, bool no_times);
 
     } // namespace dump
 } // namespace pstore
