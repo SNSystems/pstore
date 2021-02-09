@@ -2,7 +2,6 @@
 # %stores = a directory in which data stores may be created
 # %S = the test source directory
 
-XFAIL:*
-RUN: "%binaries/pstore-write" "%S/empty"
+RUN: ! "%binaries/pstore-write" "%S/empty"
 
 #eof:empty.test
