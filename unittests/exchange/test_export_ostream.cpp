@@ -183,8 +183,7 @@ namespace {
 
     class ostringstream final : public pstore::exchange::export_ns::ostream_base {
     public:
-        ostringstream ()
-                : ostream_base{} {}
+        ostringstream () = default;
         ostringstream (ostringstream const &) = delete;
         ostringstream (ostringstream &&) = delete;
 
@@ -193,20 +192,49 @@ namespace {
         ostringstream & operator= (ostringstream const &) = delete;
         ostringstream & operator= (ostringstream &&) = delete;
 
-        std::string const & str () {
-            this->flush ();
-            return str_;
-        }
+        std::string const & str ();
 
     private:
         std::string str_;
-
-        void flush_buffer (std::vector<char> const & buffer, std::size_t size) override {
-            assert (size < std::numeric_limits<std::string::size_type>::max ());
-            str_.append (buffer.data (), size);
-        }
+        void flush_buffer (std::vector<char> const & buffer, std::size_t size) override;
     };
 
+    std::string const & ostringstream::str () {
+        this->flush ();
+        return str_;
+    }
+
+    void ostringstream::flush_buffer (std::vector<char> const & buffer, std::size_t size) {
+        assert (size < std::numeric_limits<std::string::size_type>::max ());
+        str_.append (buffer.data (), size);
+    }
+
+} // end anonymous namespace
+
+namespace {
+
+    // signed test values
+    // ~~~~~~~~~~~~~~~~~~
+    // Returns the values used to test signed integer types.
+    template <typename T, typename = typename std::enable_if_t<std::is_signed<T>::value>>
+    decltype (auto) signed_test_values () {
+        return testing::Values (std::numeric_limits<T>::min (),
+                                static_cast<T> (std::numeric_limits<T>::min () + 1), T{-1}, T{0},
+                                T{1}, static_cast<T> (std::numeric_limits<T>::max () - 1),
+                                std::numeric_limits<T>::max ());
+    }
+
+    // unsigned test values
+    // ~~~~~~~~~~~~~~~~~~~~
+    // Generates the values used to test unsigned integer types.
+    template <typename T, typename = typename std::enable_if_t<std::is_unsigned<T>::value>>
+    decltype (auto) unsigned_test_values () {
+        return testing::Values (T{0}, T{1}, static_cast<T> (std::numeric_limits<T>::max () - 1U),
+                                std::numeric_limits<T>::max ());
+    }
+
+    // check
+    // ~~~~~
     // This function is the heart of the integer write tests. It works by comparing the output of
     // a stream type derived from pstore::exchange::export_ns::ostream_base with the output from
     // std::ostringstream and expecting that both produce the same result.
@@ -221,81 +249,148 @@ namespace {
 
 } // end anonymous namespace
 
-
+//*  _   _         _                  _   ___ _            _    *
+//* | | | |_ _  __(_)__ _ _ _  ___ __| | / __| |_  ___ _ _| |_  *
+//* | |_| | ' \(_-< / _` | ' \/ -_) _` | \__ \ ' \/ _ \ '_|  _| *
+//*  \___/|_||_/__/_\__, |_||_\___\__,_| |___/_||_\___/_|  \__| *
+//*                 |___/                                       *
 class UnsignedShort : public testing::TestWithParam<unsigned short> {};
+
 TEST_P (UnsignedShort, UnsignedTest) {
     SCOPED_TRACE ("UnsignedShort");
     check (GetParam ());
 }
-INSTANTIATE_TEST_SUITE_P (UnsignedShort, UnsignedShort,
-                          testing::Values (static_cast<unsigned short> (0),
-                                           static_cast<unsigned short> (1),
-                                           std::numeric_limits<unsigned short>::max ()));
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+INSTANTIATE_TEST_CASE_P (UnsignedShort, UnsignedShort, unsigned_test_values<unsigned short> (), );
+#else
+INSTANTIATE_TEST_SUITE_P (UnsignedShort, UnsignedShort, unsigned_test_values<unsigned short> ());
+#endif
 
+//*  ___ _                  _   ___ _            _    *
+//* / __(_)__ _ _ _  ___ __| | / __| |_  ___ _ _| |_  *
+//* \__ \ / _` | ' \/ -_) _` | \__ \ ' \/ _ \ '_|  _| *
+//* |___/_\__, |_||_\___\__,_| |___/_||_\___/_|  \__| *
+//*       |___/                                       *
 class SignedShort : public testing::TestWithParam<short> {};
+
 TEST_P (SignedShort, Signed) {
     SCOPED_TRACE ("SignedShort");
     check (GetParam ());
 }
-INSTANTIATE_TEST_SUITE_P (SignedShort, SignedShort,
-                          testing::Values (std::numeric_limits<short>::min (),
-                                           static_cast<short> (-1), static_cast<short> (0),
-                                           static_cast<short> (1),
-                                           std::numeric_limits<short>::max ()));
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+INSTANTIATE_TEST_CASE_P (SignedShort, SignedShort, signed_test_values<short> (), );
+#else
+INSTANTIATE_TEST_SUITE_P (SignedShort, SignedShort, signed_test_values<short> ());
+#endif
 
-
+//*  _   _         _                  _   ___     _    *
+//* | | | |_ _  __(_)__ _ _ _  ___ __| | |_ _|_ _| |_  *
+//* | |_| | ' \(_-< / _` | ' \/ -_) _` |  | || ' \  _| *
+//*  \___/|_||_/__/_\__, |_||_\___\__,_| |___|_||_\__| *
+//*                 |___/                              *
 class UnsignedInt : public testing::TestWithParam<unsigned> {};
+
 TEST_P (UnsignedInt, Unsigned) {
     SCOPED_TRACE ("UnsignedInt");
     check (GetParam ());
 }
-INSTANTIATE_TEST_SUITE_P (UnsignedInt, UnsignedInt,
-                          testing::Values (0U, 1U, std::numeric_limits<unsigned>::max ()));
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+INSTANTIATE_TEST_CASE_P (UnsignedInt, UnsignedInt, unsigned_test_values<unsigned> (), );
+#else
+INSTANTIATE_TEST_SUITE_P (UnsignedInt, UnsignedInt, unsigned_test_values<unsigned> ());
+#endif
+
+//*  ___ _                  _   ___     _    *
+//* / __(_)__ _ _ _  ___ __| | |_ _|_ _| |_  *
+//* \__ \ / _` | ' \/ -_) _` |  | || ' \  _| *
+//* |___/_\__, |_||_\___\__,_| |___|_||_\__| *
+//*       |___/                              *
 class SignedInt : public testing::TestWithParam<int> {};
+
 TEST_P (SignedInt, Signed) {
     SCOPED_TRACE ("SignedInt");
     check (GetParam ());
 }
-INSTANTIATE_TEST_SUITE_P (SignedInt, SignedInt,
-                          testing::Values (std::numeric_limits<int>::min (), -1, 0, 1,
-                                           std::numeric_limits<int>::max ()));
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+INSTANTIATE_TEST_CASE_P (SignedInt, SignedInt, signed_test_values<int> (), );
+#else
+INSTANTIATE_TEST_SUITE_P (SignedInt, SignedInt, signed_test_values<int> ());
+#endif
 
-
+//*  _   _         _                  _   _                   *
+//* | | | |_ _  __(_)__ _ _ _  ___ __| | | |   ___ _ _  __ _  *
+//* | |_| | ' \(_-< / _` | ' \/ -_) _` | | |__/ _ \ ' \/ _` | *
+//*  \___/|_||_/__/_\__, |_||_\___\__,_| |____\___/_||_\__, | *
+//*                 |___/                              |___/  *
 class UnsignedLong : public testing::TestWithParam<unsigned long> {};
+
 TEST_P (UnsignedLong, Unsigned) {
     SCOPED_TRACE ("UnsignedLong");
     check (GetParam ());
 }
-INSTANTIATE_TEST_SUITE_P (UnsignedLong, UnsignedLong,
-                          testing::Values (0UL, 1UL, std::numeric_limits<unsigned long>::max ()));
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+INSTANTIATE_TEST_CASE_P (UnsignedLong, UnsignedLong, unsigned_test_values<unsigned long> (), );
+#else
+INSTANTIATE_TEST_SUITE_P (UnsignedLong, UnsignedLong, unsigned_test_values<unsigned long> ());
+#endif
+
+//*  ___ _                  _   _                   *
+//* / __(_)__ _ _ _  ___ __| | | |   ___ _ _  __ _  *
+//* \__ \ / _` | ' \/ -_) _` | | |__/ _ \ ' \/ _` | *
+//* |___/_\__, |_||_\___\__,_| |____\___/_||_\__, | *
+//*       |___/                              |___/  *
 class SignedLong : public testing::TestWithParam<long> {};
+
 TEST_P (SignedLong, Signed) {
     SCOPED_TRACE ("SignedLong");
     check (GetParam ());
 }
-INSTANTIATE_TEST_SUITE_P (SignedLong, SignedLong,
-                          testing::Values (std::numeric_limits<long>::min (), -1L, 0L, 1L,
-                                           std::numeric_limits<long>::max ()));
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+INSTANTIATE_TEST_CASE_P (SignedLong, SignedLong, signed_test_values<long> (), );
+#else
+INSTANTIATE_TEST_SUITE_P (SignedLong, SignedLong, signed_test_values<long> ());
+#endif
+
+//*  _   _         _                  _   _                    _                   *
+//* | | | |_ _  __(_)__ _ _ _  ___ __| | | |   ___ _ _  __ _  | |   ___ _ _  __ _  *
+//* | |_| | ' \(_-< / _` | ' \/ -_) _` | | |__/ _ \ ' \/ _` | | |__/ _ \ ' \/ _` | *
+//*  \___/|_||_/__/_\__, |_||_\___\__,_| |____\___/_||_\__, | |____\___/_||_\__, | *
+//*                 |___/                              |___/                |___/  *
 class UnsignedLongLong : public testing::TestWithParam<unsigned long long> {};
+
 TEST_P (UnsignedLongLong, Unsigned) {
     SCOPED_TRACE ("UnsignedLongLong");
     check (GetParam ());
 }
-INSTANTIATE_TEST_SUITE_P (UnsignedLongLong, UnsignedLongLong,
-                          testing::Values (0ULL, 1ULL,
-                                           std::numeric_limits<unsigned long long>::max ()));
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+INSTANTIATE_TEST_CASE_P (UnsignedLongLong, UnsignedLongLong,
+                         unsigned_test_values<unsigned long long> (), );
+#else
+INSTANTIATE_TEST_SUITE_P (UnsignedLongLong, UnsignedLongLong,
+                          unsigned_test_values<unsigned long long> ());
+#endif
+
+//*  ___ _                  _   _                    _                   *
+//* / __(_)__ _ _ _  ___ __| | | |   ___ _ _  __ _  | |   ___ _ _  __ _  *
+//* \__ \ / _` | ' \/ -_) _` | | |__/ _ \ ' \/ _` | | |__/ _ \ ' \/ _` | *
+//* |___/_\__, |_||_\___\__,_| |____\___/_||_\__, | |____\___/_||_\__, | *
+//*       |___/                              |___/                |___/  *
 class SignedLongLong : public testing::TestWithParam<long long> {};
+
 TEST_P (SignedLongLong, Signed) {
     SCOPED_TRACE ("SignedLong");
     check (GetParam ());
 }
-INSTANTIATE_TEST_SUITE_P (SignedLongLong, SignedLongLong,
-                          testing::Values (std::numeric_limits<long long>::min (), -1LL, 0LL, 1LL,
-                                           std::numeric_limits<long long>::max ()));
+
+#ifdef PSTORE_IS_INSIDE_LLVM
+INSTANTIATE_TEST_CASE_P (SignedLongLong, SignedLongLong, signed_test_values<long long> (), );
+#else
+INSTANTIATE_TEST_SUITE_P (SignedLongLong, SignedLongLong, signed_test_values<long long> ());
+#endif
