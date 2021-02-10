@@ -140,7 +140,7 @@ namespace pstore {
             }
 
             void ostringstream::flush_buffer (std::vector<char> const & buffer, std::size_t size) {
-                assert (size < std::numeric_limits<std::string::size_type>::max ());
+                PSTORE_ASSERT (size < std::numeric_limits<std::string::size_type>::max ());
                 str_.append (buffer.data (), size);
             }
 
