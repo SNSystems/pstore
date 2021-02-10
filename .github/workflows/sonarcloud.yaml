@@ -14,10 +14,16 @@ jobs:
                   fetch-depth: 0
 
             - name: Create the SonarCloud tools directory
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   mkdir "$TOOLS_PATH"
 
             - name: Install Sonar Scanner CLI
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   cd "$TOOLS_PATH"
                   curl --location     \
@@ -26,6 +32,9 @@ jobs:
                   unzip scanner.zip
 
             - name: Install SonarCloud Build Wrapper
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   cd "$TOOLS_PATH"
                   curl --location \
@@ -34,9 +43,15 @@ jobs:
                   unzip build-wrapper-linux-x86.zip
 
             - name: Create Build Environment
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: cmake -E make_directory "$BUILD_PATH"
 
             - name: Configure
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   cd "$BUILD_PATH"
                   cmake -G "Unix Makefiles"    \
@@ -45,6 +60,9 @@ jobs:
                         "$GITHUB_WORKSPACE"
 
             - name: Build
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   cd "$BUILD_PATH"
                   "$TOOLS_PATH/build-wrapper-linux-x86/build-wrapper-linux-x86-64 \
@@ -52,12 +70,17 @@ jobs:
                       make -j 2 clean all pstore-system-tests
 
             - name: Gather Coverage
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   cd "$BUILD_PATH"
                   find . -name \*.gcno -exec gcov {} \;
 
             - name: Run Sonar Scanner
               env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
                   LOGIN: ${{ secrets.SONAR_CLOUD_LOGIN }}
                   OUT_DIR: bw-output
                   THREADS: 2
