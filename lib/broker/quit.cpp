@@ -142,9 +142,8 @@ namespace {
 
     using pstore::broker::sig_self_quit;
 
-    template <ssize_t Size>
+    template <ssize_t Size, typename = typename std::enable_if_t<(Size > 0)>>
     char const * signal_name (int signo, pstore::gsl::span<char, Size> buffer) {
-        static_assert (Size > 0, "signal name needs a buffer of size > 0");
 #define X(sig)                                                                                     \
     case sig: return #sig;
         switch (signo) { SIGNALS }
@@ -169,7 +168,7 @@ namespace {
     void quit_thread (std::weak_ptr<pstore::broker::command_processor> const cp,
                       std::weak_ptr<pstore::broker::scavenger> const scav,
                       unsigned const num_read_threads,
-                      not_null<pstore::maybe<pstore::http::server_status> *> http_status,
+                      not_null<pstore::maybe<pstore::http::server_status> *> const http_status,
                       not_null<std::atomic<bool> *> const uptime_done) {
         try {
             pstore::threads::set_name ("quit");
