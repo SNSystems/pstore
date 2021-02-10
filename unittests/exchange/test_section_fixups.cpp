@@ -360,15 +360,16 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     // Build a collection of external fixups. These refer to names added to the database
     // add_export_strings().
     xfixup_collection xfixups;
-    xfixups.emplace_back (indir_strings["foo"], static_cast<pstore::repo::relocation_type> (5), 7,
-                          9);
-    xfixups.emplace_back (indir_strings["bar"], static_cast<pstore::repo::relocation_type> (11), 13,
-                          17);
+    xfixups.emplace_back (indir_strings["foo"], static_cast<pstore::repo::relocation_type> (5),
+                          false /*is_weak*/, 7, 9);
+    xfixups.emplace_back (indir_strings["bar"], static_cast<pstore::repo::relocation_type> (11),
+                          true /*is_weak*/, 13, 17);
 
 
 
     // Export the external fixup array to the 'exported_fixups' string-stream.
     std::ostringstream exported_fixups;
+    exported_fixups << std::boolalpha;
     emit_external_fixups (exported_fixups, pstore::exchange::export_ns::indent{}, export_db_,
                           exported_names, std::begin (xfixups), std::end (xfixups), false);
 
@@ -501,6 +502,32 @@ TEST_F (ExternalFixupMembersImport, Type) {
     {
         auto const & parser2 = this->parse (
             R"({ "name":0, "type":true, "offset":19, "addend":23 })", &db_, imported_names);
+        ASSERT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser2.last_error (),
+                   make_error_code (pstore::exchange::import::error::unexpected_boolean));
+    }
+}
+
+TEST_F (ExternalFixupMembersImport, IsWeak) {
+    mock_mutex mutex;
+    auto transaction = begin (db_, transaction_lock{mutex});
+
+    pstore::exchange::import::name_mapping imported_names;
+    // Add a single name with index 0.
+    ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
+
+    // The is_weak key is missing altogether. That's okay: the default is 'false'.
+    {
+        auto const & parser1 = this->parse (R"({ "name":0, "type":17, "offset":19, "addend":23 })",
+                                            &db_, imported_names);
+        EXPECT_FALSE (parser1.has_error ())
+            << "JSON error was: " << parser1.last_error ().message ();
+    }
+    // The is_weak key has the wrong type.
+    {
+        auto const & parser2 =
+            this->parse (R"({ "name":0, "type":true, "is_weak":0, offset":19, "addend":23 })", &db_,
+                         imported_names);
         ASSERT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
                    make_error_code (pstore::exchange::import::error::unexpected_boolean));

@@ -85,6 +85,7 @@ namespace pstore {
                 ostream_base & operator= (ostream_base const &) = delete;
                 ostream_base & operator= (ostream_base &&) = delete;
 
+                ostream_base & write (bool b);
                 /// Writes a single character to the output.
                 ostream_base & write (char c);
                 /// Writes a null-terminated string to the output.
@@ -174,6 +175,9 @@ namespace pstore {
             inline ostream_base & operator<< (ostream_base & os, T const v) {
                 return os.write (v);
             }
+            inline ostream_base & operator<< (ostream_base & os, bool const b) {
+                return os.write (b);
+            }
             inline ostream_base & operator<< (ostream_base & os, gsl::czstring const str) {
                 return os.write (str);
             }
@@ -207,6 +211,29 @@ namespace pstore {
                 FILE * const os_;
             };
 
+            //*         _       _              _                       *
+            //*  ___ __| |_ _ _(_)_ _  __ _ __| |_ _ _ ___ __ _ _ __   *
+            //* / _ (_-<  _| '_| | ' \/ _` (_-<  _| '_/ -_) _` | '  \  *
+            //* \___/__/\__|_| |_|_||_\__, /__/\__|_| \___\__,_|_|_|_| *
+            //*                       |___/                            *
+            class ostringstream final : public pstore::exchange::export_ns::ostream_base {
+            public:
+                ostringstream () = default;
+                ostringstream (ostringstream const &) = delete;
+                ostringstream (ostringstream &&) = delete;
+
+                ~ostringstream () noexcept override = default;
+
+                ostringstream & operator= (ostringstream const &) = delete;
+                ostringstream & operator= (ostringstream &&) = delete;
+
+                std::string const & str ();
+
+            private:
+                std::string str_;
+                void flush_buffer (std::vector<char> const & buffer, std::size_t size) override;
+            };
+
             //*         _                        _                  _            *
             //*  ___ __| |_ _ _ ___ __ _ _ __   (_)_ _  ___ ___ _ _| |_ ___ _ _  *
             //* / _ (_-<  _| '_/ -_) _` | '  \  | | ' \(_-</ -_) '_|  _/ -_) '_| *
@@ -220,7 +247,7 @@ namespace pstore {
                 using pointer = void;
                 using reference = void;
 
-                explicit ostream_inserter (ostream & os) noexcept
+                explicit ostream_inserter (ostream_base & os) noexcept
                         : os_{os} {}
                 ostream_inserter & operator= (char const c) {
                     os_ << c;
@@ -231,7 +258,7 @@ namespace pstore {
                 ostream_inserter operator++ (int) noexcept { return *this; }
 
             private:
-                ostream & os_;
+                ostream_base & os_;
             };
 
         } // end namespace export_ns

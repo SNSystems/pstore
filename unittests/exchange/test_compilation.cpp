@@ -140,7 +140,7 @@ TEST_F (ExchangeCompilation, Empty) {
     emit_names (exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
                 export_db_.get_current_revision (), &exported_names);
 
-    std::ostringstream exported_compilation_stream;
+    pstore::exchange::export_ns::ostringstream exported_compilation_stream;
     {
         mock_mutex mutex;
         auto transaction = begin (export_db_, transaction_lock{mutex});
@@ -218,7 +218,7 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
     constexpr pstore::index::digest compilation_digest{0x12345678, 0x9ABCDEF0};
     constexpr pstore::index::digest fragment_digest{0x9ABCDEF0, 0x12345678};
 
-    std::ostringstream exported_compilation_stream;
+    pstore::exchange::export_ns::ostringstream exported_compilation_stream;
     std::ostringstream exported_fragment_stream;
 
     {

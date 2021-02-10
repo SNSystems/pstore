@@ -105,7 +105,9 @@ namespace pstore {
                                             fixups_pointer const fixups)
                     : rule (ctxt)
                     , names_{names}
-                    , fixups_{fixups} {}
+                    , fixups_{fixups} {
+                seen_[is_weak] = true; // 'is_weak' defaults to false if not present in the input.
+            }
 
             // name
             // ~~~~~
@@ -121,6 +123,10 @@ namespace pstore {
                 if (k == "type") {
                     seen_[type] = true;
                     return this->push<uint64_rule> (&type_);
+                }
+                if (k == "is_weak") {
+                    seen_[is_weak] = true;
+                    return this->push<bool_rule> (&is_weak_);
                 }
                 if (k == "offset") {
                     seen_[offset] = true;
@@ -146,8 +152,8 @@ namespace pstore {
                 }
 
                 // TODO: validate some values here.
-                fixups_->emplace_back (*name, static_cast<repo::relocation_type> (type_), offset_,
-                                       addend_);
+                fixups_->emplace_back (*name, static_cast<repo::relocation_type> (type_), is_weak_,
+                                       offset_, addend_);
                 return pop ();
             }
 

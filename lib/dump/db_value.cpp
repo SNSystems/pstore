@@ -19,23 +19,6 @@
 
 #include "pstore/core/generation_iterator.hpp"
 
-namespace {
-
-    pstore::dump::value_ptr
-    make_generation (pstore::database const & db,
-                     pstore::typed_address<pstore::trailer> const footer_pos, bool const no_times) {
-        using namespace pstore::dump;
-        auto const trailer = db.getro (footer_pos);
-        return make_value (object::container{
-            {"footer", make_value (*trailer, no_times)},
-            {"content",
-             make_blob (db, footer_pos.to_address () - trailer->a.size, trailer->a.size)},
-        });
-    }
-
-} // end anonymous namespace
-
-
 namespace pstore {
     namespace dump {
 

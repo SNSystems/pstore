@@ -23,6 +23,18 @@ namespace pstore {
     namespace exchange {
         namespace import {
 
+            //*  _              _            _      *
+            //* | |__  ___  ___| |  _ _ _  _| |___  *
+            //* | '_ \/ _ \/ _ \ | | '_| || | / -_) *
+            //* |_.__/\___/\___/_| |_|  \_,_|_\___| *
+            //*                                     *
+            std::error_code bool_rule::boolean_value (bool const v) {
+                *v_ = v;
+                return pop ();
+            }
+
+            gsl::czstring bool_rule::name () const noexcept { return "bool"; }
+
             //*  _     _    __ _ _             _      *
             //* (_)_ _| |_ / /| | |   _ _ _  _| |___  *
             //* | | ' \  _/ _ \_  _| | '_| || | / -_) *

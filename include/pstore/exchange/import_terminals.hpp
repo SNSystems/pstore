@@ -24,6 +24,18 @@ namespace pstore {
     namespace exchange {
         namespace import {
 
+            class bool_rule final : public rule {
+            public:
+                bool_rule (not_null<context *> const ctxt, not_null<bool *> const v) noexcept
+                        : rule (ctxt)
+                        , v_{v} {}
+                std::error_code boolean_value (bool v) override;
+                gsl::czstring name () const noexcept override;
+
+            private:
+                not_null<bool *> const v_;
+            };
+
             class int64_rule final : public rule {
             public:
                 int64_rule (not_null<context *> const ctxt,

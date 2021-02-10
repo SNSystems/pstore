@@ -149,7 +149,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
         // Build the data section's contents and fixups.
         data.data.assign ({'t', 'e', 'x', 't'});
         data.ifixups.emplace_back (internal_fixup{section_kind::data, 2, 2, 2});
-        data.xfixups.emplace_back (external_fixup{name, 3, 3, 3});
+        data.xfixups.emplace_back (external_fixup{name, 3, false /*is_weak*/, 3, 3});
     }
 
     // Build the definition for 'foo'
@@ -184,7 +184,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     value->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (23U, lines.size ());
+    ASSERT_EQ (24U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
@@ -201,6 +201,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("xfixups", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "name", ":", "foo"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("type", ":", "0x3"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("is_weak", ":", "false"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("offset", ":", "0x3"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("addend", ":", "0x3"));
 

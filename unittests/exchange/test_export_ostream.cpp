@@ -181,38 +181,6 @@ TEST (OStream, LargeSpan) {
 
 namespace {
 
-    class ostringstream final : public pstore::exchange::export_ns::ostream_base {
-    public:
-        ostringstream () = default;
-        ostringstream (ostringstream const &) = delete;
-        ostringstream (ostringstream &&) = delete;
-
-        ~ostringstream () noexcept override = default;
-
-        ostringstream & operator= (ostringstream const &) = delete;
-        ostringstream & operator= (ostringstream &&) = delete;
-
-        std::string const & str ();
-
-    private:
-        std::string str_;
-        void flush_buffer (std::vector<char> const & buffer, std::size_t size) override;
-    };
-
-    std::string const & ostringstream::str () {
-        this->flush ();
-        return str_;
-    }
-
-    void ostringstream::flush_buffer (std::vector<char> const & buffer, std::size_t size) {
-        assert (size < std::numeric_limits<std::string::size_type>::max ());
-        str_.append (buffer.data (), size);
-    }
-
-} // end anonymous namespace
-
-namespace {
-
     // signed test values
     // ~~~~~~~~~~~~~~~~~~
     // Returns the values used to test signed integer types.
@@ -240,7 +208,7 @@ namespace {
     // std::ostringstream and expecting that both produce the same result.
     template <typename T>
     void check (T const t) {
-        ostringstream os;
+        pstore::exchange::export_ns::ostringstream os;
         os << t;
         std::ostringstream stdos;
         stdos << t;

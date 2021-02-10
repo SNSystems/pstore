@@ -42,6 +42,15 @@ namespace pstore {
 
             // write
             // ~~~~~
+            ostream_base & ostream_base::write (bool const b) {
+                if (b) {
+                    static std::array<char, 4> const t{{'t', 'r', 'u', 'e'}};
+                    return this->write (gsl::make_span (t));
+                }
+                static std::array<char, 5> const f{{'f', 'a', 'l', 's', 'e'}};
+                return this->write (gsl::make_span (f));
+            }
+
             ostream_base & ostream_base::write (char const c) {
                 if (ptr_ == end_) {
                     this->flush ();
@@ -118,6 +127,21 @@ namespace pstore {
                         raise (error_code::write_failed);
                     }
                 }
+            }
+
+            //*         _       _              _                       *
+            //*  ___ __| |_ _ _(_)_ _  __ _ __| |_ _ _ ___ __ _ _ __   *
+            //* / _ (_-<  _| '_| | ' \/ _` (_-<  _| '_/ -_) _` | '  \  *
+            //* \___/__/\__|_| |_|_||_\__, /__/\__|_| \___\__,_|_|_|_| *
+            //*                       |___/                            *
+            std::string const & ostringstream::str () {
+                this->flush ();
+                return str_;
+            }
+
+            void ostringstream::flush_buffer (std::vector<char> const & buffer, std::size_t size) {
+                assert (size < std::numeric_limits<std::string::size_type>::max ());
+                str_.append (buffer.data (), size);
             }
 
         } // end namespace export_ns
