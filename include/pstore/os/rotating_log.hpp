@@ -35,7 +35,9 @@ namespace pstore {
     ///       std::ostream or std::ostringstream.
     ///     - Define the following member functions:
     ///           void open (stream_type & s, std::string const & name, std::ios_base::openmode
-    ///           mode); void close (stream_type & s); void clear (stream_type &);
+    ///           mode);
+    ///           void close (stream_type & s);
+    ///           void clear (stream_type &);
     /// \tparam FileSystemTraits A structure which must:
     ///     - Define the following member functions:
     ///           bool exists (std::string const & path);
