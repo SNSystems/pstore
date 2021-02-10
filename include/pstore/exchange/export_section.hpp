@@ -40,7 +40,15 @@ namespace pstore {
                     using type = std::ostream_iterator<T>;
                 };
                 template <typename T>
+                struct output_iterator<ostream_base, T> {
+                    using type = ostream_inserter;
+                };
+                template <typename T>
                 struct output_iterator<ostream, T> {
+                    using type = ostream_inserter;
+                };
+                template <typename T>
+                struct output_iterator<ostringstream, T> {
                     using type = ostream_inserter;
                 };
 

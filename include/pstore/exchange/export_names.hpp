@@ -25,12 +25,13 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
+            class ostream_base;
+
             //*                                             _            *
             //*  _ _  __ _ _ __  ___   _ __  __ _ _ __ _ __(_)_ _  __ _  *
             //* | ' \/ _` | '  \/ -_) | '  \/ _` | '_ \ '_ \ | ' \/ _` | *
             //* |_||_\__,_|_|_|_\___| |_|_|_\__,_| .__/ .__/_|_||_\__, | *
             //*                                  |_|  |_|         |___/  *
-
             /// The name_mapping call is used to associate the addresses of a set of strings with an
             /// index in the exported names array. The enables the exported JSON to simply reference
             /// a string by index rather than having to emit the string each time.
@@ -63,41 +64,14 @@ namespace pstore {
             /// Writes the array of names defined in transaction \p generation to output stream
             /// \p os.
             ///
-            /// \tparam OStream An iostreams-style output type.
             /// \p os  The stream to which output is written.
             /// \p ind  The indentation of the output.
             /// \p db  The database instance whose strings are to be dumped.
             /// \p generation  The database generation number whose strings are to be dumped.
             /// \p string_table  The string table accumulates the address-to-index mapping of each
             /// string as it is dumped.
-            template <typename OStream>
-            void emit_names (OStream & os, indent ind, database const & db,
-                             unsigned const generation, name_mapping * const string_table) {
-                auto const names_index = index::get_index<trailer::indices::name> (db);
-                PSTORE_ASSERT (generation > 0);
-
-                auto const * separator = "";
-                auto const * tail_separator = "";
-                auto close_bracket_indent = indent{};
-
-                auto member_indent = ind.next ();
-                auto const out_fn = [&] (pstore::address const addr) {
-                    os << separator << '\n' << member_indent;
-                    {
-                        indirect_string const str = names_index->load_leaf_node (db, addr);
-                        shared_sstring_view owner;
-                        raw_sstring_view view = str.as_db_string_view (&owner);
-                        emit_string (os, view);
-                        string_table->add (addr);
-                    }
-                    separator = ",";
-                    tail_separator = "\n";
-                    close_bracket_indent = ind;
-                };
-                os << '[';
-                diff (db, *names_index, generation - 1U, make_diff_out (&out_fn));
-                os << tail_separator << close_bracket_indent << ']';
-            }
+            void emit_names (ostream_base & os, indent ind, database const & db,
+                             unsigned const generation, name_mapping * const string_table);
 
         } // end namespace export_ns
     }     // end namespace exchange
