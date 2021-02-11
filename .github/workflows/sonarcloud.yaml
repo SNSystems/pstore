@@ -84,6 +84,7 @@ jobs:
                   THREADS: 2
               working-directory: ${{ runner.workspace }}
               run: |
+                  cd "$GITHUB_WORKSPACE"
                   "$TOOLS_PATH/sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner" -X \
                       -Dsonar.branch.name=$(git rev-parse --abbrev-ref HEAD) \
                       -Dsonar.cfamily.build-wrapper-output="$BW_PATH"        \
@@ -99,5 +100,5 @@ jobs:
                       -Dsonar.projectName=pstore                             \
                       -Dsonar.projectVersion=$GITHUB_SHA                     \
                       -Dsonar.sourceEncoding=UTF-8                           \
-                      -Dsonar.sources=./include,./lib,./examples             \
-                      -Dsonar.tests=./system_tests,./unittests
+                      -Dsonar.sources=include,lib,examples                    \
+                      -Dsonar.tests=system_tests,unittests
