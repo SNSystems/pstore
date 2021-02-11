@@ -12,14 +12,12 @@ jobs:
 
             - name: Create the SonarCloud tools directory
               env:
-                  BUILD_PATH: ${{ runner.workspace }}/build
                   TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   mkdir "$TOOLS_PATH"
 
             - name: Install Sonar Scanner CLI
               env:
-                  BUILD_PATH: ${{ runner.workspace }}/build
                   TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   cd "$TOOLS_PATH"
@@ -30,7 +28,6 @@ jobs:
 
             - name: Install SonarCloud Build Wrapper
               env:
-                  BUILD_PATH: ${{ runner.workspace }}/build
                   TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   cd "$TOOLS_PATH"
@@ -42,13 +39,11 @@ jobs:
             - name: Create Build Environment
               env:
                   BUILD_PATH: ${{ runner.workspace }}/build
-                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: cmake -E make_directory "$BUILD_PATH"
 
             - name: Configure
               env:
                   BUILD_PATH: ${{ runner.workspace }}/build
-                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   cd "$BUILD_PATH"
                   cmake -G "Unix Makefiles"    \
@@ -61,11 +56,12 @@ jobs:
                   BUILD_PATH: ${{ runner.workspace }}/build
                   TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
                   BW_PATH: ${{ runner.workspace }}/bw-output
+                  THREADS: 2
               run: |
                   cd "$BUILD_PATH"
                   "$TOOLS_PATH/build-wrapper-linux-x86/build-wrapper-linux-x86-64" \
                        --out-dir "$BW_PATH" \
-                      make -j 2 clean all pstore-system-tests
+                      make -j $THREADS clean all pstore-system-tests
 
             - name: Gather Coverage
               env:
@@ -82,12 +78,12 @@ jobs:
                   LOGIN: ${{ secrets.SONAR_CLOUD_LOGIN }}
                   BW_PATH: ${{ runner.workspace }}/bw-output
                   THREADS: 2
-              working-directory: ${{ runner.workspace }}
               run: |
                   cd "$GITHUB_WORKSPACE"
                   "$TOOLS_PATH/sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner" -X \
                       -Dsonar.branch.name=$(git rev-parse --abbrev-ref HEAD) \
                       -Dsonar.cfamily.build-wrapper-output="$BW_PATH"        \
+                      -Dsonar.cfamily.cache.enabled=false                    \
                       -Dsonar.cfamily.gcov.reportsPath="$BUILD_PATH"         \
                       -Dsonar.cfamily.threads=$THREADS                       \
                       -Dsonar.coverage.exclusions='system_tests/**/*'        \
@@ -100,5 +96,5 @@ jobs:
                       -Dsonar.projectName=pstore                             \
                       -Dsonar.projectVersion=$GITHUB_SHA                     \
                       -Dsonar.sourceEncoding=UTF-8                           \
-                      -Dsonar.sources=include,lib,examples                    \
+                      -Dsonar.sources=include,lib,examples                   \
                       -Dsonar.tests=system_tests,unittests
