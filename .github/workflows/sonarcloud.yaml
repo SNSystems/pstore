@@ -4,9 +4,6 @@ on:
 jobs:
     sonar-cloud:
         runs-on: ubuntu-latest
-        env:
-            BUILD_PATH: ${{ runner.workspace }}/build
-            TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
         steps:
             - uses: actions/checkout@v2
               with:
