@@ -62,7 +62,7 @@ jobs:
                   TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
               run: |
                   cd "$BUILD_PATH"
-                  "$TOOLS_PATH/build-wrapper-linux-x86/build-wrapper-linux-x86-64 \
+                  "$TOOLS_PATH/build-wrapper-linux-x86/build-wrapper-linux-x86-64" \
                        --outdir $OUTDIR \
                       make -j 2 clean all pstore-system-tests
 
