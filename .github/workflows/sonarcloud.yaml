@@ -60,10 +60,11 @@ jobs:
               env:
                   BUILD_PATH: ${{ runner.workspace }}/build
                   TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
+                  BW_PATH: ${{ runner.workspace }}/bw-output
               run: |
                   cd "$BUILD_PATH"
                   "$TOOLS_PATH/build-wrapper-linux-x86/build-wrapper-linux-x86-64" \
-                       --outdir $OUTDIR \
+                       --outdir "$BW_PATH" \
                       make -j 2 clean all pstore-system-tests
 
             - name: Gather Coverage
@@ -79,13 +80,13 @@ jobs:
                   BUILD_PATH: ${{ runner.workspace }}/build
                   TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
                   LOGIN: ${{ secrets.SONAR_CLOUD_LOGIN }}
-                  OUT_DIR: bw-output
+                  BW_PATH: ${{ runner.workspace }}/bw-output
                   THREADS: 2
               working-directory: ${{ runner.workspace }}
               run: |
                   "$TOOLS_PATH/sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner" -X \
                       -Dsonar.branch.name=$(git rev-parse --abbrev-ref HEAD) \
-                      -Dsonar.cfamily.build-wrapper-output=$OUT_DIR          \
+                      -Dsonar.cfamily.build-wrapper-output="$BW_PATH"        \
                       -Dsonar.cfamily.gcov.reportsPath="$BUILD_PATH"         \
                       -Dsonar.cfamily.threads=$THREADS                       \
                       -Dsonar.coverage.exclusions='system_tests/**/*'        \
