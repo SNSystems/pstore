@@ -64,7 +64,7 @@ jobs:
               run: |
                   cd "$BUILD_PATH"
                   "$TOOLS_PATH/build-wrapper-linux-x86/build-wrapper-linux-x86-64" \
-                       --outdir "$BW_PATH" \
+                       --out-dir "$BW_PATH" \
                       make -j 2 clean all pstore-system-tests
 
             - name: Gather Coverage
