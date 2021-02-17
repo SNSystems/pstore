@@ -32,8 +32,8 @@ namespace pstore {
     namespace dump {
 
         struct parameters {
-            parameters (database const & db_, bool hex_mode_, bool expanded_addresses_,
-                        bool no_times_, std::string const & triple_)
+            parameters (database const & db_, bool const hex_mode_, bool const expanded_addresses_,
+                        bool const no_times_, std::string const & triple_)
                     : db{db_}
                     , hex_mode{hex_mode_}
                     , expanded_addresses{expanded_addresses_}
