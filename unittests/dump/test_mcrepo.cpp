@@ -148,8 +148,11 @@ TEST_F (MCRepoFixture, DumpFragment) {
     {
         // Build the data section's contents and fixups.
         data.data.assign ({'t', 'e', 'x', 't'});
-        data.ifixups.emplace_back (internal_fixup{section_kind::data, 2, 2, 2});
-        data.xfixups.emplace_back (external_fixup{name, 3, false /*is_weak*/, 3, 3});
+        data.ifixups.emplace_back (internal_fixup{section_kind::data, relocation_type{2},
+                                                  UINT64_C (2) /*offset*/, INT64_C (2) /*addend*/});
+        data.xfixups.emplace_back (external_fixup{name, relocation_type{3},
+                                                  pstore::repo::reference_strength::strong,
+                                                  UINT64_C (3) /*offset*/, INT32_C (3) /*addend*/});
     }
 
     // Build the definition for 'foo'

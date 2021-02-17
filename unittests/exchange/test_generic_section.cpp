@@ -137,10 +137,12 @@ TEST_F (GenericSection, RoundTripForPopulated) {
         pstore::repo::section_kind::read_only, pstore::repo::relocation_type{11},
         std::uint64_t{13} /*offset*/, std::int64_t{17} /*addend*/);
     exported_content.xfixups.emplace_back (indir_strings[name1], pstore::repo::relocation_type{19},
-                                           false /*is_weak*/, std::uint64_t{23} /*offset*/,
+                                           pstore::repo::reference_strength::strong,
+                                           std::uint64_t{23} /*offset*/,
                                            std::int64_t{29} /*addend*/);
     exported_content.xfixups.emplace_back (indir_strings[name2], pstore::repo::relocation_type{31},
-                                           true /*is_weak*/, std::uint64_t{37} /*offset*/,
+                                           pstore::repo::reference_strength::weak,
+                                           std::uint64_t{37} /*offset*/,
                                            std::int64_t{41} /*addend*/);
 
 
