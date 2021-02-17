@@ -143,7 +143,7 @@ namespace pstore {
                 return !operator== (rhs);
             }
 
-            constexpr reference_strength strength () const {
+            constexpr reference_strength strength () const noexcept {
                 return is_weak ? reference_strength::weak : reference_strength::strong;
             }
 
