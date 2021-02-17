@@ -173,17 +173,17 @@ namespace {
         return make_value (result);
     }
 
-    pstore::dump::value_ptr make_log (pstore::database const & db, bool no_times) {
+    pstore::dump::value_ptr make_log (pstore::dump::parameters const & parm) {
         using namespace pstore::dump;
 
         array::container array;
         for (pstore::typed_address<pstore::trailer> footer_pos :
-             pstore::generation_container (db)) {
-            auto footer = db.getro (footer_pos);
+             pstore::generation_container (parm.db)) {
+            auto footer = parm.db.getro (footer_pos);
             auto revision = std::make_shared<object> (object::container{
                 {"number", make_value (footer->a.generation.load ())},
                 {"size", make_number (footer->a.size.load ())},
-                {"time", make_time (footer->a.time, no_times)},
+                {"time", make_time (footer->a.time, parm.no_times)},
             });
             revision->compact (true);
             array.emplace_back (revision);
@@ -357,27 +357,30 @@ int main (int argc, char * argv[]) {
                                make_value (object::container{{"path", make_value (path)},
                                                              {"size", make_value (db.size ())}}));
 
+            pstore::dump::parameters parm{db, opt.hex, opt.expanded_addresses, opt.no_times,
+                                          opt.triple};
+
             show_index<pstore::trailer::indices::fragment, dump_error_code::fragment_not_found,
                        dump_error_code::no_fragment_index> (
                 file, db, opt.show_all_fragments, opt.fragments,
-                [&db, &opt] (pstore::index::fragment_index::value_type const & value) {
-                    return make_value (db, value, opt.triple.c_str (), opt.hex);
+                [&parm] (pstore::index::fragment_index::value_type const & value) {
+                    return make_value (value, parm);
                 });
 
             show_index<pstore::trailer::indices::compilation,
                        dump_error_code::compilation_not_found,
                        dump_error_code::no_compilation_index> (
                 file, db, opt.show_all_compilations, opt.compilations,
-                [&db] (pstore::index::compilation_index::value_type const & value) {
-                    return make_value (db, value);
+                [&parm] (pstore::index::compilation_index::value_type const & value) {
+                    return make_value (value, parm);
                 });
 
             show_index<pstore::trailer::indices::debug_line_header,
                        dump_error_code::debug_line_header_not_found,
                        dump_error_code::no_debug_line_header_index> (
                 file, db, opt.show_all_debug_line_headers, opt.debug_line_headers,
-                [&db, &opt] (pstore::index::debug_line_header_index::value_type const & value) {
-                    return make_value (db, value, opt.hex);
+                [&parm] (pstore::index::debug_line_header_index::value_type const & value) {
+                    return make_value (value, parm);
                 });
 
             if (opt.show_header) {
@@ -388,7 +391,7 @@ int main (int argc, char * argv[]) {
                 file.emplace_back ("indices", make_indices (db));
             }
             if (opt.show_log) {
-                file.emplace_back ("log", make_log (db, opt.no_times));
+                file.emplace_back ("log", make_log (parm));
             }
             if (opt.show_shared) {
                 file.emplace_back ("shared_memory", make_shared_memory (db, opt.no_times));

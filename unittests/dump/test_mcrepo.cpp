@@ -178,9 +178,13 @@ TEST_F (MCRepoFixture, DumpFragment) {
         *db_, fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
                                pstore::make_pointee_adaptor (dispatchers.end ())));
 
+    constexpr bool hex_mode = false;
+    constexpr bool expanded_addresses = false;
+    constexpr bool no_times = false;
+    pstore::dump::parameters parms{*db_, hex_mode, expanded_addresses, no_times,
+                                   "x86_64-vendor-os"};
     std::ostringstream out;
-    pstore::dump::value_ptr value = pstore::dump::make_fragment_value (
-        *db_, *fragment, "machine-vendor-os", false /*hex mode?*/);
+    pstore::dump::value_ptr value = pstore::dump::make_fragment_value (*fragment, parms);
     value->write (out);
 
     auto const lines = split_lines (out.str ());
@@ -195,12 +199,23 @@ TEST_F (MCRepoFixture, DumpFragment) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("dGV4dA=="));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("ifixups", ":"));
 
-    char const * expected_ifixup[] = {"-",       "{",    "section:", "data,", "type:", "0x2,",
-                                      "offset:", "0x2,", "addend:",  "0x2",   "}"};
+    // If building inside LLVM, dump will use the ELF name for the relocation rather than its raw
+    // numeric value.
+#ifdef PSTORE_IS_INSIDE_LLVM
+    constexpr auto reloc2_name = "R_X86_64_PC32";
+    constexpr auto reloc3_name = "R_X86_64_GOT32";
+#else
+    constexpr auto reloc2_name = "0x2";
+    constexpr auto reloc3_name = "0x3";
+#endif // PSTORE_IS_INSIDE_LLVM
+
+    std::string const expected_ifixup[] = {
+        "-",       "{",    "section:", "data,", "type:", std::string{reloc2_name} + ",",
+        "offset:", "0x2,", "addend:",  "0x2",   "}"};
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAreArray (expected_ifixup));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("xfixups", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "name", ":", "foo"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("type", ":", "0x3"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("type", ":", reloc3_name));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("is_weak", ":", "false"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("offset", ":", "0x3"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("addend", ":", "0x3"));
@@ -238,7 +253,12 @@ TEST_F (MCRepoFixture, DumpCompilation) {
                                   std::begin (v), std::end (v)));
 
     std::ostringstream out;
-    pstore::dump::value_ptr addr = pstore::dump::make_value (*db_, compilation);
+    constexpr bool hex_mode = false;
+    constexpr bool expanded_addresses = false;
+    constexpr bool no_times = false;
+    pstore::dump::parameters parms{*db_, hex_mode, expanded_addresses, no_times,
+                                   "machine-vendor-os"};
+    pstore::dump::value_ptr addr = pstore::dump::make_value (compilation, parms);
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
@@ -272,10 +292,15 @@ TEST_F (MCRepoFixture, DumpDebugLineHeader) {
     transaction.commit ();
 
     std::ostringstream out;
+    constexpr bool hex_mode = true;
+    constexpr bool expanded_addresses = false;
+    constexpr bool no_times = false;
+    pstore::dump::parameters parms{*db_, hex_mode, expanded_addresses, no_times,
+                                   "machine-vendor-os"};
     pstore::dump::value_ptr addr =
         pstore::dump::make_index<pstore::trailer::indices::debug_line_header> (
-            *db_, [this] (pstore::index::debug_line_header_index::value_type const & value) {
-                return pstore::dump::make_value (*this->db_, value, true);
+            *db_, [&parms] (pstore::index::debug_line_header_index::value_type const & value) {
+                return pstore::dump::make_value (value, parms);
             });
 
     addr->write (out);
@@ -321,8 +346,12 @@ TEST_F (MCRepoFixture, DumpBssSection) {
     }();
 
     std::ostringstream out;
-    pstore::dump::value_ptr value =
-        pstore::dump::make_fragment_value (*db_, *frag, "machine-vendor-os", false /*hex mode?*/);
+    constexpr bool hex_mode = false;
+    constexpr bool expanded_addresses = false;
+    constexpr bool no_times = false;
+    pstore::dump::parameters parms{*db_, hex_mode, expanded_addresses, no_times,
+                                   "machine-vendor-os"};
+    pstore::dump::value_ptr value = pstore::dump::make_fragment_value (*frag, parms);
     value->write (out);
 
     auto const lines = split_lines (out.str ());

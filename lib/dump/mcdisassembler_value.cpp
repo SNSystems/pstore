@@ -345,22 +345,22 @@ namespace {
     // ~~~~~~~~~~~~
     std::error_code disasm_block (pstore::gsl::span<std::uint8_t const> const & span,
                                   pstore::dump::array::container & output, // out
-                                  llvm::Triple const & triple, bool hex_mode) {
+                                  pstore::dump::parameters const & parm) {
         if (span.size () <= 0) {
             return {};
         }
 
         // clang-format off
-        return (create_target (triple) >>= [&] (llvm::Target const * const target) {
-        return create_register_info (*target, triple) >>= [&] (register_ptr const & registers) {
-        return create_asm_info (*target, *registers, triple) >>= [&] (asm_info_ptr const & asm_info) {
-        return create_subtarget_info (*target, triple) >>= [&] (subtarget_ptr const & subtarget) {
+        return (create_target (parm.triple) >>= [&] (llvm::Target const * const target) {
+        return create_register_info (*target, parm.triple) >>= [&] (register_ptr const & registers) {
+        return create_asm_info (*target, *registers, parm.triple) >>= [&] (asm_info_ptr const & asm_info) {
+        return create_subtarget_info (*target, parm.triple) >>= [&] (subtarget_ptr const & subtarget) {
         return create_instruction_info (*target) >>= [&] (instr_info_ptr const & instr) {
-        context context{triple, asm_info.get (), registers.get ()};
+        context context{parm.triple, asm_info.get (), registers.get ()};
         return create_disassembler (*target, *subtarget, context.get ()) >>= [&] (disasm_ptr const & disasm) {
-        return create_inst_printer (context.get (), triple, *target, *instr) >>= [&] (inst_printer_ptr & ip) {
+        return create_inst_printer (context.get (), parm.triple, *target, *instr) >>= [&] (inst_printer_ptr & ip) {
             disassembler_state state{context.get (), disasm, subtarget, ip};
-            return emit_instructions (state, span, output, hex_mode);
+            return emit_instructions (state, span, output, parm.hex_mode);
         }; }; }; }; }; }; }).get_error ();
         // clang-format on
     }
@@ -372,8 +372,9 @@ namespace {
 namespace {
 
     pstore::dump::value_ptr make_hex_dump_value (std::uint8_t const * first,
-                                                 std::uint8_t const * last, bool const hex_mode) {
-        if (hex_mode) {
+                                                 std::uint8_t const * last,
+                                                 pstore::dump::parameters const & parm) {
+        if (parm.hex_mode) {
             return std::make_shared<pstore::dump::binary16> (first, last);
         }
         return std::make_shared<pstore::dump::binary> (first, last);
@@ -388,13 +389,12 @@ namespace pstore {
 
         value_ptr make_disassembled_value (std::uint8_t const * const first,
                                            std::uint8_t const * const last,
-                                           gsl::czstring const triple, bool const hex_mode) {
+                                           parameters const & parm) {
             array::container arr;
-
-            if (!disasm_block (gsl::make_span (first, last), arr, llvm::Triple{triple}, hex_mode)) {
+            if (!disasm_block (gsl::make_span (first, last), arr, parm)) {
                 return make_value (arr);
             }
-            return make_hex_dump_value (first, last, hex_mode);
+            return make_hex_dump_value (first, last, parm);
         }
 
     } // end namespace dump
@@ -407,8 +407,8 @@ namespace pstore {
 
         value_ptr make_disassembled_value (std::uint8_t const * const first,
                                            std::uint8_t const * const last,
-                                           gsl::czstring const /*triple*/, bool const hex_mode) {
-            return make_hex_dump_value (first, last, hex_mode);
+                                           parameters const & parm) {
+            return make_hex_dump_value (first, last, parm);
         }
 
     } // end namespace dump
