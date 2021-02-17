@@ -12,9 +12,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file generic_section.cpp
+/// \brief Defines the generic section that is used for many fragment sections.
 #include "pstore/mcrepo/generic_section.hpp"
-
-#include <cstring>
 
 namespace pstore {
     namespace repo {
@@ -25,11 +25,15 @@ namespace pstore {
                       << ", addend:" << ifx.addend << '}';
         }
 
-        std::ostream & operator<< (std::ostream & os, external_fixup const & xfx) {
-            return os << "{ name:" << xfx.name << ", type:" << static_cast<unsigned> (xfx.type)
-                      << ", offset:" << xfx.offset << ", addend:" << xfx.addend << '}';
+        std::ostream & operator<< (std::ostream & os, reference_strength const & strength) {
+            return os << (strength == reference_strength::weak ? "weak" : "strong");
         }
 
+        std::ostream & operator<< (std::ostream & os, external_fixup const & xfx) {
+            return os << "{ name:" << xfx.name << ", type:" << static_cast<unsigned> (xfx.type)
+                      << ", strength:" << xfx.strength () << ", offset:" << xfx.offset
+                      << ", addend:" << xfx.addend << '}';
+        }
 
         //*             _   _                       _           _    *
         //*  ___ ___ __| |_(_)___ _ _    __ ___ _ _| |_ ___ _ _| |_  *

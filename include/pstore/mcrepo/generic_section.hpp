@@ -99,6 +99,9 @@ namespace pstore {
             weak,
         };
 
+        std::ostream & operator<< (std::ostream & os, reference_strength const & strength);
+
+
         //*          _                     _    __ _                *
         //*  _____ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
         //* / -_) \ /  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
@@ -138,6 +141,10 @@ namespace pstore {
             }
             bool operator!= (external_fixup const & rhs) const noexcept {
                 return !operator== (rhs);
+            }
+
+            constexpr reference_strength strength () const {
+                return is_weak ? reference_strength::weak : reference_strength::strong;
             }
 
             typed_address<indirect_string> name;
