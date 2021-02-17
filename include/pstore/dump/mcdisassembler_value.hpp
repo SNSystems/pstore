@@ -22,6 +22,8 @@
 #define PSTORE_DUMP_MCDISASSEMBLER_VALUE_HPP
 
 #include <cstdint>
+
+#include "pstore/dump/parameter.hpp"
 #include "pstore/dump/value.hpp"
 #include "pstore/support/gsl.hpp"
 
@@ -29,7 +31,7 @@ namespace pstore {
     namespace dump {
 
         value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                           gsl::czstring triple, bool hex_mode);
+                                           parameters const & parm);
 
     } // end namespace dump
 } // end namespace pstore

@@ -16,42 +16,40 @@
 #define PSTORE_DUMP_MCREPO_VALUE_HPP
 
 #include "pstore/core/hamt_map.hpp"
+#include "pstore/dump/parameter.hpp"
 #include "pstore/dump/value.hpp"
 #include "pstore/mcrepo/fragment.hpp"
 
 namespace pstore {
     namespace dump {
 
-        value_ptr make_value (pstore::repo::section_kind t);
-        value_ptr make_value (repo::internal_fixup const & ifx);
-        value_ptr make_value (database const & db, repo::external_fixup const & xfx);
+        value_ptr make_value (repo::section_kind t);
+        value_ptr make_value (repo::internal_fixup const & ifx, parameters const & parm);
+        value_ptr make_value (repo::external_fixup const & xfx, parameters const & parm);
 
-        value_ptr make_section_value (database const & db, repo::generic_section const & section,
-                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode);
-        value_ptr make_section_value (database const & db,
-                                      repo::linked_definitions const & linked_definitions,
-                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode);
-        value_ptr make_section_value (database const & db, repo::debug_line_section const & section,
-                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode);
-        value_ptr make_section_value (database const & db, repo::bss_section const & section,
-                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode);
+        value_ptr make_section_value (repo::generic_section const & section, repo::section_kind sk,
+                                      parameters const & parm);
+        value_ptr make_section_value (repo::linked_definitions const & linked_definitions,
+                                      repo::section_kind sk, parameters const & parm);
+        value_ptr make_section_value (repo::debug_line_section const & section,
+                                      repo::section_kind sk, parameters const & parm);
+        value_ptr make_section_value (repo::bss_section const & section, repo::section_kind sk,
+                                      parameters const & s);
 
-        value_ptr make_fragment_value (database const & db, repo::fragment const & fragment,
-                                       gsl::czstring triple, bool hex_mode);
+        value_ptr make_fragment_value (repo::fragment const & fragment, parameters const & parm);
 
         value_ptr make_value (repo::linkage l);
         value_ptr make_value (repo::visibility v);
-        value_ptr make_value (database const & db, repo::definition const & member);
-        value_ptr make_value (database const & db,
-                              std::shared_ptr<repo::compilation const> const & compilation);
+        value_ptr make_value (repo::definition const & member, parameters const & parm);
+        value_ptr make_value (std::shared_ptr<repo::compilation const> const & compilation,
+                              parameters const & parm);
 
-        value_ptr make_value (database const & db, index::fragment_index::value_type const & value,
-                              gsl::czstring triple, bool hex_mode);
-        value_ptr make_value (database const & db,
-                              index::compilation_index::value_type const & value);
-        value_ptr make_value (database const & db,
-                              index::debug_line_header_index::value_type const & value,
-                              bool hex_mode);
+        value_ptr make_value (index::fragment_index::value_type const & value,
+                              parameters const & parm);
+        value_ptr make_value (index::compilation_index::value_type const & value,
+                              parameters const & parm);
+        value_ptr make_value (index::debug_line_header_index::value_type const & value,
+                              parameters const & parm);
 
     } // end namespace dump
 } // end namespace pstore

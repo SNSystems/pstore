@@ -53,6 +53,7 @@ add_pstore_library (
         mcdebugline_value.hpp
         mcdisassembler_value.hpp
         mcrepo_value.hpp
+        parameter.hpp
         value.hpp
 )
 target_link_libraries (pstore-dump-lib PUBLIC pstore-adt pstore-core pstore-mcrepo)

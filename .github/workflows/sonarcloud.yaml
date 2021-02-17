@@ -1,0 +1,100 @@
+name: SonarCloud
+on:
+    workflow_dispatch:
+jobs:
+    sonar-cloud:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  # Disabling shallow clone is recommended for improving relevancy of reporting
+                  fetch-depth: 0
+
+            - name: Create the SonarCloud tools directory
+              env:
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
+              run: |
+                  mkdir "$TOOLS_PATH"
+
+            - name: Install Sonar Scanner CLI
+              env:
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
+              run: |
+                  cd "$TOOLS_PATH"
+                  curl --location     \
+                       -o scanner.zip \
+                       https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.4.0.2170-linux.zip
+                  unzip scanner.zip
+
+            - name: Install SonarCloud Build Wrapper
+              env:
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
+              run: |
+                  cd "$TOOLS_PATH"
+                  curl --location \
+                       -o build-wrapper-linux-x86.zip \
+                       https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+                  unzip build-wrapper-linux-x86.zip
+
+            - name: Create Build Environment
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+              run: cmake -E make_directory "$BUILD_PATH"
+
+            - name: Configure
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+              run: |
+                  cd "$BUILD_PATH"
+                  cmake -G "Unix Makefiles"    \
+                        -D PSTORE_COVERAGE=Yes \
+                        -D PSTORE_EXAMPLES=Yes \
+                        "$GITHUB_WORKSPACE"
+
+            - name: Build
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
+                  BW_PATH: ${{ runner.workspace }}/bw-output
+                  THREADS: 2
+              run: |
+                  cd "$BUILD_PATH"
+                  "$TOOLS_PATH/build-wrapper-linux-x86/build-wrapper-linux-x86-64" \
+                       --out-dir "$BW_PATH" \
+                      make -j $THREADS clean all pstore-system-tests
+
+            - name: Gather Coverage
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
+              run: |
+                  cd "$BUILD_PATH"
+                  find . -name \*.gcno -exec gcov {} \;
+
+            - name: Run Sonar Scanner
+              env:
+                  BUILD_PATH: ${{ runner.workspace }}/build
+                  TOOLS_PATH: ${{ runner.workspace }}/sonarcloud
+                  LOGIN: ${{ secrets.SONAR_CLOUD_LOGIN }}
+                  BW_PATH: ${{ runner.workspace }}/bw-output
+                  THREADS: 2
+              run: |
+                  cd "$GITHUB_WORKSPACE"
+                  "$TOOLS_PATH/sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner" -X \
+                      -Dsonar.branch.name=$(git rev-parse --abbrev-ref HEAD) \
+                      -Dsonar.cfamily.build-wrapper-output="$BW_PATH"        \
+                      -Dsonar.cfamily.cache.enabled=false                    \
+                      -Dsonar.cfamily.gcov.reportsPath="$BUILD_PATH"         \
+                      -Dsonar.cfamily.threads=$THREADS                       \
+                      -Dsonar.coverage.exclusions='system_tests/**/*'        \
+                      -Dsonar.cpd.exclusions='unittests/**/*,examples/**/*'  \
+                      -Dsonar.exclusions='build/**/*,3rd_party/**/*'         \
+                      -Dsonar.host.url=https://sonarcloud.io                 \
+                      -Dsonar.login=$LOGIN                                   \
+                      -Dsonar.organization=snsystems                         \
+                      -Dsonar.projectKey=SNSystems_pstore                    \
+                      -Dsonar.projectName=pstore                             \
+                      -Dsonar.projectVersion=$GITHUB_SHA                     \
+                      -Dsonar.sourceEncoding=UTF-8                           \
+                      -Dsonar.sources=include,lib,examples                   \
+                      -Dsonar.tests=system_tests,unittests
