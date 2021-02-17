@@ -361,9 +361,9 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     // add_export_strings().
     xfixup_collection xfixups;
     xfixups.emplace_back (indir_strings["foo"], static_cast<pstore::repo::relocation_type> (5),
-                          false /*is_weak*/, 7, 9);
+                          pstore::repo::reference_strength::strong, 7, 9);
     xfixups.emplace_back (indir_strings["bar"], static_cast<pstore::repo::relocation_type> (11),
-                          true /*is_weak*/, 13, 17);
+                          pstore::repo::reference_strength::weak, 13, 17);
 
 
 

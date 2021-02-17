@@ -143,12 +143,15 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
         text.data.assign (std::begin (original), std::end (original));
         text.ifixups.emplace_back (internal_fixup{section_kind::text, 1, 1, 1});
         text.ifixups.emplace_back (internal_fixup{section_kind::data, 2, 2, 2});
-        text.xfixups.emplace_back (
-            external_fixup{indirect_string_address (3), 3, false /*is_weak*/, 3, 3});
-        text.xfixups.emplace_back (
-            external_fixup{indirect_string_address (4), 4, true /*is_weak*/, 4, 4});
-        text.xfixups.emplace_back (
-            external_fixup{indirect_string_address (5), 5, false /*is_weak*/, 5, 5});
+        text.xfixups.emplace_back (external_fixup{indirect_string_address (3), relocation_type{3},
+                                                  pstore::repo::reference_strength::strong,
+                                                  UINT64_C (3) /*offset*/, INT64_C (3) /*addend*/});
+        text.xfixups.emplace_back (external_fixup{indirect_string_address (4), relocation_type{4},
+                                                  pstore::repo::reference_strength::weak,
+                                                  UINT64_C (4) /*offset*/, INT64_C (4) /*addend*/});
+        text.xfixups.emplace_back (external_fixup{indirect_string_address (5), relocation_type{5},
+                                                  pstore::repo::reference_strength::strong,
+                                                  UINT64_C (5) /*offset*/, INT64_C (5) /*addend*/});
     }
 
     auto extent = build_fragment (transaction_, std::begin (c), std::end (c));
@@ -179,11 +182,16 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     EXPECT_THAT (s.payload (), ElementsAreArray (original));
     EXPECT_THAT (s.ifixups (), ElementsAre (internal_fixup{section_kind::text, 1, 1, 1},
                                             internal_fixup{section_kind::data, 2, 2, 2}));
-    EXPECT_THAT (
-        s.xfixups (),
-        ElementsAre (external_fixup{indirect_string_address (3), 3, false /*is_weak*/, 3, 3},
-                     external_fixup{indirect_string_address (4), 4, true /*is_weak*/, 4, 4},
-                     external_fixup{indirect_string_address (5), 5, false /*is_weak*/, 5, 5}));
+    EXPECT_THAT (s.xfixups (),
+                 ElementsAre (external_fixup{indirect_string_address (3), relocation_type{3},
+                                             pstore::repo::reference_strength::strong,
+                                             UINT64_C (3) /*offset*/, INT64_C (3) /*addend*/},
+                              external_fixup{indirect_string_address (4), relocation_type{4},
+                                             pstore::repo::reference_strength::weak,
+                                             UINT64_C (4) /*offset*/, INT64_C (4) /*addend*/},
+                              external_fixup{indirect_string_address (5), relocation_type{5},
+                                             pstore::repo::reference_strength::strong,
+                                             UINT64_C (5) /*offset*/, INT64_C (5) /*addend*/}));
 }
 
 TEST_F (FragmentTest, MakeTextSectionWithLinkedDefinitions) {

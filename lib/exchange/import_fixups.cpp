@@ -152,7 +152,9 @@ namespace pstore {
                 }
 
                 // TODO: validate some values here.
-                fixups_->emplace_back (*name, static_cast<repo::relocation_type> (type_), is_weak_,
+                fixups_->emplace_back (*name, static_cast<repo::relocation_type> (type_),
+                                       is_weak_ ? repo::reference_strength::weak
+                                                : repo::reference_strength::strong,
                                        offset_, addend_);
                 return pop ();
             }
