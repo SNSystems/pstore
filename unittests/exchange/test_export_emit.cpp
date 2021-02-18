@@ -64,23 +64,21 @@ TEST (ExportEmitString, Multiple) {
 }
 
 TEST (ExportEmitArray, Empty) {
-    std::ostringstream os;
+    pstore::exchange::export_ns::ostringstream os;
     std::vector<int> values{};
     emit_array (os, pstore::exchange::export_ns::indent{}, std::begin (values), std::end (values),
-                [] (std::ostringstream & os1, pstore::exchange::export_ns::indent ind, int v) {
-                    os1 << ind << v;
-                });
+                [] (pstore::exchange::export_ns::ostringstream & os1,
+                    pstore::exchange::export_ns::indent ind, int v) { os1 << ind << v; });
     auto const actual = os.str ();
     EXPECT_EQ (actual, "[]");
 }
 
 TEST (ExportEmitArray, Array) {
-    std::ostringstream os;
+    pstore::exchange::export_ns::ostringstream os;
     std::vector<int> values{2, 3, 5};
     emit_array (os, pstore::exchange::export_ns::indent{}, std::begin (values), std::end (values),
-                [] (std::ostringstream & os1, pstore::exchange::export_ns::indent ind, int v) {
-                    os1 << ind << v;
-                });
+                [] (pstore::exchange::export_ns::ostringstream & os1,
+                    pstore::exchange::export_ns::indent ind, int v) { os1 << ind << v; });
     auto const actual = os.str ();
     EXPECT_EQ (actual, "[\n  2,\n  3,\n  5\n]");
 }

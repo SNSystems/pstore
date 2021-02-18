@@ -41,18 +41,12 @@ namespace pstore {
                 unsigned distance_ = 0U;
             };
 
-            template <typename OStream>
-            OStream & operator<< (OStream & os, indent const & i) {
-                for (unsigned d = i.distance (); d > 0U; --d) {
-                    os << "  ";
-                }
-                return os;
-            }
+            ostream_base & operator<< (ostream_base & os, indent const & i);
 
             namespace details {
 
-                template <typename OSStream, typename ElementType, std::ptrdiff_t Extent>
-                void write_span (OSStream & os, gsl::span<ElementType, Extent> const & sp) {
+                template <typename ElementType, std::ptrdiff_t Extent>
+                void write_span (ostream_base & os, gsl::span<ElementType, Extent> const & sp) {
                     os.write (sp.data (), sp.length ());
                 }
 

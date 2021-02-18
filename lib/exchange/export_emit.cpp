@@ -18,6 +18,13 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
+            ostream_base & operator<< (ostream_base & os, indent const & i) {
+                for (unsigned d = i.distance (); d > 0U; --d) {
+                    os << "  ";
+                }
+                return os;
+            }
+
             void emit_digest (ostream_base & os, uint128 const d) {
                 std::array<char, uint128::hex_string_length> hex;
                 auto const out = d.to_hex (hex.begin ());
