@@ -20,6 +20,7 @@
 #define PSTORE_EXCHANGE_EXPORT_EMIT_HPP
 
 #include "pstore/core/indirect_string.hpp"
+#include "pstore/exchange/export_ostream.hpp"
 
 namespace pstore {
 
@@ -40,18 +41,12 @@ namespace pstore {
                 unsigned distance_ = 0U;
             };
 
-            template <typename OStream>
-            OStream & operator<< (OStream & os, indent const & i) {
-                for (unsigned d = i.distance (); d > 0U; --d) {
-                    os << "  ";
-                }
-                return os;
-            }
+            ostream_base & operator<< (ostream_base & os, indent const & i);
 
             namespace details {
 
-                template <typename OSStream, typename ElementType, std::ptrdiff_t Extent>
-                void write_span (OSStream & os, gsl::span<ElementType, Extent> const & sp) {
+                template <typename ElementType, std::ptrdiff_t Extent>
+                void write_span (ostream_base & os, gsl::span<ElementType, Extent> const & sp) {
                     os.write (sp.data (), sp.length ());
                 }
 
@@ -94,21 +89,11 @@ namespace pstore {
             diff_out<OutputFunction> make_diff_out (OutputFunction const * const fn) {
                 return diff_out<OutputFunction>{fn};
             }
-                
-            template <typename OStream>
-            void emit_digest (OStream & os, uint128 const d) {
-                std::array<char, uint128::hex_string_length> hex;
-                auto const out = d.to_hex (hex.begin ());
-                (void) out;
-                PSTORE_ASSERT (out == hex.end ());
-                os << '"';
-                details::write_span (os, gsl::make_span (hex));
-                os << '"';
-            }
 
+            void emit_digest (ostream_base & os, uint128 const d);
 
-            template <typename OStream, typename Iterator>
-            void emit_string (OStream & os, Iterator first, Iterator last) {
+            template <typename Iterator>
+            void emit_string (ostream_base & os, Iterator first, Iterator last) {
                 os << '"';
                 auto pos = first;
                 while ((pos = std::find_if (first, last, [] (char const c) {
@@ -124,10 +109,7 @@ namespace pstore {
                 os << '"';
             }
 
-            template <typename OStream>
-            void emit_string (OStream & os, raw_sstring_view const & view) {
-                emit_string (os, std::begin (view), std::end (view));
-            }
+            void emit_string (ostream_base & os, raw_sstring_view const & view);
 
             /// If \p comments is true, emits a comment containing the body of the string at address
             /// \p addr.
@@ -137,17 +119,9 @@ namespace pstore {
             /// \param addr  The address of the indirect-string to be emitted.
             /// \param comments  A value indicating whether comment emission is enabled.
             /// \returns A reference to \p os.
-            template <typename OStream>
-            OStream & show_string (OStream & os, pstore::database const & db,
-                                   pstore::typed_address<pstore::indirect_string> const addr,
-                                   bool const comments) {
-                if (comments) {
-                    auto const str = serialize::read<pstore::indirect_string> (
-                        serialize::archive::database_reader{db, addr.to_address ()});
-                    os << R"( //")" << str << '"';
-                }
-                return os;
-            }
+            ostream_base & show_string (ostream_base & os, pstore::database const & db,
+                                        pstore::typed_address<pstore::indirect_string> const addr,
+                                        bool const comments);
 
             /// Writes an array of values given by the range \p first to \p last to the output
             /// stream \p os. The output follows the JSON syntax of "[ a, b ]" except that each

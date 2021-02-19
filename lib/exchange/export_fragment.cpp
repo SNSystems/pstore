@@ -18,6 +18,35 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
+            void emit_fragment (ostream_base & os, indent const ind, class database const & db,
+                                name_mapping const & names,
+                                std::shared_ptr<repo::fragment const> const & fragment,
+                                bool comments) {
+                os << "{\n";
+                auto const * section_sep = "";
+                for (repo::section_kind const section : *fragment) {
+                    auto const object_indent = ind.next ();
+                    os << section_sep << object_indent << '"' << emit_section_name (section)
+                       << R"(":)";
+#define X(a)                                                                                       \
+    case repo::section_kind::a:                                                                    \
+        emit_section<repo::section_kind::a> (os, object_indent, db, names,                         \
+                                             fragment->at<pstore::repo::section_kind::a> (),       \
+                                             comments);                                            \
+        break;
+                    switch (section) {
+                        PSTORE_MCREPO_SECTION_KINDS
+                    case repo::section_kind::last:
+                        // unreachable...
+                        PSTORE_ASSERT (false);
+                        break;
+                    }
+#undef X
+                    section_sep = ",\n";
+                }
+                os << '\n' << ind << '}';
+            }
+
             void emit_fragments (ostream & os, indent const ind, database const & db,
                                  unsigned const generation, name_mapping const & names,
                                  bool const comments) {
@@ -31,7 +60,7 @@ namespace pstore {
                         os << fragment_sep << ind;
                         emit_digest (os, kvp.first);
                         os << ':';
-                        emit_fragment (os, ind.next (), db, names, db.getro (kvp.second), comments);
+                        emit_fragment (os, ind, db, names, db.getro (kvp.second), comments);
                         fragment_sep = ",\n";
                     };
 

@@ -27,12 +27,12 @@ namespace pstore {
 
             gsl::czstring emit_section_name (repo::section_kind section) noexcept;
 
-            template <typename OStream, typename IFixupIterator>
-            OStream & emit_internal_fixups (OStream & os, indent const ind, IFixupIterator first,
-                                            IFixupIterator last) {
+            template <typename IFixupIterator>
+            ostream_base & emit_internal_fixups (ostream_base & os, indent const ind,
+                                                 IFixupIterator first, IFixupIterator last) {
                 emit_array (
                     os, ind, first, last,
-                    [] (OStream & os1, indent const ind1, repo::internal_fixup const & ifx) {
+                    [] (ostream_base & os1, indent const ind1, repo::internal_fixup const & ifx) {
                         os1 << ind1 << '{' << R"("section":")" << emit_section_name (ifx.section)
                             << R"(","type":)" << static_cast<unsigned> (ifx.type) << ','
                             << R"("offset":)" << ifx.offset << ',' << R"("addend":)" << ifx.addend
@@ -41,12 +41,14 @@ namespace pstore {
                 return os;
             }
 
-            template <typename OStream, typename XFixupIterator>
-            OStream & emit_external_fixups (OStream & os, indent const ind, database const & db,
-                                            name_mapping const & names, XFixupIterator first,
-                                            XFixupIterator last, bool comments) {
+            template <typename XFixupIterator>
+            ostream_base & emit_external_fixups (ostream_base & os, indent const ind,
+                                                 database const & db, name_mapping const & names,
+                                                 XFixupIterator first, XFixupIterator last,
+                                                 bool comments) {
                 return emit_array_with_name (os, ind, db, first, last, comments,
-                                             [&] (OStream & os1, repo::external_fixup const & xfx) {
+                                             [&] (ostream_base & os1,
+                                                  repo::external_fixup const & xfx) {
                                                  os1 << R"({"name":)" << names.index (xfx.name)
                                                      << R"(,"type":)"
                                                      << static_cast<unsigned> (xfx.type);

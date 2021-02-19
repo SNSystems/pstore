@@ -20,6 +20,7 @@ add_pstore_unit_test (pstore-exchange-unit-tests
     test_bss_section.cpp
     test_compilation.cpp
     test_export_emit.cpp
+    test_export_ostream.cpp
     test_generic_section.cpp
     test_linked_definitions_section.cpp
     test_section_fixups.cpp

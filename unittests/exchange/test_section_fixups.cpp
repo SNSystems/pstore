@@ -20,6 +20,7 @@
 
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/json/json.hpp"
+#include "pstore/exchange/export_ostream.hpp"
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
@@ -60,7 +61,7 @@ TEST_F (ExchangeSectionFixups, RoundTripInternalEmpty) {
     internal_fixup_collection ifixups;
 
     // Export the internal fixup array to the 'os' string-stream.
-    std::ostringstream os;
+    pstore::exchange::export_ns::ostringstream os;
     emit_internal_fixups (os, pstore::exchange::export_ns::indent{}, std::begin (ifixups),
                           std::end (ifixups));
 
@@ -93,7 +94,7 @@ TEST_F (ExchangeSectionFixups, RoundTripInternalCollection) {
                           std::int64_t{47} /*addend*/);
 
     // Export the internal fixup array to the 'os' string-stream.
-    std::ostringstream os;
+    pstore::exchange::export_ns::ostringstream os;
     emit_internal_fixups (os, pstore::exchange::export_ns::indent{}, std::begin (ifixups),
                           std::end (ifixups));
 
@@ -317,7 +318,7 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
     xfixup_collection xfixups;
 
     // Export the internal fixup array to the 'os' string-stream.
-    std::ostringstream os;
+    pstore::exchange::export_ns::ostringstream os;
     pstore::exchange::export_ns::name_mapping names{export_db_};
     emit_external_fixups (os, pstore::exchange::export_ns::indent{}, export_db_, names,
                           std::begin (xfixups), std::end (xfixups), false);
@@ -351,7 +352,7 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
 
     // Write the names that we just created as JSON.
     pstore::exchange::export_ns::name_mapping exported_names{export_db_};
-    std::ostringstream exported_names_stream;
+    pstore::exchange::export_ns::ostringstream exported_names_stream;
     emit_names (exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
                 export_db_.get_current_revision (), &exported_names);
 
@@ -368,8 +369,7 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
 
 
     // Export the external fixup array to the 'exported_fixups' string-stream.
-    std::ostringstream exported_fixups;
-    exported_fixups << std::boolalpha;
+    pstore::exchange::export_ns::ostringstream exported_fixups;
     emit_external_fixups (exported_fixups, pstore::exchange::export_ns::indent{}, export_db_,
                           exported_names, std::begin (xfixups), std::end (xfixups), false);
 

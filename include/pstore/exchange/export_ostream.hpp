@@ -24,75 +24,231 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
-            class ostream {
-            public:
-                explicit ostream (FILE * const os)
-                        : os_ (os) {}
-                ostream (ostream const &) = delete;
-                ostream (ostream &&) = delete;
+            namespace details {
 
-                ~ostream () noexcept = default;
+                template <typename T>
+                using enable_if_unsigned = typename std::enable_if_t<std::is_unsigned<T>::value>;
 
-                ostream & operator= (ostream const &) = delete;
-                ostream & operator= (ostream &&) = delete;
-
-                ostream & write (bool b);
-                ostream & write (char c);
-                ostream & write (std::uint16_t v);
-                ostream & write (std::uint32_t v);
-                ostream & write (std::int64_t v);
-                ostream & write (std::uint64_t v);
-                ostream & write (gsl::czstring str);
-                ostream & write (std::string const & str);
-
-                template <typename T, typename = typename std::enable_if<
-                                          std::is_trivially_copyable<T>::value>::type>
-                ostream & write (T const * s, std::streamsize const length) {
-                    std::fwrite (s, sizeof (T),
-                                 unsigned_cast<decltype (length), std::size_t> (length), os_);
-                    if (ferror (os_)) {
-                        raise (error_code::write_failed);
-                    }
-                    return *this;
+                /// Returns the number of characters (in base 10) that a value of type Unsigned
+                /// will occupy.
+                template <typename Unsigned, typename = enable_if_unsigned<Unsigned>>
+                constexpr unsigned
+                base10digits (Unsigned value = std::numeric_limits<Unsigned>::max ()) noexcept {
+                    return value < 10U ? 1U : 1U + base10digits<Unsigned> (value / Unsigned{10});
                 }
 
-                void flush ();
+                template <typename Unsigned, typename = enable_if_unsigned<Unsigned>>
+                using base10storage = std::array<char, base10digits<Unsigned> ()>;
+
+                /// Converts an unsigned numeric value to an array of characters.
+                ///
+                /// \param v  The unsigned number value to be converted.
+                /// \param out  A character buffer to which the output is written.
+                /// \result  A pair denoting the range of valid characters in the \p out buffer.
+                template <typename Unsigned, typename = enable_if_unsigned<Unsigned>>
+                std::pair<char const *, char const *>
+                to_characters (Unsigned v,
+                               gsl::not_null<base10storage<Unsigned> *> const out) noexcept {
+                    char * const end = out->data () + out->size ();
+                    char * ptr = end - 1;
+                    if (v == 0U) {
+                        *ptr = '0';
+                        return {ptr, end};
+                    }
+
+                    for (; v > 0; --ptr) {
+                        *ptr = (v % 10U) + '0';
+                        v /= 10U;
+                    }
+                    ++ptr;
+                    PSTORE_ASSERT (ptr >= out->data ());
+                    return {ptr, end};
+                }
+
+            } // end namespace details
+
+            //*         _                        _                   *
+            //*  ___ __| |_ _ _ ___ __ _ _ __   | |__  __ _ ___ ___  *
+            //* / _ (_-<  _| '_/ -_) _` | '  \  | '_ \/ _` (_-</ -_) *
+            //* \___/__/\__|_| \___\__,_|_|_|_| |_.__/\__,_/__/\___| *
+            //*                                                      *
+            class ostream_base {
+            public:
+                /// \param buffer_size  The number of characters in the output buffer.
+                explicit ostream_base (std::size_t buffer_size = 4 * 1024);
+
+                ostream_base (ostream_base const &) = delete;
+                ostream_base (ostream_base &&) = delete;
+
+                virtual ~ostream_base () noexcept = 0;
+
+                ostream_base & operator= (ostream_base const &) = delete;
+                ostream_base & operator= (ostream_base &&) = delete;
+
+                ostream_base & write (bool b);
+                /// Writes a single character to the output.
+                ostream_base & write (char c);
+                /// Writes a null-terminated string to the output.
+                ostream_base & write (gsl::czstring str);
+                /// Writes a string to the output.
+                ostream_base & write (std::string const & str);
+                ostream_base & write (char const * s, std::streamsize length);
+
+                /// Writes an unsigned numeric value to the output.
+                template <typename Unsigned,
+                          typename = typename std::enable_if_t<std::is_unsigned<Unsigned>::value>>
+                ostream_base & write (Unsigned const v) {
+                    details::base10storage<Unsigned> str{{}};
+                    auto res = details::to_characters (v, &str);
+                    return this->write (gsl::make_span (res.first, res.second));
+                }
+
+                /// Writes an signed numeric value to the output.
+                template <typename Signed, typename Unused = void,
+                          typename = typename std::enable_if_t<!std::is_unsigned<Signed>::value>>
+                ostream_base & write (Signed const v) {
+                    using unsigned_type = typename std::make_unsigned<Signed>::type;
+                    if (v < 0) {
+                        this->write ('-');
+                        if (v == std::numeric_limits<Signed>::min ()) {
+                            return this->write (static_cast<unsigned_type> (v));
+                        }
+                        return this->write (static_cast<unsigned_type> (-v));
+                    }
+                    return this->write (static_cast<unsigned_type> (v));
+                }
+
+                /// Writes a span of characters to the output.
+                template <std::ptrdiff_t Extent>
+                ostream_base & write (gsl::span<char const, Extent> s);
+
+                std::size_t flush ();
+
+            protected:
+                virtual void flush_buffer (std::vector<char> const & buffer, std::size_t size) = 0;
 
             private:
-                FILE * os_;
+                /// Returns the number of characters held in the output buffer.
+                std::size_t buffered_chars () const noexcept;
+                /// Returns the number of characters that the buffer can accommodate before it is
+                /// full.
+                std::size_t available_space () const noexcept;
+
+                std::vector<char> buffer_;
+                char * ptr_ = nullptr;
+                char * end_ = nullptr;
             };
 
-            inline ostream & operator<< (ostream & os, bool const b) { return os.write (b); }
-            inline ostream & operator<< (ostream & os, char const c) { return os.write (c); }
-            inline ostream & operator<< (ostream & os, std::uint16_t const v) {
+            template <std::ptrdiff_t Extent>
+            ostream_base & ostream_base::write (gsl::span<char const, Extent> const s) {
+                if (s.empty ()) {
+                    return *this;
+                }
+                auto index = typename gsl::span<char const, Extent>::index_type{0};
+                auto remaining = unsigned_cast (s.size ());
+                while (remaining > 0U) {
+                    // Flush the buffer if it is full.
+                    auto available = this->available_space ();
+                    if (available == 0U) {
+                        available = this->flush ();
+                    }
+                    PSTORE_ASSERT (available > 0U);
+
+                    // Copy as many characters as we can from the input span to the buffer.
+                    auto const count = std::min (remaining, available);
+                    using span_index_type = gsl::span<char const>::index_type;
+                    PSTORE_ASSERT (count <=
+                                   unsigned_cast (std::numeric_limits<span_index_type>::max ()));
+                    auto ss = s.subspan (index, static_cast<span_index_type> (count));
+                    ptr_ = std::copy (ss.begin (), ss.end (), ptr_);
+                    PSTORE_ASSERT (ptr_ <= end_);
+
+                    // Adjust our view of the characters remaining to be copied.
+                    remaining -= count;
+                    index += count;
+                }
+                return *this;
+            }
+
+            template <typename T,
+                      typename = typename std::enable_if_t<std::numeric_limits<T>::is_integer>>
+            inline ostream_base & operator<< (ostream_base & os, T const v) {
                 return os.write (v);
             }
-            inline ostream & operator<< (ostream & os, std::uint32_t const v) {
-                return os.write (v);
+            inline ostream_base & operator<< (ostream_base & os, bool const b) {
+                return os.write (b);
             }
-            inline ostream & operator<< (ostream & os, std::uint64_t const v) {
-                return os.write (v);
-            }
-            inline ostream & operator<< (ostream & os, std::int64_t const v) {
-                return os.write (v);
-            }
-            inline ostream & operator<< (ostream & os, gsl::czstring const str) {
+            inline ostream_base & operator<< (ostream_base & os, gsl::czstring const str) {
                 return os.write (str);
             }
-            inline ostream & operator<< (ostream & os, std::string const & str) {
+            inline ostream_base & operator<< (ostream_base & os, std::string const & str) {
                 return os.write (str);
             }
-            inline ostream & operator<< (ostream & os, indirect_string const & ind_str) {
+            inline ostream_base & operator<< (ostream_base & os, indirect_string const & ind_str) {
                 shared_sstring_view owner;
                 return os << ind_str.as_string_view (&owner);
             }
 
-
-            class ostream_inserter : public std::iterator<std::output_iterator_tag, char> {
+            //*         _                       *
+            //*  ___ __| |_ _ _ ___ __ _ _ __   *
+            //* / _ (_-<  _| '_/ -_) _` | '  \  *
+            //* \___/__/\__|_| \___\__,_|_|_|_| *
+            //*                                 *
+            class ostream final : public ostream_base {
             public:
-                explicit ostream_inserter (ostream & os)
-                        : os_{os} {}
+                explicit ostream (FILE * os);
+                ostream (ostream const &) = delete;
+                ostream (ostream &&) = delete;
 
+                ~ostream () noexcept override;
+
+                ostream & operator= (ostream const &) = delete;
+                ostream & operator= (ostream &&) = delete;
+
+            private:
+                void flush_buffer (std::vector<char> const & buffer, std::size_t size) override;
+
+                FILE * const os_;
+            };
+
+            //*         _       _              _                       *
+            //*  ___ __| |_ _ _(_)_ _  __ _ __| |_ _ _ ___ __ _ _ __   *
+            //* / _ (_-<  _| '_| | ' \/ _` (_-<  _| '_/ -_) _` | '  \  *
+            //* \___/__/\__|_| |_|_||_\__, /__/\__|_| \___\__,_|_|_|_| *
+            //*                       |___/                            *
+            class ostringstream final : public pstore::exchange::export_ns::ostream_base {
+            public:
+                ostringstream () = default;
+                ostringstream (ostringstream const &) = delete;
+                ostringstream (ostringstream &&) = delete;
+
+                ~ostringstream () noexcept override = default;
+
+                ostringstream & operator= (ostringstream const &) = delete;
+                ostringstream & operator= (ostringstream &&) = delete;
+
+                std::string const & str ();
+
+            private:
+                std::string str_;
+                void flush_buffer (std::vector<char> const & buffer, std::size_t size) override;
+            };
+
+            //*         _                        _                  _            *
+            //*  ___ __| |_ _ _ ___ __ _ _ __   (_)_ _  ___ ___ _ _| |_ ___ _ _  *
+            //* / _ (_-<  _| '_/ -_) _` | '  \  | | ' \(_-</ -_) '_|  _/ -_) '_| *
+            //* \___/__/\__|_| \___\__,_|_|_|_| |_|_||_/__/\___|_|  \__\___|_|   *
+            //*                                                                  *
+            class ostream_inserter {
+            public:
+                using iterator_category = std::output_iterator_tag;
+                using value_type = void;
+                using difference_type = void;
+                using pointer = void;
+                using reference = void;
+
+                explicit ostream_inserter (ostream_base & os) noexcept
+                        : os_{os} {}
                 ostream_inserter & operator= (char const c) {
                     os_ << c;
                     return *this;
@@ -102,7 +258,7 @@ namespace pstore {
                 ostream_inserter operator++ (int) noexcept { return *this; }
 
             private:
-                ostream & os_;
+                ostream_base & os_;
             };
 
         } // end namespace export_ns

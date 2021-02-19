@@ -23,8 +23,13 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
-            // ctor
-            // ~~~~
+            //*                                             _            *
+            //*  _ _  __ _ _ __  ___   _ __  __ _ _ __ _ __(_)_ _  __ _  *
+            //* | ' \/ _` | '  \/ -_) | '  \/ _` | '_ \ '_ \ | ' \/ _` | *
+            //* |_||_\__,_|_|_|_\___| |_|_|_\__,_| .__/ .__/_|_||_\__, | *
+            //*                                  |_|  |_|         |___/  *
+            // (ctor)
+            // ~~~~~~
             name_mapping::name_mapping (database const & db) {
                 auto const index = index::get_index<trailer::indices::name> (db);
                 names_.reserve (index->size ());
@@ -46,6 +51,40 @@ namespace pstore {
                 PSTORE_ASSERT (pos != names_.end ());
                 return pos->second;
             }
+
+            //*            _ _                             *
+            //*  ___ _ __ (_) |_   _ _  __ _ _ __  ___ ___ *
+            //* / -_) '  \| |  _| | ' \/ _` | '  \/ -_|_-< *
+            //* \___|_|_|_|_|\__| |_||_\__,_|_|_|_\___/__/ *
+            //*                                            *
+            void emit_names (ostream_base & os, indent ind, database const & db,
+                             unsigned const generation, name_mapping * const string_table) {
+                auto const names_index = index::get_index<trailer::indices::name> (db);
+                PSTORE_ASSERT (generation > 0);
+
+                auto const * separator = "";
+                auto const * tail_separator = "";
+                auto close_bracket_indent = indent{};
+
+                auto member_indent = ind.next ();
+                auto const out_fn = [&] (pstore::address const addr) {
+                    os << separator << '\n' << member_indent;
+                    {
+                        indirect_string const str = names_index->load_leaf_node (db, addr);
+                        shared_sstring_view owner;
+                        raw_sstring_view view = str.as_db_string_view (&owner);
+                        emit_string (os, view);
+                        string_table->add (addr);
+                    }
+                    separator = ",";
+                    tail_separator = "\n";
+                    close_bracket_indent = ind;
+                };
+                os << '[';
+                diff (db, *names_index, generation - 1U, make_diff_out (&out_fn));
+                os << tail_separator << close_bracket_indent << ']';
+            }
+
 
         } // end namespace export_ns
     }     // end namespace exchange

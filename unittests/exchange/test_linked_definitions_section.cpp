@@ -80,7 +80,7 @@ namespace {
         transaction.commit ();
 
         exchange::export_ns::name_mapping exported_names{export_db_};
-        std::ostringstream str;
+        exchange::export_ns::ostringstream str;
         emit_fragment (str, exchange::export_ns::indent{}, export_db_, exported_names,
                        export_db_.getro (fext), true);
         return str.str ();

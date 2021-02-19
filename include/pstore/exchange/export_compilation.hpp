@@ -18,6 +18,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file export_compilation.hpp
+/// \brief  Functions for exporting compilations and the compilation index.
 #ifndef PSTORE_EXCHANGE_EXPORT_COMPILATION_HPP
 #define PSTORE_EXCHANGE_EXPORT_COMPILATION_HPP
 
@@ -28,77 +30,15 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
-#define X(a)                                                                                       \
-case repo::linkage::a: return os << #a;
-            template <typename OStream>
-            OStream & operator<< (OStream & os, repo::linkage const linkage) {
-                switch (linkage) { PSTORE_REPO_LINKAGES }
-                return os << "unknown";
-            }
-#undef X
+            class ostream_base;
 
-            template <typename OStream>
-            OStream & operator<< (OStream & os, repo::visibility const visibility) {
-                switch (visibility) {
-                case repo::visibility::default_vis: return os << "default";
-                case repo::visibility::hidden_vis: return os << "hidden";
-                case repo::visibility::protected_vis: return os << "protected";
-                }
-                return os << "unknown";
-            }
-            template <typename OStream>
-            void emit_compilation (OStream & os, indent const ind, database const & db,
+            void emit_compilation (ostream_base & os, indent const ind, database const & db,
                                    repo::compilation const & compilation,
-                                   name_mapping const & names, bool comments) {
-                os << "{\n";
-                auto const object_indent = ind.next ();
-                os << object_indent << R"("path":)" << names.index (compilation.path ()) << ',';
-                show_string (os, db, compilation.path (), comments);
-                os << '\n'
-                   << object_indent << R"("triple":)" << names.index (compilation.triple ()) << ',';
-                show_string (os, db, compilation.triple (), comments);
-                os << '\n' << object_indent << R"("definitions":)";
-                emit_array_with_name (os, object_indent, db, compilation.begin (),
-                                      compilation.end (), comments,
-                                      [&] (OStream & os1, repo::definition const & d) {
-                                          os1 << R"({"digest":)";
-                                          emit_digest (os1, d.digest);
-                                          os1 << R"(,"name":)" << names.index (d.name)
-                                              << R"(,"linkage":")" << d.linkage () << '"';
-                                          if (d.visibility () != repo::visibility::default_vis) {
-                                              os1 << R"(,"visibility":")" << d.visibility () << '"';
-                                          }
-                                          os1 << '}';
-                                          return d.name;
-                                      });
-                os << '\n' << ind << '}';
-            }
+                                   name_mapping const & names, bool comments);
 
-
-            template <typename OStream>
-            void emit_compilation_index (OStream & os, indent const ind, database const & db,
+            void emit_compilation_index (ostream_base & os, indent const ind, database const & db,
                                          unsigned const generation, name_mapping const & names,
-                                         bool comments) {
-                auto const compilations = index::get_index<trailer::indices::compilation> (db);
-                if (!compilations || compilations->empty ()) {
-                    return;
-                }
-                if (generation == 0) {
-                    // The first (zeroth) transaction in the store is, by definition, empty.
-                    return;
-                }
-                auto const * sep = "\n";
-
-                auto const out_fn = [&] (address addr) {
-                    auto const & kvp = compilations->load_leaf_node (db, addr);
-                    os << sep << ind;
-                    emit_digest (os, kvp.first);
-                    os << ':';
-                    emit_compilation (os, ind, db, *db.getro (kvp.second), names, comments);
-                    sep = ",\n";
-                };
-                diff (db, *compilations, generation - 1U, make_diff_out (&out_fn));
-            }
+                                         bool comments);
 
         } // end namespace export_ns
     }     // end namespace exchange

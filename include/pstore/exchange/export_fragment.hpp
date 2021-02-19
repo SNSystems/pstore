@@ -21,34 +21,10 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
-            template <typename OStream>
-            void emit_fragment (OStream & os, indent const ind, class database const & db,
+            void emit_fragment (ostream_base & os, indent const ind, class database const & db,
                                 name_mapping const & names,
                                 std::shared_ptr<repo::fragment const> const & fragment,
-                                bool comments) {
-                os << "{\n";
-                auto const * section_sep = "";
-                for (repo::section_kind const section : *fragment) {
-                    auto const object_indent = ind.next ();
-                    os << section_sep << object_indent << '"' << emit_section_name (section)
-                       << R"(":)";
-#define X(a)                                                                                       \
-case repo::section_kind::a:                                                                        \
-    emit_section<repo::section_kind::a> (                                                          \
-        os, object_indent, db, names, fragment->at<pstore::repo::section_kind::a> (), comments);   \
-    break;
-                    switch (section) {
-                        PSTORE_MCREPO_SECTION_KINDS
-                    case repo::section_kind::last:
-                        // unreachable...
-                        PSTORE_ASSERT (false);
-                        break;
-                    }
-#undef X
-                    section_sep = ",\n";
-                }
-                os << '\n' << ind << '}';
-            }
+                                bool comments);
 
             void emit_fragments (ostream & os, indent ind, class database const & db,
                                  unsigned generation, name_mapping const & names, bool comments);
