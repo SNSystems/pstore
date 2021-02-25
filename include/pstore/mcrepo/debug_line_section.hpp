@@ -18,6 +18,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file debug_line_section.hpp
+/// \brief  Declares the type used to record debug_line sections in a fragment.
+
 #ifndef PSTORE_MCREPO_DEBUG_LINE_SECTION_HPP
 #define PSTORE_MCREPO_DEBUG_LINE_SECTION_HPP
 
@@ -28,8 +31,9 @@
 namespace pstore {
     namespace repo {
 
-        // TODO: modelling the debug line section as a "generic_section plus an extent for the CU
-        // header is expedient but we probably don't need to store the alignment or xfixup array.
+        // TODO: modeling the debug line section as a "generic_section plus an extent for the CU
+        // header" is expedient but we probably don't need to store the alignment or external fixup
+        // array.
         class debug_line_section : public section_base {
         public:
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
@@ -39,7 +43,7 @@ namespace pstore {
                 std::uint8_t align)
                     : header_digest_{header_digest}
                     , header_{header_extent}
-                    , g_ (src.data_range, src.ifixups_range, src.xfixups_range, align) {}
+                    , g_{src.data_range, src.ifixups_range, src.xfixups_range, align} {}
 
 
             index::digest const & header_digest () const noexcept { return header_digest_; }
@@ -78,6 +82,8 @@ namespace pstore {
         };
         static_assert (std::is_standard_layout<debug_line_section>::value,
                        "debug_line_section must be standard-layout");
+        static_assert (alignof (debug_line_section) == 16,
+                       "debug_line_section alignment must be 16");
 
 
         template <>
@@ -100,7 +106,7 @@ namespace pstore {
                     : section_creation_dispatcher (section_kind::debug_line)
                     , header_digest_{header_digest}
                     , header_{header}
-                    , section_ (sec) {}
+                    , section_{sec} {}
 
             debug_line_section_creation_dispatcher (
                 debug_line_section_creation_dispatcher const &) = delete;
@@ -114,6 +120,7 @@ namespace pstore {
 
         private:
             std::uintptr_t aligned_impl (std::uintptr_t in) const override;
+
             index::digest header_digest_;
             extent<std::uint8_t> header_;
             section_content const * const section_;
