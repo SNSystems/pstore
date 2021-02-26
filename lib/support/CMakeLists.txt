@@ -308,12 +308,17 @@ add_pstore_library (
     HEADER_DIR "${PSTORE_ROOT_DIR}/include/pstore/support"
     INCLUDES "${PSTORE_SUPPORT_INCLUDES}"
 )
-target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-target_include_directories (pstore-support PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
-if (Backtrace_FOUND)
-    target_include_directories (pstore-support PRIVATE ${Backtrace_INCLUDE_DIRS})
-    target_link_libraries (pstore-support PRIVATE ${Backtrace_LIBRARY})
-endif ()
+
+function (pstore_config_support_library target)
+    target_link_libraries (${target} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+    target_include_directories (${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+    if (Backtrace_FOUND)
+        target_include_directories (${target} PRIVATE ${Backtrace_INCLUDE_DIRS})
+        target_link_libraries (${target} PRIVATE ${Backtrace_LIBRARY})
+    endif ()
+endfunction (pstore_config_support_library)
+
+pstore_config_support_library (pstore-support)
 add_clang_tidy_target (pstore-support)
 
 # Add the exception-handling-enabled pstore-support-ex if we're building inside LLVM
@@ -332,7 +337,7 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
 
-    target_link_libraries (pstore-support-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+    pstore_config_support_library (pstore-support-ex)
 endif (NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
@@ -354,6 +359,5 @@ if (PSTORE_BITCODE)
         CXX_STANDARD "${pstore_cxx_version}"
         CXX_STANDARD_REQUIRED Yes
     )
-    target_include_directories (pstore-support-bc PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
-    target_link_libraries (pstore-support-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+    pstore_config_support_library (pstore-support-bc)
 endif (PSTORE_BITCODE)
