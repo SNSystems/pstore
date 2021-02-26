@@ -69,7 +69,8 @@ namespace pstore {
                 return this->write (gsl::make_span (str));
             }
 
-            ostream_base & ostream_base::write (char const * s, std::streamsize const length) {
+            ostream_base & ostream_base::write (char const * const s,
+                                                std::streamsize const length) {
                 PSTORE_ASSERT (length >= 0);
                 return this->write (gsl::make_span (s, length));
             }
@@ -139,7 +140,8 @@ namespace pstore {
                 return str_;
             }
 
-            void ostringstream::flush_buffer (std::vector<char> const & buffer, std::size_t size) {
+            void ostringstream::flush_buffer (std::vector<char> const & buffer,
+                                              std::size_t const size) {
                 PSTORE_ASSERT (size < std::numeric_limits<std::string::size_type>::max ());
                 str_.append (buffer.data (), size);
             }

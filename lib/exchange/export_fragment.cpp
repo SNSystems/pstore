@@ -21,7 +21,7 @@ namespace pstore {
             void emit_fragment (ostream_base & os, indent const ind, class database const & db,
                                 name_mapping const & names,
                                 std::shared_ptr<repo::fragment const> const & fragment,
-                                bool comments) {
+                                bool const comments) {
                 os << "{\n";
                 auto const * section_sep = "";
                 for (repo::section_kind const section : *fragment) {

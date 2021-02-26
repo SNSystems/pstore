@@ -57,7 +57,7 @@ namespace pstore {
 
             void emit_compilation (ostream_base & os, indent const ind, database const & db,
                                    repo::compilation const & compilation,
-                                   name_mapping const & names, bool comments) {
+                                   name_mapping const & names, bool const comments) {
                 os << "{\n";
                 auto const object_indent = ind.next ();
                 os << object_indent << R"("path":)" << names.index (compilation.path ()) << ',';
@@ -85,7 +85,7 @@ namespace pstore {
 
             void emit_compilation_index (ostream_base & os, indent const ind, database const & db,
                                          unsigned const generation, name_mapping const & names,
-                                         bool comments) {
+                                         bool const comments) {
                 auto const compilations = index::get_index<trailer::indices::compilation> (db);
                 if (!compilations || compilations->empty ()) {
                     return;
@@ -96,7 +96,7 @@ namespace pstore {
                 }
                 auto const * sep = "\n";
 
-                auto const out_fn = [&] (address addr) {
+                auto const out_fn = [&] (address const addr) {
                     auto const & kvp = compilations->load_leaf_node (db, addr);
                     os << sep << ind;
                     emit_digest (os, kvp.first);
