@@ -44,7 +44,7 @@ add_pstore_library (TARGET pstore-brokerface
 )
 target_link_libraries (pstore-brokerface PUBLIC pstore-adt pstore-os pstore-support)
 
-if (NOT PSTORE_EXCEPTIONS)
+if (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
@@ -61,4 +61,4 @@ if (NOT PSTORE_EXCEPTIONS)
     set (PSTORE_EXCEPTIONS No)
 
     target_link_libraries (pstore-brokerface-ex PUBLIC pstore-adt-ex pstore-os-ex pstore-support-ex)
-endif (NOT PSTORE_EXCEPTIONS)
+endif (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)
