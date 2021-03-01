@@ -24,6 +24,7 @@ from __future__ import print_function
 
 import argparse
 import os.path
+import re
 import subprocess
 import sys
 
@@ -39,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 def strip_lines(lines, index, comment_str):
     """Removes leading and trailing comment lines from the file."""
 
-    is_blank = lambda x: x == '' or x == '\n';
+    is_blank = lambda x: x == '' or x == '\n'
 
     # Remove blank lines
     while len(lines) > 0 and is_blank(lines[index]):
@@ -91,11 +92,18 @@ def split_extension(path):
 
 
 def tu_name_from_path(path):
-    name = split_extension(os.path.basename(path))[0]
+    bn = os.path.basename(path)
+    name = split_extension(bn)[0]
     name = remove_string_prefix(name, 'test_') # pstore-style snake_case
     name = remove_string_prefix(name, 'Test') # LLVM-style CamelCase.
     name = remove_string_suffix(name, '_win32')
     name = remove_string_suffix(name, '_posix')
+
+    if bn != 'CMakeLists.txt':
+        # In CamelCase, a lower-to-upper transition is a space.
+        name = re.sub (r'([a-z])([A-Z])', r'\1 \2', name)
+
+    # In snake_case, an underscore is a space.
     return name.replace('_', ' ')
 
 
@@ -109,8 +117,20 @@ def figlet(name, comment_char):
     return comments
 
 
+LANGUAGE_MAPPING = {
+    '.h': 'C++',
+    '.hpp': 'C++',
+}
+
+
 def get_path_line(path, comment_char):
     path_line_suffix = '===//'
+
+    (_, ext) = split_extension(path)
+    language = LANGUAGE_MAPPING.get (ext, '')
+    if len(language) > 0:
+        path_line_suffix = '*- mode: {0} -*-'.format (language) + path_line_suffix
+
     path_line = comment_char + '===- ' + path + ' '
     path_line += '-' * (80 - len(path_line) - len(path_line_suffix)) + path_line_suffix
     return [path_line + '\n']
@@ -153,6 +173,8 @@ def boilerplate(path, base_path, comment_char=None, figlet_enabled=True):
         raise RuntimeError('path (%s) was not inside base-path (%s)' % (path, base_path))
 
     subpath = path[len(base_path):]
+
+    # pstore files that are input to CMake's configure_files() end with '.in'. Remove it.
     if subpath.endswith('.in'):
         subpath = subpath[:-len('.in')]
 
@@ -171,12 +193,15 @@ def boilerplate(path, base_path, comment_char=None, figlet_enabled=True):
     if shebang is not None:
         prolog += [shebang]
 
+    prolog += get_path_line(subpath, comment_char)
+
+    line_of_dashes = comment_char + '===----------------------------------------------------------------------===//\n'
     if figlet_enabled:
         prolog += figlet(tu_name, comment_char)
+        prolog += [ line_of_dashes ]
 
-    prolog += get_path_line(subpath, comment_char)
     prolog += get_license(comment_char)
-    prolog += [comment_char + '===----------------------------------------------------------------------===//\n']
+    prolog += [ line_of_dashes ]
     return prolog + lines
 
 
