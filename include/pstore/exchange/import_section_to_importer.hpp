@@ -1,3 +1,4 @@
+//===- include/pstore/exchange/import_section_to_importer.hpp *- mode: C++ -*-===//
 //*  _                            _                   _   _               _         *
 //* (_)_ __ ___  _ __   ___  _ __| |_   ___  ___  ___| |_(_) ___  _ __   | |_ ___   *
 //* | | '_ ` _ \| '_ \ / _ \| '__| __| / __|/ _ \/ __| __| |/ _ \| '_ \  | __/ _ \  *
@@ -10,7 +11,7 @@
 //* | | | | | | | |_) | (_) | |  | ||  __/ |    *
 //* |_|_| |_| |_| .__/ \___/|_|   \__\___|_|    *
 //*             |_|                             *
-//===- include/pstore/exchange/import_section_to_importer.hpp -------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

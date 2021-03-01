@@ -1,10 +1,11 @@
+//===- unittests/core/test_two_connections.cpp ----------------------------===//
 //*  _                                                   _   _                  *
 //* | |___      _____     ___ ___  _ __  _ __   ___  ___| |_(_) ___  _ __  ___  *
 //* | __\ \ /\ / / _ \   / __/ _ \| '_ \| '_ \ / _ \/ __| __| |/ _ \| '_ \/ __| *
 //* | |_ \ V  V / (_) | | (_| (_) | | | | | | |  __/ (__| |_| | (_) | | | \__ \ *
 //*  \__| \_/\_/ \___/   \___\___/|_| |_|_| |_|\___|\___|\__|_|\___/|_| |_|___/ *
 //*                                                                             *
-//===- unittests/core/test_two_connections.cpp ----------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

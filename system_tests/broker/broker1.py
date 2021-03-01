@@ -1,11 +1,12 @@
 #!/usr/bin/env python
+# ===- system_tests/broker/broker1.py -------------------------------------===//
 # *  _               _             _  *
 # * | |__  _ __ ___ | | _____ _ __/ | *
 # * | '_ \| '__/ _ \| |/ / _ \ '__| | *
 # * | |_) | | | (_) |   <  __/ |  | | *
 # * |_.__/|_|  \___/|_|\_\___|_|  |_| *
 # *                                   *
-# ===- system_tests/broker/broker1.py -------------------------------------===//
+# ===----------------------------------------------------------------------===//
 #
 #  Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 #  See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

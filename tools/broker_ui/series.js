@@ -1,10 +1,11 @@
+//===- tools/broker_ui/series.js ------------------------------------------===//
 //*                _            *
 //*  ___  ___ _ __(_) ___  ___  *
 //* / __|/ _ \ '__| |/ _ \/ __| *
 //* \__ \  __/ |  | |  __/\__ \ *
 //* |___/\___|_|  |_|\___||___/ *
 //*                             *
-//===- tools/broker_ui/series.js ------------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

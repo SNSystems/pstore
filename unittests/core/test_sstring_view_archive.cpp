@@ -1,3 +1,4 @@
+//===- unittests/core/test_sstring_view_archive.cpp -----------------------===//
 //*          _        _                     _                *
 //*  ___ ___| |_ _ __(_)_ __   __ _  __   _(_) _____      __ *
 //* / __/ __| __| '__| | '_ \ / _` | \ \ / / |/ _ \ \ /\ / / *
@@ -10,7 +11,7 @@
 //* | (_| | | | (__| | | | |\ V /  __/ *
 //*  \__,_|_|  \___|_| |_|_| \_/ \___| *
 //*                                    *
-//===- unittests/core/test_sstring_view_archive.cpp -----------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

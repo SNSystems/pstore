@@ -1,3 +1,4 @@
+//===- include/pstore/exchange/import_non_terminals.hpp ---*- mode: C++ -*-===//
 //*  _                            _                        *
 //* (_)_ __ ___  _ __   ___  _ __| |_   _ __   ___  _ __   *
 //* | | '_ ` _ \| '_ \ / _ \| '__| __| | '_ \ / _ \| '_ \  *
@@ -10,7 +11,7 @@
 //* | ||  __/ |  | | | | | | | | | | (_| | \__ \ *
 //*  \__\___|_|  |_| |_| |_|_|_| |_|\__,_|_|___/ *
 //*                                              *
-//===- include/pstore/exchange/import_non_terminals.hpp -------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

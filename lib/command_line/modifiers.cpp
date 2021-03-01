@@ -1,10 +1,11 @@
+//===- lib/command_line/modifiers.cpp -------------------------------------===//
 //*                      _ _  __ _                *
 //*  _ __ ___   ___   __| (_)/ _(_) ___ _ __ ___  *
 //* | '_ ` _ \ / _ \ / _` | | |_| |/ _ \ '__/ __| *
 //* | | | | | | (_) | (_| | |  _| |  __/ |  \__ \ *
 //* |_| |_| |_|\___/ \__,_|_|_| |_|\___|_|  |___/ *
 //*                                               *
-//===- lib/command_line/modifiers.cpp -------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- unittests/support/test_quoted.cpp ----------------------------------===//
 //*                    _           _  *
 //*   __ _ _   _  ___ | |_ ___  __| | *
 //*  / _` | | | |/ _ \| __/ _ \/ _` | *
 //* | (_| | |_| | (_) | ||  __/ (_| | *
 //*  \__, |\__,_|\___/ \__\___|\__,_| *
 //*     |_|                           *
-//===- unittests/support/test_quoted.cpp ----------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

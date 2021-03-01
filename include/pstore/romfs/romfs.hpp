@@ -1,10 +1,11 @@
+//===- include/pstore/romfs/romfs.hpp ---------------------*- mode: C++ -*-===//
 //*                       __      *
 //*  _ __ ___  _ __ ___  / _|___  *
 //* | '__/ _ \| '_ ` _ \| |_/ __| *
 //* | | | (_) | | | | | |  _\__ \ *
 //* |_|  \___/|_| |_| |_|_| |___/ *
 //*                               *
-//===- include/pstore/romfs/romfs.hpp -------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- lib/command_line/word_wrapper.cpp ----------------------------------===//
 //*                        _                                             *
 //* __      _____  _ __ __| | __      ___ __ __ _ _ __  _ __   ___ _ __  *
 //* \ \ /\ / / _ \| '__/ _` | \ \ /\ / / '__/ _` | '_ \| '_ \ / _ \ '__| *
 //*  \ V  V / (_) | | | (_| |  \ V  V /| | | (_| | |_) | |_) |  __/ |    *
 //*   \_/\_/ \___/|_|  \__,_|   \_/\_/ |_|  \__,_| .__/| .__/ \___|_|    *
 //*                                              |_|   |_|               *
-//===- lib/command_line/word_wrapper.cpp ----------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

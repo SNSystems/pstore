@@ -1,10 +1,11 @@
+//===- include/pstore/dump/db_value.hpp -------------------*- mode: C++ -*-===//
 //*      _ _                  _             *
 //*   __| | |__   __   ____ _| |_   _  ___  *
 //*  / _` | '_ \  \ \ / / _` | | | | |/ _ \ *
 //* | (_| | |_) |  \ V / (_| | | |_| |  __/ *
 //*  \__,_|_.__/    \_/ \__,_|_|\__,_|\___| *
 //*                                         *
-//===- include/pstore/dump/db_value.hpp -----------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

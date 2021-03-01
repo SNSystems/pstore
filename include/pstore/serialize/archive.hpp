@@ -1,10 +1,11 @@
+//===- include/pstore/serialize/archive.hpp ---------------*- mode: C++ -*-===//
 //*                 _     _            *
 //*   __ _ _ __ ___| |__ (_)_   _____  *
 //*  / _` | '__/ __| '_ \| \ \ / / _ \ *
 //* | (_| | | | (__| | | | |\ V /  __/ *
 //*  \__,_|_|  \___|_| |_|_| \_/ \___| *
 //*                                    *
-//===- include/pstore/serialize/archive.hpp -------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

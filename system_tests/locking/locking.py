@@ -1,11 +1,12 @@
 #!/usr/bin/env python
+# ===- system_tests/locking/locking.py ------------------------------------===//
 # *  _            _    _              *
 # * | | ___   ___| | _(_)_ __   __ _  *
 # * | |/ _ \ / __| |/ / | '_ \ / _` | *
 # * | | (_) | (__|   <| | | | | (_| | *
 # * |_|\___/ \___|_|\_\_|_| |_|\__, | *
 # *                            |___/  *
-# ===- system_tests/locking/locking.py ------------------------------------===//
+# ===----------------------------------------------------------------------===//
 #
 #  Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 #  See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

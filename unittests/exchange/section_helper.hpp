@@ -1,10 +1,11 @@
+//===- unittests/exchange/section_helper.hpp --------------*- mode: C++ -*-===//
 //*                _   _               _          _                  *
 //*  ___  ___  ___| |_(_) ___  _ __   | |__   ___| |_ __   ___ _ __  *
 //* / __|/ _ \/ __| __| |/ _ \| '_ \  | '_ \ / _ \ | '_ \ / _ \ '__| *
 //* \__ \  __/ (__| |_| | (_) | | | | | | | |  __/ | |_) |  __/ |    *
 //* |___/\___|\___|\__|_|\___/|_| |_| |_| |_|\___|_| .__/ \___|_|    *
 //*                                                |_|               *
-//===- unittests/exchange/section_helper.hpp ------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- include/pstore/os/logging.hpp ----------------------*- mode: C++ -*-===//
 //*  _                   _              *
 //* | | ___   __ _  __ _(_)_ __   __ _  *
 //* | |/ _ \ / _` |/ _` | | '_ \ / _` | *
 //* | | (_) | (_| | (_| | | | | | (_| | *
 //* |_|\___/ \__, |\__, |_|_| |_|\__, | *
 //*          |___/ |___/         |___/  *
-//===- include/pstore/os/logging.hpp --------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

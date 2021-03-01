@@ -1,10 +1,11 @@
+//===- include/pstore/adt/small_vector.hpp ----------------*- mode: C++ -*-===//
 //*                      _ _                  _              *
 //*  ___ _ __ ___   __ _| | | __   _____  ___| |_ ___  _ __  *
 //* / __| '_ ` _ \ / _` | | | \ \ / / _ \/ __| __/ _ \| '__| *
 //* \__ \ | | | | | (_| | | |  \ V /  __/ (__| || (_) | |    *
 //* |___/_| |_| |_|\__,_|_|_|   \_/ \___|\___|\__\___/|_|    *
 //*                                                          *
-//===- include/pstore/adt/small_vector.hpp --------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

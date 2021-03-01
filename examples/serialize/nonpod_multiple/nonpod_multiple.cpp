@@ -1,10 +1,11 @@
+//===- examples/serialize/nonpod_multiple/nonpod_multiple.cpp -------------===//
 //*                                    _                   _ _   _       _       *
 //*  _ __   ___  _ __  _ __   ___   __| |  _ __ ___  _   _| | |_(_)_ __ | | ___  *
 //* | '_ \ / _ \| '_ \| '_ \ / _ \ / _` | | '_ ` _ \| | | | | __| | '_ \| |/ _ \ *
 //* | | | | (_) | | | | |_) | (_) | (_| | | | | | | | |_| | | |_| | |_) | |  __/ *
 //* |_| |_|\___/|_| |_| .__/ \___/ \__,_| |_| |_| |_|\__,_|_|\__|_| .__/|_|\___| *
 //*                   |_|                                         |_|            *
-//===- examples/serialize/nonpod_multiple/nonpod_multiple.cpp -------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

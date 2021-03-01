@@ -1,10 +1,11 @@
+//===- include/pstore/os/file_win32.hpp -------------------*- mode: C++ -*-===//
 //*   __ _ _       *
 //*  / _(_) | ___  *
 //* | |_| | |/ _ \ *
 //* |  _| | |  __/ *
 //* |_| |_|_|\___| *
 //*                *
-//===- include/pstore/os/file_win32.hpp -----------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

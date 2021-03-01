@@ -1,10 +1,11 @@
+# ===- system_tests/broker/watchdog_timer.py ------------------------------===//
 # *                _       _         _               _   _                      *
 # * __      ____ _| |_ ___| |__   __| | ___   __ _  | |_(_)_ __ ___   ___ _ __  *
 # * \ \ /\ / / _` | __/ __| '_ \ / _` |/ _ \ / _` | | __| | '_ ` _ \ / _ \ '__| *
 # *  \ V  V / (_| | || (__| | | | (_| | (_) | (_| | | |_| | | | | | |  __/ |    *
 # *   \_/\_/ \__,_|\__\___|_| |_|\__,_|\___/ \__, |  \__|_|_| |_| |_|\___|_|    *
 # *                                          |___/                              *
-# ===- system_tests/broker/watchdog_timer.py ------------------------------===//
+# ===----------------------------------------------------------------------===//
 #
 #  Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 #  See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,3 +1,4 @@
+//===- examples/serialize/vector_string_reader/vector_string_reader.cpp ---===//
 //*                 _                   _        _              *
 //* __   _____  ___| |_ ___  _ __   ___| |_ _ __(_)_ __   __ _  *
 //* \ \ / / _ \/ __| __/ _ \| '__| / __| __| '__| | '_ \ / _` | *
@@ -10,7 +11,7 @@
 //* | | |  __/ (_| | (_| |  __/ |    *
 //* |_|  \___|\__,_|\__,_|\___|_|    *
 //*                                  *
-//===- examples/serialize/vector_string_reader/vector_string_reader.cpp ---===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- unittests/core/test_region.cpp -------------------------------------===//
 //*                 _              *
 //*  _ __ ___  __ _(_) ___  _ __   *
 //* | '__/ _ \/ _` | |/ _ \| '_ \  *
 //* | | |  __/ (_| | | (_) | | | | *
 //* |_|  \___|\__, |_|\___/|_| |_| *
 //*           |___/                *
-//===- unittests/core/test_region.cpp -------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

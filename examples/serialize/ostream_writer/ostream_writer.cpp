@@ -1,10 +1,11 @@
+//===- examples/serialize/ostream_writer/ostream_writer.cpp ---------------===//
 //*            _                                            _ _             *
 //*   ___  ___| |_ _ __ ___  __ _ _ __ ___   __      ___ __(_) |_ ___ _ __  *
 //*  / _ \/ __| __| '__/ _ \/ _` | '_ ` _ \  \ \ /\ / / '__| | __/ _ \ '__| *
 //* | (_) \__ \ |_| | |  __/ (_| | | | | | |  \ V  V /| |  | | ||  __/ |    *
 //*  \___/|___/\__|_|  \___|\__,_|_| |_| |_|   \_/\_/ |_|  |_|\__\___|_|    *
 //*                                                                         *
-//===- examples/serialize/ostream_writer/ostream_writer.cpp ---------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,3 +1,4 @@
+//===- include/pstore/exchange/import_debug_line_header.hpp *- mode: C++ -*-===//
 //*  _                            _         _      _                  *
 //* (_)_ __ ___  _ __   ___  _ __| |_    __| | ___| |__  _   _  __ _  *
 //* | | '_ ` _ \| '_ \ / _ \| '__| __|  / _` |/ _ \ '_ \| | | |/ _` | *
@@ -10,7 +11,7 @@
 //* | | | | | |  __/ | | | |  __/ (_| | (_| |  __/ |    *
 //* |_|_|_| |_|\___| |_| |_|\___|\__,_|\__,_|\___|_|    *
 //*                                                     *
-//===- include/pstore/exchange/import_debug_line_header.hpp ---------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- unittests/harness.cpp ----------------------------------------------===//
 //*  _                                     *
 //* | |__   __ _ _ __ _ __   ___  ___ ___  *
 //* | '_ \ / _` | '__| '_ \ / _ \/ __/ __| *
 //* | | | | (_| | |  | | | |  __/\__ \__ \ *
 //* |_| |_|\__,_|_|  |_| |_|\___||___/___/ *
 //*                                        *
-//===- unittests/harness.cpp ----------------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

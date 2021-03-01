@@ -1,10 +1,11 @@
+//===- include/pstore/support/ios_state.hpp ---------------*- mode: C++ -*-===//
 //*  _                 _        _        *
 //* (_) ___  ___   ___| |_ __ _| |_ ___  *
 //* | |/ _ \/ __| / __| __/ _` | __/ _ \ *
 //* | | (_) \__ \ \__ \ || (_| | ||  __/ *
 //* |_|\___/|___/ |___/\__\__,_|\__\___| *
 //*                                      *
-//===- include/pstore/support/ios_state.hpp -------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

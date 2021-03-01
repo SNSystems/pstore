@@ -1,10 +1,11 @@
+//===- tools/genromfs/scan.cpp --------------------------------------------===//
 //*                       *
 //*  ___  ___ __ _ _ __   *
 //* / __|/ __/ _` | '_ \  *
 //* \__ \ (_| (_| | | | | *
 //* |___/\___\__,_|_| |_| *
 //*                       *
-//===- tools/genromfs/scan.cpp --------------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- lib/http/wskey.cpp -------------------------------------------------===//
 //*               _               *
 //* __      _____| | _____ _   _  *
 //* \ \ /\ / / __| |/ / _ \ | | | *
 //*  \ V  V /\__ \   <  __/ |_| | *
 //*   \_/\_/ |___/_|\_\___|\__, | *
 //*                        |___/  *
-//===- lib/http/wskey.cpp -------------------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

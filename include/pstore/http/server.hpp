@@ -1,10 +1,11 @@
+//===- include/pstore/http/server.hpp ---------------------*- mode: C++ -*-===//
 //*                                *
 //*  ___  ___ _ ____   _____ _ __  *
 //* / __|/ _ \ '__\ \ / / _ \ '__| *
 //* \__ \  __/ |   \ V /  __/ |    *
 //* |___/\___|_|    \_/ \___|_|    *
 //*                                *
-//===- include/pstore/http/server.hpp -------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- tools/brokerd/switches.cpp -----------------------------------------===//
 //*               _ _       _                *
 //*  _____      _(_) |_ ___| |__   ___  ___  *
 //* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
 //* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
 //* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
 //*                                          *
-//===- tools/brokerd/switches.cpp -----------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

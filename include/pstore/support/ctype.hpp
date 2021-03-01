@@ -1,10 +1,11 @@
+//===- include/pstore/support/ctype.hpp -------------------*- mode: C++ -*-===//
 //*       _                     *
 //*   ___| |_ _   _ _ __   ___  *
 //*  / __| __| | | | '_ \ / _ \ *
 //* | (__| |_| |_| | |_) |  __/ *
 //*  \___|\__|\__, | .__/ \___| *
 //*           |___/|_|          *
-//===- include/pstore/support/ctype.hpp -----------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

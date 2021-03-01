@@ -1,10 +1,11 @@
+//===- examples/serialize/write_pod_struct/write_pod_struct.cpp -----------===//
 //*                _ _                         _       _                   _    *
 //* __      ___ __(_) |_ ___   _ __   ___   __| |  ___| |_ _ __ _   _  ___| |_  *
 //* \ \ /\ / / '__| | __/ _ \ | '_ \ / _ \ / _` | / __| __| '__| | | |/ __| __| *
 //*  \ V  V /| |  | | ||  __/ | |_) | (_) | (_| | \__ \ |_| |  | |_| | (__| |_  *
 //*   \_/\_/ |_|  |_|\__\___| | .__/ \___/ \__,_| |___/\__|_|   \__,_|\___|\__| *
 //*                           |_|                                               *
-//===- examples/serialize/write_pod_struct/write_pod_struct.cpp -----------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

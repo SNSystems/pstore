@@ -1,10 +1,11 @@
+//===- tools/lock_test/lock_test.cpp --------------------------------------===//
 //*  _            _      _            _    *
 //* | | ___   ___| | __ | |_ ___  ___| |_  *
 //* | |/ _ \ / __| |/ / | __/ _ \/ __| __| *
 //* | | (_) | (__|   <  | ||  __/\__ \ |_  *
 //* |_|\___/ \___|_|\_\  \__\___||___/\__| *
 //*                                        *
-//===- tools/lock_test/lock_test.cpp --------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

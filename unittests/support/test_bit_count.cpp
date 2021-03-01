@@ -1,10 +1,11 @@
+//===- unittests/support/test_bit_count.cpp -------------------------------===//
 //*  _     _ _                           _    *
 //* | |__ (_) |_    ___ ___  _   _ _ __ | |_  *
 //* | '_ \| | __|  / __/ _ \| | | | '_ \| __| *
 //* | |_) | | |_  | (_| (_) | |_| | | | | |_  *
 //* |_.__/|_|\__|  \___\___/ \__,_|_| |_|\__| *
 //*                                           *
-//===- unittests/support/test_bit_count.cpp -------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

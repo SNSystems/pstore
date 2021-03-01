@@ -1,3 +1,4 @@
+//===- examples/write_using_serializer/write_using_serializer.cpp ---------===//
 //*                _ _                   _              *
 //* __      ___ __(_) |_ ___   _   _ ___(_)_ __   __ _  *
 //* \ \ /\ / / '__| | __/ _ \ | | | / __| | '_ \ / _` | *
@@ -10,7 +11,7 @@
 //* \__ \  __/ |  | | (_| | | |/ /  __/ |    *
 //* |___/\___|_|  |_|\__,_|_|_/___\___|_|    *
 //*                                          *
-//===- examples/write_using_serializer/write_using_serializer.cpp ---------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

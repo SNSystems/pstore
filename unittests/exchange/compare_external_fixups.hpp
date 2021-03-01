@@ -1,3 +1,4 @@
+//===- unittests/exchange/compare_external_fixups.hpp -----*- mode: C++ -*-===//
 //*                                            *
 //*   ___ ___  _ __ ___  _ __   __ _ _ __ ___  *
 //*  / __/ _ \| '_ ` _ \| '_ \ / _` | '__/ _ \ *
@@ -10,7 +11,7 @@
 //* |  __/>  <| ||  __/ |  | | | | (_| | | |  _| |>  <| |_| | |_) \__ \ *
 //*  \___/_/\_\\__\___|_|  |_| |_|\__,_|_| |_| |_/_/\_\\__,_| .__/|___/ *
 //*                                                         |_|         *
-//===- unittests/exchange/compare_external_fixups.hpp ---------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

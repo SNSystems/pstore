@@ -1,10 +1,11 @@
+//===- include/pstore/support/assert.hpp ------------------*- mode: C++ -*-===//
 //*                          _    *
 //*   __ _ ___ ___  ___ _ __| |_  *
 //*  / _` / __/ __|/ _ \ '__| __| *
 //* | (_| \__ \__ \  __/ |  | |_  *
 //*  \__,_|___/___/\___|_|   \__| *
 //*                               *
-//===- include/pstore/support/assert.hpp ----------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,3 +1,4 @@
+//===- lib/os/memory_mapper_win32.cpp -------------------------------------===//
 //*                                             *
 //*  _ __ ___   ___ _ __ ___   ___  _ __ _   _  *
 //* | '_ ` _ \ / _ \ '_ ` _ \ / _ \| '__| | | | *
@@ -10,7 +11,7 @@
 //* | | | | | | (_| | |_) | |_) |  __/ |    *
 //* |_| |_| |_|\__,_| .__/| .__/ \___|_|    *
 //*                 |_|   |_|               *
-//===- lib/os/memory_mapper_win32.cpp -------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

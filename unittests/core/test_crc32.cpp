@@ -1,10 +1,11 @@
+//===- unittests/core/test_crc32.cpp --------------------------------------===//
 //*                _________   *
 //*   ___ _ __ ___|___ /___ \  *
 //*  / __| '__/ __| |_ \ __) | *
 //* | (__| | | (__ ___) / __/  *
 //*  \___|_|  \___|____/_____| *
 //*                            *
-//===- unittests/core/test_crc32.cpp --------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

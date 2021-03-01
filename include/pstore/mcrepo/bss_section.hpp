@@ -1,10 +1,11 @@
+//===- include/pstore/mcrepo/bss_section.hpp --------------*- mode: C++ -*-===//
 //*  _                             _   _              *
 //* | |__  ___ ___   ___  ___  ___| |_(_) ___  _ __   *
 //* | '_ \/ __/ __| / __|/ _ \/ __| __| |/ _ \| '_ \  *
 //* | |_) \__ \__ \ \__ \  __/ (__| |_| | (_) | | | | *
 //* |_.__/|___/___/ |___/\___|\___|\__|_|\___/|_| |_| *
 //*                                                   *
-//===- include/pstore/mcrepo/bss_section.hpp ------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

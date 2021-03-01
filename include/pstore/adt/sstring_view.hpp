@@ -1,10 +1,11 @@
+//===- include/pstore/adt/sstring_view.hpp ----------------*- mode: C++ -*-===//
 //*          _        _                     _                *
 //*  ___ ___| |_ _ __(_)_ __   __ _  __   _(_) _____      __ *
 //* / __/ __| __| '__| | '_ \ / _` | \ \ / / |/ _ \ \ /\ / / *
 //* \__ \__ \ |_| |  | | | | | (_| |  \ V /| |  __/\ V  V /  *
 //* |___/___/\__|_|  |_|_| |_|\__, |   \_/ |_|\___| \_/\_/   *
 //*                           |___/                          *
-//===- include/pstore/adt/sstring_view.hpp --------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- include/pstore/core/storage.hpp --------------------*- mode: C++ -*-===//
 //*      _                              *
 //*  ___| |_ ___  _ __ __ _  __ _  ___  *
 //* / __| __/ _ \| '__/ _` |/ _` |/ _ \ *
 //* \__ \ || (_) | | | (_| | (_| |  __/ *
 //* |___/\__\___/|_|  \__,_|\__, |\___| *
 //*                         |___/       *
-//===- include/pstore/core/storage.hpp ------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

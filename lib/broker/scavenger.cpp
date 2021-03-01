@@ -1,10 +1,11 @@
+//===- lib/broker/scavenger.cpp -------------------------------------------===//
 //*                                                 *
 //*  ___  ___ __ ___   _____ _ __   __ _  ___ _ __  *
 //* / __|/ __/ _` \ \ / / _ \ '_ \ / _` |/ _ \ '__| *
 //* \__ \ (_| (_| |\ V /  __/ | | | (_| |  __/ |    *
 //* |___/\___\__,_| \_/ \___|_| |_|\__, |\___|_|    *
 //*                                |___/            *
-//===- lib/broker/scavenger.cpp -------------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

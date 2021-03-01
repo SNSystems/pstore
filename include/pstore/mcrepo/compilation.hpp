@@ -1,10 +1,11 @@
+//===- include/pstore/mcrepo/compilation.hpp --------------*- mode: C++ -*-===//
 //*                            _ _       _   _              *
 //*   ___ ___  _ __ ___  _ __ (_) | __ _| |_(_) ___  _ __   *
 //*  / __/ _ \| '_ ` _ \| '_ \| | |/ _` | __| |/ _ \| '_ \  *
 //* | (_| (_) | | | | | | |_) | | | (_| | |_| | (_) | | | | *
 //*  \___\___/|_| |_| |_| .__/|_|_|\__,_|\__|_|\___/|_| |_| *
 //*                     |_|                                 *
-//===- include/pstore/mcrepo/compilation.hpp ------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

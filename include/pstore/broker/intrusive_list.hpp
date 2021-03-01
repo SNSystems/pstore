@@ -1,10 +1,11 @@
+//===- include/pstore/broker/intrusive_list.hpp -----------*- mode: C++ -*-===//
 //*  _       _                  _             _ _     _    *
 //* (_)_ __ | |_ _ __ _   _ ___(_)_   _____  | (_)___| |_  *
 //* | | '_ \| __| '__| | | / __| \ \ / / _ \ | | / __| __| *
 //* | | | | | |_| |  | |_| \__ \ |\ V /  __/ | | \__ \ |_  *
 //* |_|_| |_|\__|_|   \__,_|___/_| \_/ \___| |_|_|___/\__| *
 //*                                                        *
-//===- include/pstore/broker/intrusive_list.hpp ---------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

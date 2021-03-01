@@ -1,10 +1,11 @@
+//===- include/pstore/diff_dump/diff_value.hpp ------------*- mode: C++ -*-===//
 //*      _ _  __  __              _             *
 //*   __| (_)/ _|/ _| __   ____ _| |_   _  ___  *
 //*  / _` | | |_| |_  \ \ / / _` | | | | |/ _ \ *
 //* | (_| | |  _|  _|  \ V / (_| | | |_| |  __/ *
 //*  \__,_|_|_| |_|     \_/ \__,_|_|\__,_|\___| *
 //*                                             *
-//===- include/pstore/diff_dump/diff_value.hpp ----------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

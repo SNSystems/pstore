@@ -1,10 +1,11 @@
+//===- tools/brokerd/html/javascript.js -----------------------------------===//
 //*    _                                _       _    *
 //*   (_) __ ___   ____ _ ___  ___ _ __(_)_ __ | |_  *
 //*   | |/ _` \ \ / / _` / __|/ __| '__| | '_ \| __| *
 //*   | | (_| |\ V / (_| \__ \ (__| |  | | |_) | |_  *
 //*  _/ |\__,_| \_/ \__,_|___/\___|_|  |_| .__/ \__| *
 //* |__/                                 |_|         *
-//===- tools/brokerd/html/javascript.js -----------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

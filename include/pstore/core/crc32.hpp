@@ -1,10 +1,11 @@
+//===- include/pstore/core/crc32.hpp ----------------------*- mode: C++ -*-===//
 //*                _________   *
 //*   ___ _ __ ___|___ /___ \  *
 //*  / __| '__/ __| |_ \ __) | *
 //* | (__| | | (__ ___) / __/  *
 //*  \___|_|  \___|____/_____| *
 //*                            *
-//===- include/pstore/core/crc32.hpp --------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

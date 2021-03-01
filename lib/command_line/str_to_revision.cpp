@@ -1,10 +1,11 @@
+//===- lib/command_line/str_to_revision.cpp -------------------------------===//
 //*      _          _                         _     _              *
 //*  ___| |_ _ __  | |_ ___    _ __ _____   _(_)___(_) ___  _ __   *
 //* / __| __| '__| | __/ _ \  | '__/ _ \ \ / / / __| |/ _ \| '_ \  *
 //* \__ \ |_| |    | || (_) | | | |  __/\ V /| \__ \ | (_) | | | | *
 //* |___/\__|_|     \__\___/  |_|  \___| \_/ |_|___/_|\___/|_| |_| *
 //*                                                                *
-//===- lib/command_line/str_to_revision.cpp -------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

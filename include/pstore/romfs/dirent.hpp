@@ -1,10 +1,11 @@
+//===- include/pstore/romfs/dirent.hpp --------------------*- mode: C++ -*-===//
 //*      _ _                _    *
 //*   __| (_)_ __ ___ _ __ | |_  *
 //*  / _` | | '__/ _ \ '_ \| __| *
 //* | (_| | | | |  __/ | | | |_  *
 //*  \__,_|_|_|  \___|_| |_|\__| *
 //*                              *
-//===- include/pstore/romfs/dirent.hpp ------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

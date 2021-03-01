@@ -1,10 +1,11 @@
+//===- unittests/romfs/klee/romfs/open.cpp --------------------------------===//
 //*                          *
 //*   ___  _ __   ___ _ __   *
 //*  / _ \| '_ \ / _ \ '_ \  *
 //* | (_) | |_) |  __/ | | | *
 //*  \___/| .__/ \___|_| |_| *
 //*       |_|                *
-//===- unittests/romfs/klee/romfs/open.cpp --------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- include/pstore/broker/spawn.hpp --------------------*- mode: C++ -*-===//
 //*                                  *
 //*  ___ _ __   __ ___      ___ __   *
 //* / __| '_ \ / _` \ \ /\ / / '_ \  *
 //* \__ \ |_) | (_| |\ V  V /| | | | *
 //* |___/ .__/ \__,_| \_/\_/ |_| |_| *
 //*     |_|                          *
-//===- include/pstore/broker/spawn.hpp ------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- include/pstore/exchange/export_section.hpp ---------*- mode: C++ -*-===//
 //*                             _                   _   _              *
 //*   _____  ___ __   ___  _ __| |_   ___  ___  ___| |_(_) ___  _ __   *
 //*  / _ \ \/ / '_ \ / _ \| '__| __| / __|/ _ \/ __| __| |/ _ \| '_ \  *
 //* |  __/>  <| |_) | (_) | |  | |_  \__ \  __/ (__| |_| | (_) | | | | *
 //*  \___/_/\_\ .__/ \___/|_|   \__| |___/\___|\___|\__|_|\___/|_| |_| *
 //*           |_|                                                      *
-//===- include/pstore/exchange/export_section.hpp -------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- include/pstore/support/max.hpp ---------------------*- mode: C++ -*-===//
 //*                        *
 //*  _ __ ___   __ ___  __ *
 //* | '_ ` _ \ / _` \ \/ / *
 //* | | | | | | (_| |>  <  *
 //* |_| |_| |_|\__,_/_/\_\ *
 //*                        *
-//===- include/pstore/support/max.hpp -------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

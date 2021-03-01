@@ -1,10 +1,11 @@
+//===- include/pstore/vacuum/watch.hpp --------------------*- mode: C++ -*-===//
 //*                _       _      *
 //* __      ____ _| |_ ___| |__   *
 //* \ \ /\ / / _` | __/ __| '_ \  *
 //*  \ V  V / (_| | || (__| | | | *
 //*   \_/\_/ \__,_|\__\___|_| |_| *
 //*                               *
-//===- include/pstore/vacuum/watch.hpp ------------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

@@ -1,10 +1,11 @@
+//===- examples/write_basic/write_basic.cpp -------------------------------===//
 //*                _ _         _               _       *
 //* __      ___ __(_) |_ ___  | |__   __ _ ___(_) ___  *
 //* \ \ /\ / / '__| | __/ _ \ | '_ \ / _` / __| |/ __| *
 //*  \ V  V /| |  | | ||  __/ | |_) | (_| \__ \ | (__  *
 //*   \_/\_/ |_|  |_|\__\___| |_.__/ \__,_|___/_|\___| *
 //*                                                    *
-//===- examples/write_basic/write_basic.cpp -------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license

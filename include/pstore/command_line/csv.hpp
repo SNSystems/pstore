@@ -1,10 +1,11 @@
+//===- include/pstore/command_line/csv.hpp ----------------*- mode: C++ -*-===//
 //*                  *
 //*   ___ _____   __ *
 //*  / __/ __\ \ / / *
 //* | (__\__ \\ V /  *
 //*  \___|___/ \_/   *
 //*                  *
-//===- include/pstore/command_line/csv.hpp --------------------------------===//
+//===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
