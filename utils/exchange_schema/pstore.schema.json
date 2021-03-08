@@ -3,6 +3,19 @@
     "$id": "http://github.com/SNSystems/pstore.schema.json",
 
     "definitions": {
+        "unsigned8": {
+            "description": "An unsigned 8-bit integer",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+        },
+
+        "unsigned64": {
+            "description": "An unsigned 64-bit integer (no max declared!)",
+            "type": "integer",
+            "minimum": 0
+        },
+
         "digest": {
             "description": "A 128 bit hash digest expressed as a hexadecimal value",
             "type": "string",
@@ -25,11 +38,11 @@
                 "properties": {
                     "name": {
                         "description": "The index of the name referenced by this fixup",
-                        "type": "number"
+                        "$ref": "#/definitions/unsigned64"
                     },
                     "type": {
                         "description": "The (platform-dependent) relocation to be applied when resolving this fixup",
-                        "type": "number"
+                        "$ref": "#/definitions/unsigned8"
                     },
                     "is_weak": {
                         "description": "True if the fixup can be resolved if the target symbol is undefined (false is assumed if the field is missing)",
@@ -77,7 +90,7 @@
                     },
                     "type": {
                         "description": "The (platform-dependent) relocation to be applied when resolving this fixup",
-                        "type": "number"
+                        "$ref": "#/definitions/unsigned8"
                     },
                     "offset": { "type": "number" },
                     "addend": { "type": "number" }
