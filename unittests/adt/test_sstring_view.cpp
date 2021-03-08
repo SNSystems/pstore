@@ -118,6 +118,12 @@ TYPED_TEST (SStringViewInit, Short) {
     EXPECT_EQ (std::distance (std::begin (sv), std::end (sv)), 5);
 }
 
+TEST (SStringView, FromSpan) {
+    using namespace pstore;
+    std::array<char, 5> const src{{'a', 'r', 'r', 'a', 'y'}};
+    auto sv = make_sstring_view (gsl::make_span (src));
+    EXPECT_THAT (sv, ::testing::ElementsAreArray (src));
+}
 
 TEST (SStringView, OperatorIndex) {
     std::string const src{"ABCDE"};

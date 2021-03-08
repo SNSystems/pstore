@@ -27,6 +27,7 @@
 #include <cstring>
 
 #include "pstore/support/fnv.hpp"
+#include "pstore/support/unsigned_cast.hpp"
 #include "pstore/support/varint.hpp"
 
 namespace pstore {
@@ -402,6 +403,11 @@ namespace pstore {
         return {std::move (ptr), length};
     }
 
+    template <std::ptrdiff_t Extent>
+    inline raw_sstring_view make_sstring_view (gsl::span<char const, Extent> const & span) {
+        PSTORE_ASSERT (span.size () >= 0);
+        return {span.data (), unsigned_cast (span.size ())};
+    }
     inline raw_sstring_view make_sstring_view (char const * const ptr, std::size_t const length) {
         return {ptr, length};
     }
