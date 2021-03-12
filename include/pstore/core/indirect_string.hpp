@@ -30,13 +30,14 @@ namespace pstore {
     //*                                                  |___/  *
 
     /// The string address can come in three forms:
+    ///
     /// 1. An shared_sstring_view string that hasn't been added to the index yet. This is indicated
-    /// when is_pointer_ is true. The str_ member points to the string view.
+    ///    when is_pointer_ is true. The str_ member points to the string view.
     /// 2. A database address which points to an in-memory shared_sstring_view. This happens when
-    /// the string has been inserted, but the index has not yet been flushed. In this case,
-    /// is_pointer_ is false and the LBS of address_ is set.
+    ///    the string has been inserted, but the index has not yet been flushed. In this case,
+    ///    is_pointer_ is false and the LBS of address_ is set.
     /// 3. An address of a string in the store. In this case, is_pointer_ is false and the LSB of
-    /// address_ is clear.
+    ///    address_ is clear.
     ///
     /// The use of the LBS of the address field to distinguish between in-heap and in-store
     /// addresses means that the in-store string bodies must be 2-byte aligned.
@@ -61,6 +62,8 @@ namespace pstore {
         bool operator< (indirect_string const & rhs) const;
 
         raw_sstring_view as_string_view (gsl::not_null<shared_sstring_view *> owner) const;
+
+        std::size_t length () const;
 
         /// When it is known that the string body is a store address use this function to carry out
         /// additional checks that the address is reasonable.

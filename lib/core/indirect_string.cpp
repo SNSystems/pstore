@@ -39,6 +39,20 @@ namespace pstore {
         return {owner->data (), owner->length ()};
     }
 
+    // length
+    // ~~~~~~
+    std::size_t indirect_string::length () const {
+        if (is_pointer_) {
+            return str_->length ();
+        }
+        if (address_ & in_heap_mask) {
+            return reinterpret_cast<sstring_view<char const *> const *> (address_ & ~in_heap_mask)
+                ->length ();
+        }
+        return serialize::string_helper::read_length (
+            serialize::archive::make_reader (db_, address{address_}));
+    }
+
     // operator<
     // ~~~~~~~~~
     bool indirect_string::operator< (indirect_string const & rhs) const {

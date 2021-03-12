@@ -44,12 +44,14 @@ TEST_F (IndirectString, InMemoryEquality) {
     pstore::indirect_string const x (db_, &view);
     pstore::indirect_string const y (db_, &view);
 
+    EXPECT_EQ (x.length (), 4U);
+    EXPECT_EQ (y.length (), 4U);
+
     pstore::shared_sstring_view owner;
     EXPECT_EQ (x.as_string_view (&owner), "body");
     EXPECT_TRUE (x == y);
     EXPECT_FALSE (x != y);
 }
-
 
 TEST_F (IndirectString, StoreRefToHeapRoundTrip) {
     constexpr auto str = "string";
@@ -73,6 +75,7 @@ TEST_F (IndirectString, StoreRefToHeapRoundTrip) {
     auto const ind2 = pstore::serialize::read<pstore::indirect_string> (
         pstore::serialize::archive::make_reader (db_, pointer_addr));
 
+    EXPECT_EQ (ind2.length (), std::strlen (str));
     pstore::shared_sstring_view owner;
     EXPECT_EQ (ind2.as_string_view (&owner), pstore::make_sstring_view (str));
 }
