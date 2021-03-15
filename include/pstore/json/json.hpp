@@ -36,6 +36,8 @@ namespace pstore {
             template <typename Callbacks>
             class matcher;
             template <typename Callbacks>
+            class root_matcher;
+            template <typename Callbacks>
             class whitespace_matcher;
 
             template <typename Callbacks>
@@ -132,6 +134,7 @@ namespace pstore {
         template <typename Callbacks>
         class parser {
             friend class details::matcher<Callbacks>;
+            friend class details::root_matcher<Callbacks>;
             friend class details::whitespace_matcher<Callbacks>;
 
         public:
@@ -252,6 +255,10 @@ namespace pstore {
             std::error_code error_;
             Callbacks callbacks_;
             enum parser_extensions const extensions_;
+
+            /// Each instance of the string matcher uses this string object to record its output.
+            /// This avoids having to create a new instance each time we scan a string.
+            std::string string_;
 
             /// The column and row number of the parse within the input stream.
             coord coordinate_{1U, 1U};
@@ -845,9 +852,13 @@ namespace pstore {
             template <typename Callbacks>
             class string_matcher final : public matcher<Callbacks> {
             public:
-                explicit string_matcher (bool object_key) noexcept
+                explicit string_matcher (gsl::not_null<std::string *> const str,
+                                         bool object_key) noexcept
                         : matcher<Callbacks> (start_state)
-                        , object_key_{object_key} {}
+                        , object_key_{object_key}
+                        , app_{str} {
+                    str->clear ();
+                }
 
                 std::pair<typename matcher<Callbacks>::pointer, bool>
                 consume (parser<Callbacks> & parser, maybe<char> ch) override;
@@ -866,13 +877,15 @@ namespace pstore {
 
                 class appender {
                 public:
+                    explicit appender (gsl::not_null<std::string *> const result) noexcept
+                            : result_{result} {}
                     bool append32 (char32_t code_point);
                     bool append16 (char16_t cu);
-                    std::string && result () { return std::move (result_); }
+                    gsl::not_null<std::string *> result () { return result_; }
                     bool has_high_surrogate () const noexcept { return high_surrogate_ != 0; }
 
                 private:
-                    std::string result_;
+                    gsl::not_null<std::string *> const result_;
                     char16_t high_surrogate_ = 0;
                 };
 
@@ -902,7 +915,7 @@ namespace pstore {
                     // A high surrogate followed by something other than a low surrogate.
                     ok = false;
                 } else {
-                    utf::code_point_to_utf8<char> (code_point, std::back_inserter (result_));
+                    utf::code_point_to_utf8<char> (code_point, std::back_inserter (*result_));
                 }
                 return ok;
             }
@@ -930,7 +943,7 @@ namespace pstore {
                         auto code_point = char32_t{0};
                         std::tie (first, code_point) =
                             utf::utf16_to_code_point (first, last, utf::nop_swapper);
-                        utf::code_point_to_utf8 (code_point, std::back_inserter (result_));
+                        utf::code_point_to_utf8 (code_point, std::back_inserter (*result_));
                         high_surrogate_ = 0;
                     }
                 } else {
@@ -939,7 +952,7 @@ namespace pstore {
                         ok = false;
                     } else {
                         auto const code_point = static_cast<char32_t> (cu);
-                        utf::code_point_to_utf8 (code_point, std::back_inserter (result_));
+                        utf::code_point_to_utf8 (code_point, std::back_inserter (*result_));
                     }
                 }
                 return ok;
@@ -961,9 +974,9 @@ namespace pstore {
                     } else {
                         // Consume the closing quote character.
                         if (object_key_) {
-                            error = parser.callbacks ().key (app.result ());
+                            error = parser.callbacks ().key (*app.result ());
                         } else {
-                            error = parser.callbacks ().string_value (app.result ());
+                            error = parser.callbacks ().string_value (*app.result ());
                         }
                     }
                     next_state = done_state;
@@ -1621,7 +1634,7 @@ namespace pstore {
                                 false};
                     case '"':
                         return {this->template make_terminal_matcher<string_matcher<Callbacks>> (
-                                    parser, object_key_),
+                                    parser, &parser.string_, object_key_),
                                 false};
                     case 't':
                         return {
