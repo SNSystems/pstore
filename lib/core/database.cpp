@@ -292,9 +292,10 @@ namespace pstore {
 
         using present_mode = file::file_handle::present_mode;
         auto const create_mode = file::file_handle::create_mode::open_existing;
-        auto const write_mode = (am == access_mode::writable)
-                                    ? file::file_handle::writable_mode::read_write
-                                    : file::file_handle::writable_mode::read_only;
+        auto const write_mode =
+            (am == access_mode::writable || am == access_mode::writeable_no_create)
+                ? file::file_handle::writable_mode::read_write
+                : file::file_handle::writable_mode::read_only;
 
         auto file = std::make_shared<file::file_handle> (path);
         file->open (create_mode, write_mode, present_mode::allow_not_found);

@@ -128,18 +128,22 @@ namespace {
 
 
 TEST_F (ExchangeCompilation, Empty) {
-    constexpr auto * path = "path";
+    constexpr auto name_index = pstore::trailer::indices::name;
+
+    // constexpr auto * path = "path";
     constexpr auto * triple = "triple";
-    std::array<pstore::gsl::czstring, 2> names{{triple, path}};
+    std::array<pstore::gsl::czstring, 1> names{{triple}};
     std::unordered_map<std::string, pstore::typed_address<pstore::indirect_string>> indir_strings;
-    add_export_strings (export_db_, std::begin (names), std::end (names),
-                        std::inserter (indir_strings, std::end (indir_strings)));
+    add_export_strings<name_index> (export_db_, std::begin (names), std::end (names),
+                                    std::inserter (indir_strings, std::end (indir_strings)));
 
     // Write the names that we just created as JSON.
-    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
+    pstore::exchange::export_ns::name_mapping exported_names{
+        export_db_, pstore::exchange::export_ns::name_index_tag ()};
     pstore::exchange::export_ns::ostringstream exported_names_stream;
-    emit_names (exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
-                export_db_.get_current_revision (), &exported_names);
+    pstore::exchange::export_ns::emit_strings<name_index> (
+        exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
+        export_db_.get_current_revision (), &exported_names);
 
     pstore::exchange::export_ns::ostringstream exported_compilation_stream;
     {
@@ -147,9 +151,8 @@ TEST_F (ExchangeCompilation, Empty) {
         auto transaction = begin (export_db_, transaction_lock{mutex});
         std::vector<pstore::repo::definition> definitions;
         pstore::extent<pstore::repo::compilation> const compilation =
-            pstore::repo::compilation::alloc (transaction, indir_strings[path],
-                                              indir_strings[triple], std::begin (definitions),
-                                              std::end (definitions));
+            pstore::repo::compilation::alloc (transaction, indir_strings[triple],
+                                              std::begin (definitions), std::end (definitions));
 
         emit_compilation (exported_compilation_stream, pstore::exchange::export_ns::indent{},
                           export_db_, *export_db_.getro (compilation), exported_names, false);
@@ -190,7 +193,6 @@ TEST_F (ExchangeCompilation, Empty) {
     ASSERT_NE (pos, compilation_index->end (import_db_))
         << "Compilation was not found in the index after import";
     auto const imported_compilation = import_db_.getro (pos->second);
-    EXPECT_EQ (load_string (import_db_, imported_compilation->path ()), path);
     EXPECT_EQ (load_string (import_db_, imported_compilation->triple ()), triple);
     ASSERT_EQ (imported_compilation->size (), 0U)
         << "The compilation should contain no definitions";
@@ -201,19 +203,21 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
     // yields a mapping from each name to its indirect-address.
     constexpr auto * name1 = "name1";
     constexpr auto * name2 = "name2";
-    constexpr auto * path = "path";
     constexpr auto * triple = "triple";
+    constexpr auto name_index = pstore::trailer::indices::name;
 
-    std::array<pstore::gsl::czstring, 4> names{{triple, path, name1, name2}};
+    std::array<pstore::gsl::czstring, 3> names{{triple, name1, name2}};
     std::unordered_map<std::string, pstore::typed_address<pstore::indirect_string>> indir_strings;
-    add_export_strings (export_db_, std::begin (names), std::end (names),
-                        std::inserter (indir_strings, std::end (indir_strings)));
+    add_export_strings<name_index> (export_db_, std::begin (names), std::end (names),
+                                    std::inserter (indir_strings, std::end (indir_strings)));
 
     // Write the names that we just created as JSON.
-    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
+    pstore::exchange::export_ns::name_mapping exported_names{
+        export_db_, pstore::exchange::export_ns::name_index_tag ()};
     pstore::exchange::export_ns::ostringstream exported_names_stream;
-    emit_names (exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
-                export_db_.get_current_revision (), &exported_names);
+    pstore::exchange::export_ns::emit_strings<name_index> (
+        exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
+        export_db_.get_current_revision (), &exported_names);
 
     // Now build a single fragment and a compilation that references it then export them.
     constexpr pstore::index::digest compilation_digest{0x12345678, 0x9ABCDEF0};
@@ -237,9 +241,8 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
              pstore::repo::visibility::default_vis},
         };
         pstore::extent<pstore::repo::compilation> const compilation =
-            pstore::repo::compilation::alloc (transaction, indir_strings[path],
-                                              indir_strings[triple], std::begin (definitions),
-                                              std::end (definitions));
+            pstore::repo::compilation::alloc (transaction, indir_strings[triple],
+                                              std::begin (definitions), std::end (definitions));
 
         emit_compilation (exported_compilation_stream, pstore::exchange::export_ns::indent{},
                           export_db_, *export_db_.getro (compilation), exported_names, false);
@@ -290,7 +293,6 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
         << "Compilation was not found in the index after import";
 
     auto const compilation = import_db_.getro (pos->second);
-    EXPECT_EQ (load_string (import_db_, compilation->path ()), path);
     EXPECT_EQ (load_string (import_db_, compilation->triple ()), triple);
     ASSERT_EQ (compilation->size (), 2U);
     {

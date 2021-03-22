@@ -139,10 +139,9 @@ namespace pstore {
                 fragment_index_pointer const fragments_;
                 index::digest const digest_;
 
-                enum { path_index, triple_index };
+                enum { triple_index };
                 std::bitset<triple_index + 1> seen_;
 
-                std::uint64_t path_ = 0;
                 std::uint64_t triple_ = 0;
                 definition::container definitions_;
             };

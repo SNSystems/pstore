@@ -320,7 +320,8 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
 
     // Export the internal fixup array to the 'os' string-stream.
     pstore::exchange::export_ns::ostringstream os;
-    pstore::exchange::export_ns::name_mapping names{export_db_};
+    pstore::exchange::export_ns::name_mapping names{export_db_,
+                                                    pstore::exchange::export_ns::name_index_tag ()};
     emit_external_fixups (os, pstore::exchange::export_ns::indent{}, export_db_, names,
                           std::begin (xfixups), std::end (xfixups), false);
 
@@ -342,20 +343,23 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
 }
 
 TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
+    constexpr auto name_index = pstore::trailer::indices::name;
     std::vector<pstore::gsl::czstring> strings{"foo", "bar"};
 
     // Add these strings to the database.
     std::unordered_map<std::string, string_address> indir_strings;
-    add_export_strings (export_db_, std::begin (strings), std::end (strings),
-                        std::inserter (indir_strings, std::end (indir_strings)));
+    add_export_strings<name_index> (export_db_, std::begin (strings), std::end (strings),
+                                    std::inserter (indir_strings, std::end (indir_strings)));
 
 
 
     // Write the names that we just created as JSON.
-    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
+    pstore::exchange::export_ns::name_mapping exported_names{
+        export_db_, pstore::exchange::export_ns::name_index_tag ()};
     pstore::exchange::export_ns::ostringstream exported_names_stream;
-    emit_names (exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
-                export_db_.get_current_revision (), &exported_names);
+    pstore::exchange::export_ns::emit_strings<name_index> (
+        exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
+        export_db_.get_current_revision (), &exported_names);
 
 
 

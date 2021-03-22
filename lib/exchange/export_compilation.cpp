@@ -61,10 +61,7 @@ namespace pstore {
                                    name_mapping const & names, bool const comments) {
                 os << "{\n";
                 auto const object_indent = ind.next ();
-                os << object_indent << R"("path":)" << names.index (compilation.path ()) << ',';
-                show_string (os, db, compilation.path (), comments);
-                os << '\n'
-                   << object_indent << R"("triple":)" << names.index (compilation.triple ()) << ',';
+                os << object_indent << R"("triple":)" << names.index (compilation.triple ()) << ',';
                 show_string (os, db, compilation.triple (), comments);
                 os << '\n' << object_indent << R"("definitions":)";
                 emit_array_with_name (os, object_indent, db, compilation.begin (),

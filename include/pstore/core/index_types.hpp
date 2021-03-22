@@ -103,17 +103,19 @@ namespace pstore {
         };
 
         using name_index = hamt_set<indirect_string, fnv_64a_hash_indirect_string>;
+        using path_index = hamt_set<indirect_string, fnv_64a_hash_indirect_string>;
 
         // clang-format off
         /// Maps from the indices kind enumeration to the type that is used to represent a database index of that kind.
         template <trailer::indices T>
         struct enum_to_index {};
 
-        template <> struct enum_to_index<trailer::indices::compilation         > { using type = compilation_index; };
-        template <> struct enum_to_index<trailer::indices::debug_line_header   > { using type = debug_line_header_index; };
-        template <> struct enum_to_index<trailer::indices::fragment            > { using type = fragment_index; };
-        template <> struct enum_to_index<trailer::indices::name                > { using type = name_index; };
-        template <> struct enum_to_index<trailer::indices::write               > { using type = write_index; };
+        template <> struct enum_to_index<trailer::indices::compilation      > { using type = compilation_index;       };
+        template <> struct enum_to_index<trailer::indices::debug_line_header> { using type = debug_line_header_index; };
+        template <> struct enum_to_index<trailer::indices::fragment         > { using type = fragment_index;          };
+        template <> struct enum_to_index<trailer::indices::name             > { using type = name_index;              };
+        template <> struct enum_to_index<trailer::indices::path             > { using type = path_index;              };
+        template <> struct enum_to_index<trailer::indices::write            > { using type = write_index;             };
         // clang-format on
 
         /// Returns a pointer to a index, loading it from the store on first access. If 'create' is

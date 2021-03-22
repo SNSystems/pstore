@@ -224,7 +224,6 @@ namespace pstore {
             using archive::make_reader;
             return make_value (object::container{
                 {"members", make_value (members)},
-                {"path", make_value (indirect_string::read (parm.db, compilation->path ()))},
                 {"triple", make_value (indirect_string::read (parm.db, compilation->triple ()))},
             });
         }

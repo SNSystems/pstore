@@ -85,13 +85,22 @@ namespace {
     opt<bool> indices{"indices", desc{"Dump the indices"}, cat (what_cat)};
     alias indices2{"i", desc{"Alias for --indices"}, aliasopt{indices}};
 
-    opt<bool> log_opt{"log", desc{"List the generations"}, cat (what_cat)};
+    opt<bool> log_opt{"log", desc{"List the transactions"}, cat (what_cat)};
     alias log2{"l", desc{"Alias for --log"}, aliasopt{log_opt}};
 
-    opt<bool> all{"all",
-                  desc{"Show store-related output. Equivalent to: --all-compilations "
-                       "--all-debug-line-headers --all-fragments --header --indices --log"},
-                  cat (what_cat)};
+
+    opt<bool> names_opt{"names", desc{"Dump the name index"}, cat (what_cat)};
+    alias names2{"n", desc{"Alias for --names"}, aliasopt{names_opt}};
+    opt<bool> paths_opt{"paths", desc{"Dump the path index"}, cat (what_cat)};
+    alias paths2{"p", desc{"Alias for --paths"}, aliasopt{paths_opt}};
+
+
+
+    opt<bool> all{
+        "all",
+        desc{"Show store-related output. Equivalent to: --all-compilations "
+             "--all-debug-line-headers --all-fragments --header --indices --log --names --paths"},
+        cat (what_cat)};
     alias all2{"a", desc{"Alias for --all"}, aliasopt{all}};
 
     opt<bool> shared_memory{"shared-memory", desc{"Dumps the shared-memory block"}, cat (what_cat)};
@@ -146,7 +155,16 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     result.show_indices = indices.get ();
     result.show_log = log_opt.get ();
     result.show_shared = shared_memory.get ();
-    result.show_all = all.get ();
+
+    result.show_names = names_opt.get ();
+    result.show_paths = paths_opt.get ();
+
+    if (all) {
+        result.show_all_compilations = result.show_all_debug_line_headers =
+            result.show_all_fragments = result.show_header = result.show_indices = result.show_log =
+                result.show_names = result.show_paths = true;
+    }
+
     result.revision = static_cast<unsigned> (revision.get ());
 
     result.hex = hex.get ();

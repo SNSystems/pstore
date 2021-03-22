@@ -3,9 +3,8 @@
   "id":"2dedee5a-6992-49d5-b98b-9f6fa95418f3",
   "transactions":[
     {
-      // generation 1
+      // transaction #1
       "names":[
-        "/Users/paul/test/two_modules",
         "x86_64-pc-linux-gnu-repo",
         "puts",
         "main",
@@ -16,6 +15,9 @@
         "ultimate_answer",
         "foo"
       ],
+      "paths": [
+        "/Users/paul/test"
+      ],
       "debugline":{
       },
       "fragments":{
@@ -25,31 +27,31 @@
             "data":"UL8AAAAA6AAAAAC/BgAAAOgAAAAAvwAAAACJxjHA6AAAAAAxwFnD",
             "xfixups":[
               {
-                "name":5, //"str.3832e937033435e0077a688e7b9ec336"
+                "name":4, //"str.3832e937033435e0077a688e7b9ec336"
                 "type":10,
                 "offset":2,
                 "addend":0
               },
               {
-                "name":2, //"puts"
+                "name":1, //"puts"
                 "type":4,
                 "offset":7,
                 "addend":-4
               },
               {
-                "name":9, //"foo"
+                "name":8, //"foo"
                 "type":4,
                 "offset":17,
                 "addend":-4
               },
               {
-                "name":6, //".str.1"
+                "name":5, //".str.1"
                 "type":10,
                 "offset":22,
                 "addend":0
               },
               {
-                "name":4, //"printf"
+                "name":3, //"printf"
                 "type":4,
                 "offset":31,
                 "addend":-4
@@ -79,27 +81,26 @@
       },
       "compilations":{
         "ec261f9049865026bc721a944a51728d":{
-          "path":0, //"/Users/paul/test/two_modules"
-          "triple":1, //"x86_64-pc-linux-gnu-repo"
+          "triple":0, //"x86_64-pc-linux-gnu-repo"
           "definitions":[
             {
               "digest":"c013773d4b1b506fab3b926d57223e5d",
-              "name":8, //"ultimate_answer"
+              "name":7, //"ultimate_answer"
               "linkage":"external"
             },
             {
               "digest":"6754f6ae81754f024540e2278491a4eb",
-              "name":3, //"main"
+              "name":2, //"main"
               "linkage":"external"
             },
             {
               "digest":"8994913c7f70bae8ce714e979176185a",
-              "name":6, //".str.1"
+              "name":5, //".str.1"
               "linkage":"internal_no_symbol"
             },
             {
               "digest":"36c39e7b8e687a07e035340337e93238",
-              "name":5, //"str.3832e937033435e0077a688e7b9ec336"
+              "name":4, //"str.3832e937033435e0077a688e7b9ec336"
               "linkage":"internal_no_symbol"
             }
           ]
@@ -107,10 +108,7 @@
       }
     },
     {
-      // generation 2
-      "names":[],
-      "debugline":{
-      },
+      // transaction #2
       "fragments":{
         "e9ad970e83dcf9a95a6c822947278609":{
           "text":{
@@ -121,12 +119,11 @@
       },
       "compilations":{
         "adb6caf1c6292f18934d1ec2c31d813b":{
-          "path":0, //"/Users/paul/test/two_modules"
-          "triple":1, //"x86_64-pc-linux-gnu-repo"
+          "triple":0, //"x86_64-pc-linux-gnu-repo"
           "definitions":[
             {
               "digest":"e9ad970e83dcf9a95a6c822947278609",
-              "name":9, //"foo"
+              "name":8, //"foo"
               "linkage":"external"
             }
           ]

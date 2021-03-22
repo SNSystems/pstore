@@ -80,7 +80,8 @@ namespace {
 
         transaction.commit ();
 
-        exchange::export_ns::name_mapping exported_names{export_db_};
+        exchange::export_ns::name_mapping exported_names{
+            export_db_, pstore::exchange::export_ns::name_index_tag ()};
         exchange::export_ns::ostringstream str;
         emit_fragment (str, exchange::export_ns::indent{}, export_db_, exported_names,
                        export_db_.getro (fext), true);
@@ -150,11 +151,10 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
             auto compilation_index =
                 pstore::index::get_index<pstore::trailer::indices::compilation> (transaction.db ());
             compilation_index->insert (
-                transaction,
-                std::make_pair (referenced_compilation_digest,
-                                repo::compilation::alloc (transaction, str /*path*/, str /*triple*/,
-                                                          std::begin (definitions),
-                                                          std::end (definitions))));
+                transaction, std::make_pair (referenced_compilation_digest,
+                                             repo::compilation::alloc (transaction, str /*triple*/,
+                                                                       std::begin (definitions),
+                                                                       std::end (definitions))));
         }
         transaction.commit ();
     }

@@ -127,13 +127,29 @@ namespace {
         });
     }
 
+    pstore::dump::value_ptr make_name_index (pstore::database const & db) {
+        using namespace pstore::dump;
+        constexpr bool create = true;
+
+        auto names = pstore::index::get_index<pstore::trailer::indices::name> (db, create);
+        return make_value (names->begin (db), names->end (db));
+    }
+
+    pstore::dump::value_ptr make_path_index (pstore::database const & db) {
+        using namespace pstore::dump;
+        constexpr bool create = true;
+
+        auto paths = pstore::index::get_index<pstore::trailer::indices::path> (db, create);
+        return make_value (paths->begin (db), paths->end (db));
+    }
+
     pstore::dump::value_ptr make_indices (pstore::database const & db) {
         using namespace pstore::dump;
+        constexpr bool create = false;
 
         array::container result;
         if (std::shared_ptr<pstore::index::compilation_index const> const compilation =
-                pstore::index::get_index<pstore::trailer::indices::compilation> (
-                    db, false /* create */)) {
+                pstore::index::get_index<pstore::trailer::indices::compilation> (db, create)) {
             result.push_back (make_value (object::container{
                 {"name", make_value ("compilation")},
                 {"members", make_value (compilation->begin (db), compilation->end (db))},
@@ -141,8 +157,8 @@ namespace {
         }
 
         if (std::shared_ptr<pstore::index::debug_line_header_index const> const dlh =
-                pstore::index::get_index<pstore::trailer::indices::debug_line_header> (
-                    db, false /* create */)) {
+                pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db,
+                                                                                       create)) {
             result.push_back (make_value (object::container{
                 {"name", make_value ("debug_line_header")},
                 {"members", make_value (dlh->begin (db), dlh->end (db))},
@@ -150,8 +166,7 @@ namespace {
         }
 
         if (std::shared_ptr<pstore::index::fragment_index const> const fragment =
-                pstore::index::get_index<pstore::trailer::indices::fragment> (db,
-                                                                              false /* create */)) {
+                pstore::index::get_index<pstore::trailer::indices::fragment> (db, create)) {
             result.push_back (make_value (object::container{
                 {"name", make_value ("fragment")},
                 {"members", make_value (fragment->begin (db), fragment->end (db))},
@@ -159,15 +174,23 @@ namespace {
         }
 
         if (std::shared_ptr<pstore::index::name_index const> const name =
-                pstore::index::get_index<pstore::trailer::indices::name> (db, false /* create */)) {
+                pstore::index::get_index<pstore::trailer::indices::name> (db, create)) {
             result.push_back (make_value (object::container{
                 {"name", make_value ("name")},
                 {"members", make_value (name->begin (db), name->end (db))},
             }));
         }
 
+        if (std::shared_ptr<pstore::index::path_index const> const path =
+                pstore::index::get_index<pstore::trailer::indices::path> (db, create)) {
+            result.push_back (make_value (object::container{
+                {"path", make_value ("path")},
+                {"members", make_value (path->begin (db), path->end (db))},
+            }));
+        }
+
         if (std::shared_ptr<pstore::index::write_index const> const write =
-                pstore::index::get_index<pstore::trailer::indices::write> (db, false /* create*/)) {
+                pstore::index::get_index<pstore::trailer::indices::write> (db, create)) {
             result.push_back (make_index ("write", db, *write));
         }
 
@@ -332,11 +355,6 @@ int main (int argc, char * argv[]) {
             return exit_code;
         }
 
-        if (opt.show_all) {
-            opt.show_all_fragments = opt.show_all_compilations = opt.show_header =
-                opt.show_indices = opt.show_log = opt.show_all_debug_line_headers = true;
-        }
-
         if (opt.hex) {
             pstore::dump::number_base::hex ();
         } else {
@@ -383,6 +401,13 @@ int main (int argc, char * argv[]) {
                 [&parm] (pstore::index::debug_line_header_index::value_type const & value) {
                     return make_value (value, parm);
                 });
+
+            if (opt.show_names) {
+                file.emplace_back ("names", make_name_index (db));
+            }
+            if (opt.show_paths) {
+                file.emplace_back ("paths", make_path_index (db));
+            }
 
             if (opt.show_header) {
                 auto header = db.getro (pstore::typed_address<pstore::header>::null ());
