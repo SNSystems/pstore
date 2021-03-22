@@ -13,6 +13,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file export_paths.hpp
+/// \brief  Exporting the members of the paths index.
+
 #ifndef PSTORE_EXCHANGE_EXPORT_PATHS_HPP
 #define PSTORE_EXCHANGE_EXPORT_PATHS_HPP
 

@@ -13,6 +13,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file export_paths.cpp
+/// \brief  Exporting the members of the paths index.
+
 #include "pstore/exchange/export_paths.hpp"
 
 #include <cassert>
@@ -20,8 +23,6 @@
 
 #include "pstore/core/diff.hpp"
 #include "pstore/core/index_types.hpp"
-//#include "pstore/exchange/export_emit.hpp"
-//#include "pstore/exchange/export_names.hpp"
 #include "pstore/exchange/export_ostream.hpp"
 
 namespace pstore {
