@@ -1,3 +1,18 @@
+//===- lib/exchange/export_paths.cpp --------------------------------------===//
+//*                             _                 _   _          *
+//*   _____  ___ __   ___  _ __| |_   _ __   __ _| |_| |__  ___  *
+//*  / _ \ \/ / '_ \ / _ \| '__| __| | '_ \ / _` | __| '_ \/ __| *
+//* |  __/>  <| |_) | (_) | |  | |_  | |_) | (_| | |_| | | \__ \ *
+//*  \___/_/\_\ .__/ \___/|_|   \__| | .__/ \__,_|\__|_| |_|___/ *
+//*           |_|                    |_|                         *
+//===----------------------------------------------------------------------===//
+//
+// Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://github.com/SNSystems/pstore/blob/master/LICENSE.txt for license
+// information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 #include "pstore/exchange/export_paths.hpp"
 
 #include <cassert>
