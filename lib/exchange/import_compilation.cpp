@@ -175,7 +175,7 @@ namespace pstore {
                                       not_null<transaction_base *> const transaction,
                                       not_null<name_mapping const *> const names,
                                       fragment_index_pointer const & fragments,
-                                      index::digest const digest)
+                                      index::digest const & digest)
                     : rule (ctxt)
                     , transaction_{transaction}
                     , names_{names}
@@ -190,6 +190,7 @@ namespace pstore {
                     return push<uint64_rule> (&triple_);
                 }
                 if (k == "definitions") {
+                    seen_[definitions_index] = true;
                     return push_array_rule<definition_object> (this, &definitions_, names_,
                                                                fragments_);
                 }

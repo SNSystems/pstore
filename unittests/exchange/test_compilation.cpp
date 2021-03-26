@@ -35,6 +35,8 @@
 // local includes
 #include "add_export_strings.hpp"
 
+using namespace std::literals::string_literals;
+
 namespace {
 
     using transaction_lock = std::unique_lock<mock_mutex>;
@@ -119,9 +121,7 @@ namespace {
 
     std::string load_string (pstore::database const & db,
                              pstore::typed_address<pstore::indirect_string> const addr) {
-        return pstore::serialize::read<pstore::indirect_string> (
-                   pstore::serialize::archive::database_reader{db, addr.to_address ()})
-            .to_string ();
+        return pstore::indirect_string::read (db, addr).to_string ();
     }
 
 } // end anonymous namespace
@@ -130,7 +130,6 @@ namespace {
 TEST_F (ExchangeCompilation, Empty) {
     constexpr auto name_index = pstore::trailer::indices::name;
 
-    // constexpr auto * path = "path";
     constexpr auto * triple = "triple";
     std::array<pstore::gsl::czstring, 1> names{{triple}};
     std::unordered_map<std::string, pstore::typed_address<pstore::indirect_string>> indir_strings;
@@ -309,6 +308,53 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
         EXPECT_EQ (def2.linkage (), pstore::repo::linkage::link_once_any);
         EXPECT_EQ (def2.visibility (), pstore::repo::visibility::default_vis);
     }
+
+    transaction.commit ();
+}
+
+TEST_F (ExchangeCompilation, MissingTriple) {
+    auto const compilation = R"({ "definitions": [] })"s;
+    constexpr auto compilation_digest = pstore::index::digest{0x12345678, 0x9ABCDEF0};
+
+    pstore::exchange::import::name_mapping imported_names;
+
+    mock_mutex mutex;
+    auto transaction = begin (import_db_, transaction_lock{mutex});
+
+    auto const fragment_index =
+        pstore::index::get_index<pstore::trailer::indices::fragment> (import_db_);
+    auto compilation_parser = import_compilation_parser (&transaction, &imported_names,
+                                                         fragment_index, compilation_digest);
+    compilation_parser.input (compilation).eof ();
+    EXPECT_EQ (compilation_parser.last_error (),
+               make_error_code (pstore::exchange::import::error::incomplete_compilation_object));
+
+    transaction.commit ();
+}
+
+TEST_F (ExchangeCompilation, MissingDefinitions) {
+    auto const names = R"([ "triple" ])"s;
+    auto const compilation = R"({ "triple": 0 })"s;
+    constexpr auto compilation_digest = pstore::index::digest{0x12345678, 0x9ABCDEF0};
+
+    pstore::exchange::import::name_mapping imported_names;
+
+    mock_mutex mutex;
+    auto transaction = begin (import_db_, transaction_lock{mutex});
+    auto name_parser = import_name_parser (&transaction, &imported_names);
+    name_parser.input (names).eof ();
+    ASSERT_FALSE (name_parser.has_error ())
+        << "JSON error was: " << name_parser.last_error ().message () << ' '
+        << name_parser.coordinate () << '\n'
+        << names;
+
+    auto const fragment_index =
+        pstore::index::get_index<pstore::trailer::indices::fragment> (import_db_);
+    auto compilation_parser = import_compilation_parser (&transaction, &imported_names,
+                                                         fragment_index, compilation_digest);
+    compilation_parser.input (compilation).eof ();
+    EXPECT_EQ (compilation_parser.last_error (),
+               make_error_code (pstore::exchange::import::error::incomplete_compilation_object));
 
     transaction.commit ();
 }

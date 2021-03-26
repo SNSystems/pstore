@@ -41,13 +41,11 @@ namespace pstore {
                 emit_string (os, std::begin (view), std::end (view));
             }
 
-            ostream_base & show_string (ostream_base & os, pstore::database const & db,
-                                        pstore::typed_address<pstore::indirect_string> const addr,
+            ostream_base & show_string (ostream_base & os, database const & db,
+                                        typed_address<pstore::indirect_string> const addr,
                                         bool const comments) {
                 if (comments) {
-                    auto const str = serialize::read<pstore::indirect_string> (
-                        serialize::archive::database_reader{db, addr.to_address ()});
-                    os << R"( //")" << str << '"';
+                    os << R"( //")" << indirect_string::read (db, addr) << '"';
                 }
                 return os;
             }

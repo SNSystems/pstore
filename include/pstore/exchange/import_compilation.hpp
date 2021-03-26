@@ -19,6 +19,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file import_compilation.hpp
+/// \brief  Importing of compilation records and their contents.
+
 #ifndef PSTORE_EXCHANGE_IMPORT_COMPILATION_HPP
 #define PSTORE_EXCHANGE_IMPORT_COMPILATION_HPP
 
@@ -69,15 +72,14 @@ namespace pstore {
                 not_null<name_mapping const *> const names_;
                 fragment_index_pointer const fragments_;
 
-                enum { digest_index, name_index, linkage_index, visibility_index };
-                std::bitset<visibility_index + 1> seen_;
+                enum { digest_index, name_index, linkage_index, visibility_index, last_index };
+                std::bitset<last_index> seen_;
 
                 std::string digest_;
                 std::uint64_t name_ = 0;
                 std::string linkage_;
                 std::string visibility_;
             };
-
 
             //*     _      __ _      _ _   _                _     _        _    *
             //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
@@ -118,9 +120,16 @@ namespace pstore {
             //-MARK: compilation
             class compilation final : public rule {
             public:
+                /// \param ctxt The import context.
+                /// \param transaction  The transaction to which this compilation should be added.
+                /// \param names  An object which maps from string indices in the JSON to the
+                ///   corresponding string in the database name index.
+                /// \param fragments  The fragment index.
+                /// \param digest  The compilation's digest.
                 compilation (not_null<context *> ctxt, not_null<transaction_base *> transaction,
                              not_null<name_mapping const *> names,
-                             fragment_index_pointer const & fragments, index::digest digest);
+                             fragment_index_pointer const & fragments,
+                             index::digest const & digest);
                 compilation (compilation const &) = delete;
                 compilation (compilation &&) noexcept = delete;
                 ~compilation () noexcept override = default;
@@ -134,15 +143,23 @@ namespace pstore {
                 std::error_code end_object () override;
 
             private:
+                /// The transaction to which this compilation should be added.
                 not_null<transaction_base *> const transaction_;
+                /// An object for converting string indices in the JSON (such as the triple string)
+                /// to the corresponding string in the database name index.
                 not_null<name_mapping const *> const names_;
+                /// The fragment index.
                 fragment_index_pointer const fragments_;
+                /// The compilation digest.
                 index::digest const digest_;
 
-                enum { triple_index };
-                std::bitset<triple_index + 1> seen_;
+                enum { triple_index, definitions_index, last_index };
+                /// Tracks which object properties have been encountered in the input.
+                std::bitset<last_index> seen_;
 
+                /// The index of the triple string.
                 std::uint64_t triple_ = 0;
+                /// Container for the compilation's definitions.
                 definition::container definitions_;
             };
 

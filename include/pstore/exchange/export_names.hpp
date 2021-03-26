@@ -29,15 +29,15 @@ namespace pstore {
             class ostream_base;
 
             template <typename trailer::indices Index>
-            struct index_tag_ {
+            struct index_tag {
                 static constexpr auto index = Index;
             };
 
             inline constexpr decltype (auto) name_index_tag () noexcept {
-                return index_tag_<pstore::trailer::indices::name>{};
+                return index_tag<pstore::trailer::indices::name>{};
             }
             inline constexpr decltype (auto) path_index_tag () noexcept {
-                return index_tag_<pstore::trailer::indices::path>{};
+                return index_tag<pstore::trailer::indices::path>{};
             }
 
 
@@ -46,13 +46,13 @@ namespace pstore {
             //* | ' \/ _` | '  \/ -_) | '  \/ _` | '_ \ '_ \ | ' \/ _` | *
             //* |_||_\__,_|_|_|_\___| |_|_|_\__,_| .__/ .__/_|_||_\__, | *
             //*                                  |_|  |_|         |___/  *
-            /// The name_mapping call is used to associate the addresses of a set of strings with an
-            /// index in the exported names array. The enables the exported JSON to simply reference
-            /// a string by index rather than having to emit the string each time.
+            /// The name_mapping class is used to associate the addresses of a set of strings with
+            /// an index in the exported names array. The enables the exported JSON to simply
+            /// reference a string by index rather than having to emit the string each time.
             class name_mapping {
             public:
                 template <typename trailer::indices Index>
-                name_mapping (database const & db, index_tag_<Index>) {
+                name_mapping (database const & db, index_tag<Index>) {
                     auto const index = index::get_index<Index> (db);
                     names_.reserve (index->size ());
                 }
