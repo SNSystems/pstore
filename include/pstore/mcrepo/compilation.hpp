@@ -238,12 +238,12 @@ namespace pstore {
                 {'C', 'm', 'p', 'l', '8', 'i', 'o', 'n'}};
 
             std::array<char, 8> signature_ = compilation_signature_;
+            /// The target triple for this compilation.
+            typed_address<indirect_string> triple_;
             /// The number of entries in the members_ array.
             size_type size_ = 0;
             std::uint32_t padding1_ = 0;
 
-            /// The target triple for this compilation.
-            typed_address<indirect_string> triple_;
             definition members_[1];
         };
         PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation>::value);
@@ -253,14 +253,14 @@ namespace pstore {
         template <typename Iterator>
         compilation::compilation (typed_address<indirect_string> const triple, size_type const size,
                                   Iterator const first_member, Iterator const last_member) noexcept
-                : size_{size}
-                , triple_{triple} {
-            // Assignments to suppress warnings from clang that the fields are not used.
+                : triple_{triple}
+                , size_{size} {
+            // Assignment to suppress a warning from clang that the field is not used.
             padding1_ = 0;
             PSTORE_STATIC_ASSERT (offsetof (compilation, signature_) == 0);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, size_) == 8);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, padding1_) == 12);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, triple_) == 16);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, triple_) == 8);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, size_) == 16);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, padding1_) == 20);
             PSTORE_STATIC_ASSERT (offsetof (compilation, members_) == 32);
 
             // This check can safely be an assertion because the method is private and alloc(),
