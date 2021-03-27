@@ -15,10 +15,13 @@
 //===----------------------------------------------------------------------===//
 /// \file server_status.cpp
 /// \brief Implements the server_status class representing the state of the HTTP server.
+
 #include "pstore/http/server_status.hpp"
 
 #ifdef _WIN32
 #    include <ws2tcpip.h>
+#else
+#    include <sys/socket.h>
 #endif
 
 #include "pstore/http/endian.hpp"
