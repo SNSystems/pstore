@@ -184,6 +184,13 @@
                         "uniqueItems": true
                     },
 
+                    "paths" : {
+                        "description": "The compilation paths defined by this transaction",
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "uniqueItems": true
+                    },
+
                     "debugline": {
                         "description": "Index associating a digest with a DWARF debug-line header",
                         "type": "object",
@@ -238,7 +245,6 @@
                                 "description": "A compilation defining a collection of symbols",
                                 "type": "object",
                                 "properties": {
-                                    "path": { "type": "number" },
                                     "triple": { "type": "number" },
                                     "definitions": {
                                         "type": "array",
@@ -267,7 +273,7 @@
                                         }
                                     }
                                 },
-                                "required": ["definitions", "path", "triple" ]
+                                "required": ["definitions", "triple" ]
                             }
                         },
                         "additionalProperties": false

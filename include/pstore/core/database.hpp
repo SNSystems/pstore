@@ -39,7 +39,7 @@ namespace pstore {
 
     class database {
     public:
-        enum class access_mode { read_only, writable };
+        enum class access_mode { read_only, writable, writeable_no_create };
 
         /// Creates a database instance give the path of the file to use.
         ///

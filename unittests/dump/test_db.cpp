@@ -151,8 +151,9 @@ TEST (Database, Trailer) {
                  ElementsAre ("time", ":", "1970-01-01T00:00:00Z"));
 
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("prev_generation", ":", "0x0"));
-    EXPECT_THAT (split_tokens (lines.at (line++)),
-                 ElementsAre ("indices", ":", "[", "0x0,", "0x0,", "0x0,", "0x0,", "0x0", "]"));
+    EXPECT_THAT (
+        split_tokens (lines.at (line++)),
+        ElementsAre ("indices", ":", "[", "0x0,", "0x0,", "0x0,", "0x0,", "0x0,", "0x0", "]"));
 
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("crc", ":", _));
     EXPECT_THAT (split_tokens (lines.at (line++)),

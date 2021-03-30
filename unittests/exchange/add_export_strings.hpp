@@ -40,19 +40,22 @@
 ///
 ///     std::vector<pstore::gsl::czstring> strings{"foo", "bar"};
 ///     std::unordered_map<std::string, string_address> indir_strings;
-///     add_export_strings (export_db_, std::begin (strings), std::end (strings),
-///                         std::inserter (indir_strings, std::end (indir_strings)));
+///     using index = pstore::trailer::indices::name;
+///     add_export_strings<index> (export_db_,
+///                                std::begin (strings), std::end (strings),
+///                                std::inserter (indir_strings, std::end (indir_strings)));
 ///
+/// \tparam Index  Tge index in which the strings are held.
 /// \param db  The database in which the strings will be written.
 /// \param first  The first of the range of strings to be stored.
 /// \param last  The end of the range of strings to be stored.
 /// \param out  An OutputIterator which will store a pair<czstring, string_address>
-template <typename InputIterator, typename OutputIterator>
+template <pstore::trailer::indices Index, typename InputIterator, typename OutputIterator>
 void add_export_strings (pstore::database & db, InputIterator first, InputIterator last,
                          OutputIterator out) {
     mock_mutex mutex;
     auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
-    auto const name_index = pstore::index::get_index<pstore::trailer::indices::name> (db);
+    auto const name_index = pstore::index::get_index<Index> (db);
 
     std::vector<pstore::raw_sstring_view> views;
     std::transform (first, last, std::back_inserter (views),

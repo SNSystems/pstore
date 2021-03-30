@@ -46,6 +46,7 @@ namespace {
 
     private:
         pstore::exchange::import::name_mapping names_;
+        pstore::exchange::import::name_mapping paths_;
 
         enum { version, id, transactions };
         std::bitset<transactions + 1> seen_;
@@ -73,7 +74,7 @@ namespace {
         }
         if (k == "transactions") {
             seen_[transactions] = true;
-            return push<transaction_array<pstore::transaction_lock>> (&names_);
+            return push<transaction_array<pstore::transaction_lock>> (&names_, &paths_);
         }
         return error::unrecognized_root_key;
     }

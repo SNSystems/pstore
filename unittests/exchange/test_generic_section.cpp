@@ -68,7 +68,8 @@ TEST_F (GenericSection, RoundTripForAnEmptySection) {
     static_assert (std::is_same<section_type, pstore::repo::generic_section>::value,
                    "Expected text to map to generic_section");
 
-    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
+    pstore::exchange::export_ns::name_mapping exported_names{
+        export_db_, pstore::exchange::export_ns::name_index_tag ()};
     pstore::repo::section_content exported_content;
     std::string const exported_json =
         export_section<kind> (export_db_, exported_names, exported_content, false);
@@ -101,6 +102,8 @@ TEST_F (GenericSection, RoundTripForAnEmptySection) {
 
 TEST_F (GenericSection, RoundTripForPopulated) {
     constexpr auto kind = pstore::repo::section_kind::text;
+    constexpr auto names_index = pstore::trailer::indices::name;
+
     // The type used to store a text section's properties.
     using section_type = pstore::repo::enum_to_section_t<kind>;
     static_assert (std::is_same<section_type, pstore::repo::generic_section>::value,
@@ -112,15 +115,16 @@ TEST_F (GenericSection, RoundTripForPopulated) {
     constexpr auto * name2 = "name2";
     std::array<pstore::gsl::czstring, 2> names{{name1, name2}};
     std::unordered_map<std::string, pstore::typed_address<pstore::indirect_string>> indir_strings;
-    add_export_strings (export_db_, std::begin (names), std::end (names),
-                        std::inserter (indir_strings, std::end (indir_strings)));
+    add_export_strings<names_index> (export_db_, std::begin (names), std::end (names),
+                                     std::inserter (indir_strings, std::end (indir_strings)));
 
     // Write the names that we just created as JSON.
-    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
+    pstore::exchange::export_ns::name_mapping exported_names{
+        export_db_, pstore::exchange::export_ns::name_index_tag ()};
     pstore::exchange::export_ns::ostringstream exported_names_stream;
-    pstore::exchange::export_ns::emit_names (exported_names_stream,
-                                             pstore::exchange::export_ns::indent{}, export_db_,
-                                             export_db_.get_current_revision (), &exported_names);
+    pstore::exchange::export_ns::emit_strings<names_index> (
+        exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
+        export_db_.get_current_revision (), &exported_names);
 
 
     pstore::repo::section_content exported_content;

@@ -25,6 +25,7 @@ set (pstore_exchange_includes
     export_fragment.hpp
     export_ostream.hpp
     export_names.hpp
+    export_paths.hpp
     export_section.hpp
     import_bss_section.hpp
     import_compilation.hpp
@@ -53,6 +54,7 @@ set (pstore_exchange_sources
     export_fixups.cpp
     export_fragment.cpp
     export_names.cpp
+    export_paths.cpp
     export_ostream.cpp
     import_compilation.cpp
     import_debug_line_header.cpp

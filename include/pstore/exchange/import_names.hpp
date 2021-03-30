@@ -54,6 +54,10 @@ namespace pstore {
                 void flush (not_null<transaction_base *> transaction);
 
                 error_or<typed_address<indirect_string>> lookup (std::uint64_t index) const;
+                std::size_t size () const noexcept {
+                    PSTORE_ASSERT (strings_.size () == views_.size ());
+                    return strings_.size ();
+                }
 
             private:
                 indirect_string_adder adder_;

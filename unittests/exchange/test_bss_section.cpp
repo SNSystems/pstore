@@ -69,7 +69,8 @@ TEST_F (BssSection, RoundTripForAnEmptySection) {
     static_assert (std::is_same<section_type, pstore::repo::bss_section>::value,
                    "Expected bss to map to bss_section");
 
-    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
+    pstore::exchange::export_ns::name_mapping exported_names{
+        export_db_, pstore::exchange::export_ns::name_index_tag ()};
     pstore::repo::section_content exported_content{kind};
     std::string const exported_json =
         export_section<kind> (export_db_, exported_names, exported_content, false);
@@ -107,7 +108,8 @@ TEST_F (BssSection, RoundTripForPopulated) {
     static_assert (std::is_same<section_type, pstore::repo::bss_section>::value,
                    "Expected bss to map to bss_section");
 
-    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
+    pstore::exchange::export_ns::name_mapping exported_names{
+        export_db_, pstore::exchange::export_ns::name_index_tag ()};
 
     pstore::repo::section_content exported_content{kind};
     exported_content.align = 32U;
