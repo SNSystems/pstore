@@ -33,10 +33,10 @@ namespace pstore {
                 static constexpr auto index = Index;
             };
 
-            inline constexpr decltype (auto) name_index_tag () noexcept {
+            constexpr decltype (auto) name_index_tag () noexcept {
                 return index_tag<pstore::trailer::indices::name>{};
             }
-            inline constexpr decltype (auto) path_index_tag () noexcept {
+            constexpr decltype (auto) path_index_tag () noexcept {
                 return index_tag<pstore::trailer::indices::path>{};
             }
 
