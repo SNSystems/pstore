@@ -23,9 +23,8 @@ jobs:
 
             - name: Configure CMake
               shell: bash
-              working-directory: ${{ runner.workspace }}/build
               run: |
-                  cd ${{ runner.workspace }}
+                  cd ${{ runner.workspace }}/build
                   cmake ${{ runner.workspace }} \
                         -D PSTORE_EXAMPLES=Yes \
                         -D CMAKE_BUILD_TYPE=Release
