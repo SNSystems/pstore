@@ -1149,10 +1149,6 @@ namespace pstore {
                 return {nullptr, true};
             }
 
-
-            template <typename Callbacks>
-            class root_matcher;
-
             //*                          *
             //*  __ _ _ _ _ _ __ _ _  _  *
             //* / _` | '_| '_/ _` | || | *
