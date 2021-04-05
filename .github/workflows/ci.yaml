@@ -20,7 +20,7 @@ jobs:
 
                     - name: Ubuntu-latest/gcc-7.5/Debug
                       os: ubuntu-latest
-                      compiler: gcc-7.5
+                      apt_name: g++-7
                       build_type: Debug
                       generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
@@ -28,7 +28,7 @@ jobs:
 
                     - name: Ubuntu-latest/gcc-7.5/Release
                       os: ubuntu-latest
-                      compiler: gcc-7.5
+                      apt_name: g++-7
                       build_type: Release
                       generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
@@ -36,7 +36,6 @@ jobs:
 
                     - name: Ubuntu-latest/gcc-10/Debug
                       os: ubuntu-latest
-                      compiler: gcc-10
                       build_type: Debug
                       generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
@@ -44,7 +43,6 @@ jobs:
 
                     - name: Ubuntu-latest/gcc-10/Release
                       os: ubuntu-latest
-                      compiler: gcc-10
                       build_type: Release
                       generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
@@ -52,7 +50,7 @@ jobs:
 
                     - name: Ubuntu-latest/clang-8/Debug
                       os: ubuntu-latest
-                      compiler: clang-8
+                      apt_name: clang-8
                       build_type: Debug
                       generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_C_COMPILER=clang-8
@@ -60,7 +58,7 @@ jobs:
 
                     - name: Ubuntu-latest/clang-8/Release
                       os: ubuntu-latest
-                      compiler: clang-8
+                      apt_name: clang-8
                       build_type: Release
                       generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_C_COMPILER=clang-8
@@ -68,7 +66,6 @@ jobs:
 
                     - name: Ubuntu-latest/clang-9/Debug
                       os: ubuntu-latest
-                      compiler: clang-9
                       build_type: Debug
                       generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-9 -DCMAKE_C_COMPILER=clang-9
@@ -76,7 +73,6 @@ jobs:
 
                     - name: Ubuntu-latest/clang-9/Release
                       os: ubuntu-latest
-                      compiler: clang-9
                       build_type: Release
                       generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-9 -DCMAKE_C_COMPILER=clang-9
@@ -102,13 +98,9 @@ jobs:
               with:
                   node-version: 12
 
-            - name: Install Dependencies (Linux/Clang-8)
-              if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'clang-8'
-              run: sudo apt-get install -y clang-8
-
-            - name: Install Dependencies (Linux/GCC-7.5)
-              if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'gcc-7.5'
-              run: sudo apt-get install -y g++-7.5
+            - name: Install Dependencies (Linux)
+              if: matrix.os == 'ubuntu-latest' && matrix.apt_name != ''
+              run: sudo apt-get install -y ${{ matrix.apt_name }}
 
 
 
