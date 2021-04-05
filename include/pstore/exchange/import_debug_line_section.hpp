@@ -27,7 +27,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             //*     _     _                _ _                       _   _           *
             //*  __| |___| |__ _  _ __ _  | (_)_ _  ___   ___ ___ __| |_(_)___ _ _   *
@@ -107,7 +107,7 @@ namespace pstore {
                 return this->pop ();
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

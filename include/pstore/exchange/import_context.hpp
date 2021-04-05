@@ -26,7 +26,7 @@ namespace pstore {
     class transaction_base;
 
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             class patcher {
             public:
@@ -63,7 +63,7 @@ namespace pstore {
                 std::list<std::unique_ptr<patcher>> patches;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

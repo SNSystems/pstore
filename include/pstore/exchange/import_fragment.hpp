@@ -30,7 +30,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             //*          _    _                            _      _     *
             //*  __ _ __| |__| |_ _ ___ ______  _ __  __ _| |_ __| |_   *
@@ -146,7 +146,7 @@ namespace pstore {
                 index::digest digest_;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

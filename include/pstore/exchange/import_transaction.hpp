@@ -29,7 +29,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             template <typename TransactionLock>
             class transaction_contents final : public rule {
@@ -191,7 +191,7 @@ namespace pstore {
                 return this->replace_top<transaction_object<TransactionLock>> (names_, paths_);
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

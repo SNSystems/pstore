@@ -72,7 +72,7 @@ int main (int argc, char * argv[]) {
             return EXIT_FAILURE;
         }
 
-        auto parser = pstore::exchange::import::create_parser (db);
+        auto parser = pstore::exchange::import_ns::create_parser (db);
 
         std::vector<std::uint8_t> buffer;
         buffer.resize (65535);

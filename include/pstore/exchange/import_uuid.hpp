@@ -21,7 +21,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             class uuid_rule final : public rule {
             public:
@@ -41,7 +41,7 @@ namespace pstore {
                 not_null<uuid *> const v_;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

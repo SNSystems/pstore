@@ -41,7 +41,7 @@ namespace {
         pstore::database db_;
 
         decltype (auto) make_json_uuid_parser (pstore::gsl::not_null<pstore::uuid *> v) {
-            using namespace pstore::exchange::import;
+            using namespace pstore::exchange::import_ns;
             return pstore::json::make_parser (callbacks::make<uuid_rule> (&db_, v));
         }
     };
@@ -68,5 +68,6 @@ TEST_F (Uuid, Bad) {
     auto parser = make_json_uuid_parser (&id);
     parser.input (R"("bad")"s).eof ();
     EXPECT_TRUE (parser.has_error ());
-    EXPECT_EQ (parser.last_error (), make_error_code (pstore::exchange::import::error::bad_uuid));
+    EXPECT_EQ (parser.last_error (),
+               make_error_code (pstore::exchange::import_ns::error::bad_uuid));
 }

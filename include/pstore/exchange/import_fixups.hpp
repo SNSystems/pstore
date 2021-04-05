@@ -26,7 +26,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             namespace details {
 
@@ -173,7 +173,7 @@ namespace pstore {
             using ifixups_object = fixups_object<internal_fixup, repo::internal_fixup>;
             using xfixups_object = fixups_object<external_fixup, repo::external_fixup>;
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

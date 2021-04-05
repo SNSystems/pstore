@@ -35,7 +35,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             class name_mapping {
             public:
@@ -67,7 +67,7 @@ namespace pstore {
                 std::unordered_map<std::uint64_t, typed_address<indirect_string>> lookup_;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // namespace pstore
 

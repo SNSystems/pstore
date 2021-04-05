@@ -22,7 +22,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             //*  _              _            _      *
             //* | |__  ___  ___| |  _ _ _  _| |___  *
@@ -80,6 +80,6 @@ namespace pstore {
 
             gsl::czstring string_rule::name () const noexcept { return "string"; }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore

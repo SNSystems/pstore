@@ -70,7 +70,7 @@ namespace pstore {
 
         } // end namespace cxx17shim
 
-        namespace import {
+        namespace import_ns {
 
             //*      _     _        _              _      *
             //*  ___| |__ (_)___ __| |_   _ _ _  _| |___  *
@@ -147,7 +147,7 @@ namespace pstore {
                 return rule->push<array_rule<NextRule, Args...>> (args...);
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

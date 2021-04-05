@@ -27,7 +27,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             template <typename T>
             using not_null = gsl::not_null<T>;
@@ -174,7 +174,7 @@ namespace pstore {
                 std::shared_ptr<context> context_;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

@@ -44,16 +44,16 @@ namespace {
 
     template <typename ImportRule, typename... Args>
     auto make_json_array_parser (pstore::database * const db, Args... args)
-        -> pstore::json::parser<pstore::exchange::import::callbacks> {
-        using namespace pstore::exchange::import;
+        -> pstore::json::parser<pstore::exchange::import_ns::callbacks> {
+        using namespace pstore::exchange::import_ns;
         return pstore::json::make_parser (
             callbacks::make<array_rule<ImportRule, Args...>> (db, args...));
     }
 
     template <typename ImportRule, typename... Args>
     auto make_json_object_parser (pstore::database * const db, Args... args)
-        -> pstore::json::parser<pstore::exchange::import::callbacks> {
-        using namespace pstore::exchange::import;
+        -> pstore::json::parser<pstore::exchange::import_ns::callbacks> {
+        using namespace pstore::exchange::import_ns;
         return pstore::json::make_parser (
             callbacks::make<object_rule<ImportRule, Args...>> (db, args...));
     }
@@ -62,23 +62,23 @@ namespace {
     // Parse the exported names JSON. The resulting index-to-string mappings are then available via
     // imported_names.
     decltype (auto) import_name_parser (transaction * const transaction,
-                                        pstore::exchange::import::name_mapping * const names) {
-        return make_json_array_parser<pstore::exchange::import::names_array_members> (
+                                        pstore::exchange::import_ns::name_mapping * const names) {
+        return make_json_array_parser<pstore::exchange::import_ns::names_array_members> (
             &transaction->db (), transaction, names);
     }
 
     decltype (auto) import_fragment_parser (transaction * const transaction,
-                                            pstore::exchange::import::name_mapping * const names,
+                                            pstore::exchange::import_ns::name_mapping * const names,
                                             pstore::index::digest const * const digest) {
-        return make_json_object_parser<pstore::exchange::import::fragment_sections> (
+        return make_json_object_parser<pstore::exchange::import_ns::fragment_sections> (
             &transaction->db (), transaction, names, digest);
     }
 
     decltype (auto) import_compilation_parser (
-        transaction * const transaction, pstore::exchange::import::name_mapping * const names,
+        transaction * const transaction, pstore::exchange::import_ns::name_mapping * const names,
         std::shared_ptr<pstore::index::fragment_index> const & fragment_index,
         pstore::index::digest const & digest) {
-        return make_json_object_parser<pstore::exchange::import::compilation> (
+        return make_json_object_parser<pstore::exchange::import_ns::compilation> (
             &transaction->db (), transaction, names, std::cref (fragment_index),
             std::cref (digest));
     }
@@ -161,7 +161,7 @@ TEST_F (ExchangeCompilation, Empty) {
 
 
     constexpr pstore::index::digest compilation_digest{0x12345678, 0x9ABCDEF0};
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::name_mapping imported_names;
     {
         mock_mutex mutex;
         auto transaction = begin (import_db_, transaction_lock{mutex});
@@ -254,7 +254,7 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
     auto transaction = begin (import_db_, transaction_lock{mutex});
 
 
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::name_mapping imported_names;
     {
         auto name_parser = import_name_parser (&transaction, &imported_names);
         name_parser.input (exported_names_stream.str ()).eof ();
@@ -316,7 +316,7 @@ TEST_F (ExchangeCompilation, MissingTriple) {
     auto const compilation = R"({ "definitions": [] })"s;
     constexpr auto compilation_digest = pstore::index::digest{0x12345678, 0x9ABCDEF0};
 
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::name_mapping imported_names;
 
     mock_mutex mutex;
     auto transaction = begin (import_db_, transaction_lock{mutex});
@@ -327,7 +327,7 @@ TEST_F (ExchangeCompilation, MissingTriple) {
                                                          fragment_index, compilation_digest);
     compilation_parser.input (compilation).eof ();
     EXPECT_EQ (compilation_parser.last_error (),
-               make_error_code (pstore::exchange::import::error::incomplete_compilation_object));
+               make_error_code (pstore::exchange::import_ns::error::incomplete_compilation_object));
 
     transaction.commit ();
 }
@@ -337,7 +337,7 @@ TEST_F (ExchangeCompilation, MissingDefinitions) {
     auto const compilation = R"({ "triple": 0 })"s;
     constexpr auto compilation_digest = pstore::index::digest{0x12345678, 0x9ABCDEF0};
 
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::name_mapping imported_names;
 
     mock_mutex mutex;
     auto transaction = begin (import_db_, transaction_lock{mutex});
@@ -354,7 +354,7 @@ TEST_F (ExchangeCompilation, MissingDefinitions) {
                                                          fragment_index, compilation_digest);
     compilation_parser.input (compilation).eof ();
     EXPECT_EQ (compilation_parser.last_error (),
-               make_error_code (pstore::exchange::import::error::incomplete_compilation_object));
+               make_error_code (pstore::exchange::import_ns::error::incomplete_compilation_object));
 
     transaction.commit ();
 }

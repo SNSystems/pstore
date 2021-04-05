@@ -20,7 +20,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             // lookup
             // ~~~~~~
@@ -63,6 +63,6 @@ namespace pstore {
                 adder_.flush (*transaction);
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // namespace pstore

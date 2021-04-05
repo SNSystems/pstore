@@ -24,7 +24,7 @@ namespace pstore {
     class database;
 
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             class root final : public rule {
             public:
@@ -47,7 +47,7 @@ namespace pstore {
 
             json::parser<callbacks> create_parser (database & db);
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

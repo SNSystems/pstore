@@ -23,7 +23,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             // (ctor)
             // ~~~~~~
@@ -53,6 +53,6 @@ namespace pstore {
                 return "names array members";
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore

@@ -28,9 +28,10 @@ namespace {
     //* | '_/ _ \/ _ \  _| / _ \ '_ \| / -_) _|  _| *
     //* |_| \___/\___/\__| \___/_.__// \___\__|\__| *
     //*                            |__/             *
-    class root_object final : public pstore::exchange::import::rule {
+    class root_object final : public pstore::exchange::import_ns::rule {
     public:
-        explicit root_object (pstore::gsl::not_null<pstore::exchange::import::context *> const ctxt)
+        explicit root_object (
+            pstore::gsl::not_null<pstore::exchange::import_ns::context *> const ctxt)
                 : rule (ctxt) {}
         root_object (root_object const &) = delete;
         root_object (root_object &&) noexcept = delete;
@@ -45,8 +46,8 @@ namespace {
         std::error_code end_object () override;
 
     private:
-        pstore::exchange::import::name_mapping names_;
-        pstore::exchange::import::name_mapping paths_;
+        pstore::exchange::import_ns::name_mapping names_;
+        pstore::exchange::import_ns::name_mapping paths_;
 
         enum { version, id, transactions };
         std::bitset<transactions + 1> seen_;
@@ -61,7 +62,7 @@ namespace {
     // key
     // ~~~
     std::error_code root_object::key (std::string const & k) {
-        using namespace pstore::exchange::import;
+        using namespace pstore::exchange::import_ns;
 
         // TODO: check that 'version' is the first key that we see.
         if (k == "version") {
@@ -82,8 +83,10 @@ namespace {
     // end object
     // ~~~~~~~~~~
     std::error_code root_object::end_object () {
+        using namespace pstore::exchange::import_ns;
+
         if (!seen_.all ()) {
-            return pstore::exchange::import::error::root_object_was_incomplete;
+            return error::root_object_was_incomplete;
         }
         return {};
     }
@@ -92,7 +95,7 @@ namespace {
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             //*               _    *
             //*  _ _ ___  ___| |_  *
@@ -115,6 +118,6 @@ namespace pstore {
                                           json::parser_extensions::all);
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore

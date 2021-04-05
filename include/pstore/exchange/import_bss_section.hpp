@@ -30,7 +30,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             template <typename OutputIterator>
             class bss_section : public rule {
@@ -125,7 +125,7 @@ namespace pstore {
                 return pop ();
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

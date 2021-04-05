@@ -22,7 +22,7 @@
 namespace {
 
     std::error_category const & get_error_category () noexcept {
-        static pstore::exchange::import::error_category const cat;
+        static pstore::exchange::import_ns::error_category const cat;
         return cat;
     }
 
@@ -30,7 +30,7 @@ namespace {
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             error_category::error_category () noexcept = default;
 
@@ -131,6 +131,6 @@ namespace pstore {
                 return {static_cast<int> (e), get_error_category ()};
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore

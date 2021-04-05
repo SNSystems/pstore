@@ -22,7 +22,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             enum class error : int {
                 none,
@@ -84,14 +84,14 @@ namespace pstore {
             std::error_category const & get_import_error_category () noexcept;
             std::error_code make_error_code (error e) noexcept;
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 
 namespace std {
 
     template <>
-    struct is_error_code_enum<pstore::exchange::import::error> : std::true_type {};
+    struct is_error_code_enum<pstore::exchange::import_ns::error> : std::true_type {};
 
 } // end namespace std
 

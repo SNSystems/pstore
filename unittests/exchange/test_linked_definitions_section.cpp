@@ -90,7 +90,7 @@ namespace {
 
     template <typename ImportRule, typename... Args>
     decltype (auto) make_json_object_parser (database * const db, Args... args) {
-        using namespace pstore::exchange::import;
+        using namespace pstore::exchange::import_ns;
         return json::make_parser (callbacks::make<object_rule<ImportRule, Args...>> (db, args...));
     }
 
@@ -164,8 +164,8 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
         mock_mutex mutex;
         auto transaction = begin (import_db_, transaction_lock{mutex});
         {
-            exchange::import::name_mapping imported_names;
-            auto parser = make_json_object_parser<exchange::import::fragment_sections> (
+            exchange::import_ns::name_mapping imported_names;
+            auto parser = make_json_object_parser<exchange::import_ns::fragment_sections> (
                 &import_db_, &transaction, &imported_names, &imported_digest);
             parser.input (exported_json).eof ();
             ASSERT_FALSE (parser.has_error ())
@@ -173,7 +173,7 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
                 << parser.coordinate () << '\n'
                 << exported_json;
 
-            std::shared_ptr<exchange::import::context> const & ctxt =
+            std::shared_ptr<exchange::import_ns::context> const & ctxt =
                 parser.callbacks ().get_context ();
             ctxt->apply_patches (&transaction);
         }

@@ -26,7 +26,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             class names_array_members final : public rule {
             public:
@@ -50,7 +50,7 @@ namespace pstore {
                 not_null<name_mapping *> const names_;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

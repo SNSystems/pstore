@@ -34,7 +34,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             using fragment_index_pointer = std::shared_ptr<index::fragment_index>;
 
@@ -191,7 +191,7 @@ namespace pstore {
                 fragment_index_pointer const fragments_;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

@@ -61,9 +61,9 @@ namespace {
     };
 
     template <typename ImportRule, typename... Args>
-    pstore::json::parser<pstore::exchange::import::callbacks>
+    pstore::json::parser<pstore::exchange::import_ns::callbacks>
     make_json_array_parser (pstore::database * const db, Args... args) {
-        using namespace pstore::exchange::import;
+        using namespace pstore::exchange::import_ns;
         return pstore::json::make_parser (
             callbacks::make<array_rule<ImportRule, Args...>> (db, args...));
     }
@@ -71,8 +71,8 @@ namespace {
     // Parse the exported names JSON. The resulting index-to-string mappings are then available via
     // imported_names.
     decltype (auto) import_name_parser (transaction * const transaction,
-                                        pstore::exchange::import::name_mapping * const names) {
-        return make_json_array_parser<pstore::exchange::import::names_array_members> (
+                                        pstore::exchange::import_ns::name_mapping * const names) {
+        return make_json_array_parser<pstore::exchange::import_ns::names_array_members> (
             &transaction->db (), transaction, names);
     }
 
@@ -97,7 +97,7 @@ TEST_F (ExchangePaths, ImportEmpty) {
     mock_mutex mutex;
     auto transaction = begin (import_db_, transaction_lock{mutex});
 
-    pstore::exchange::import::name_mapping imported_paths;
+    pstore::exchange::import_ns::name_mapping imported_paths;
     {
         auto name_parser = import_name_parser (&transaction, &imported_paths);
         name_parser.input (exported_paths).eof ();
@@ -110,7 +110,7 @@ TEST_F (ExchangePaths, ImportEmpty) {
     imported_paths.flush (&transaction);
     transaction.commit ();
 
-    EXPECT_EQ (imported_paths.lookup (0U), pstore::exchange::import::error::no_such_name);
+    EXPECT_EQ (imported_paths.lookup (0U), pstore::exchange::import_ns::error::no_such_name);
 }
 
 TEST_F (ExchangePaths, RoundTripForTwoPaths) {
@@ -135,7 +135,7 @@ TEST_F (ExchangePaths, RoundTripForTwoPaths) {
     }
 
     // The output from the import phase: the mapping from path index to address.
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::name_mapping imported_names;
 
     // The import phase. Read the JSON produced by the export phase and populate a database
     // accordingly.
@@ -171,5 +171,5 @@ TEST_F (ExchangePaths, RoundTripForTwoPaths) {
     }
 
     EXPECT_THAT (out, testing::UnorderedElementsAre ("path1", "path2"));
-    EXPECT_EQ (imported_names.lookup (2U), pstore::exchange::import::error::no_such_name);
+    EXPECT_EQ (imported_names.lookup (2U), pstore::exchange::import_ns::error::no_such_name);
 }

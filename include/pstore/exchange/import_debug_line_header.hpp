@@ -30,7 +30,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             class debug_line_index final : public rule {
             public:
@@ -57,7 +57,7 @@ namespace pstore {
                 not_null<transaction_base *> transaction_;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

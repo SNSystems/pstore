@@ -23,7 +23,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             class bool_rule final : public rule {
             public:
@@ -77,7 +77,7 @@ namespace pstore {
                 not_null<std::string *> const v_;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 
