@@ -16,7 +16,7 @@ jobs:
             - name: Install tools
               run: |
                   apt-get update
-                  apt-get install -y cmake ninja-build python3
+                  apt-get install -y ninja-build python3
 
             - name: Install CMake
               run: |
