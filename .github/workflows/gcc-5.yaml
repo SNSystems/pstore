@@ -24,7 +24,7 @@ jobs:
               shell: bash
               working-directory: ${{ runner.workspace }}/build
               run: |
-                  cmake $GITHUB_WORKSPACE \
+                  cmake ${{ runner.workspace }} \
                         -D PSTORE_EXAMPLES=Yes \
                         -D CMAKE_BUILD_TYPE=Release
 
