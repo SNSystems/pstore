@@ -7,87 +7,103 @@ jobs:
             matrix:
                 include:
                     - name: macOS-latest/Xcode/Debug
-                      os: macos-latest
                       build_type: Debug
                       generator: Xcode
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+                      os: macos-latest
 
                     - name: macOS-latest/Xcode/Release
-                      os: macos-latest
                       build_type: Release
                       generator: Xcode
+                      os: macos-latest
+
+
+                    - name: Ubuntu-latest/gcc-5/Debug
+                      apt_name: g++-5
+                      build_type: Debug
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_C_COMPILER=gcc-5
+                      generator: Unix Makefiles
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+                      os: ubuntu-latest
+
+                    - name: Ubuntu-latest/gcc-5/Release
+                      apt_name: g++-5
+                      build_type: Release
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_C_COMPILER=gcc-5
+                      generator: Unix Makefiles
+                      os: ubuntu-latest
 
 
                     - name: Ubuntu-latest/gcc-7.5/Debug
-                      os: ubuntu-latest
                       apt_name: g++-7
                       build_type: Debug
-                      generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
+                      generator: Unix Makefiles
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+                      os: ubuntu-latest
 
                     - name: Ubuntu-latest/gcc-7.5/Release
-                      os: ubuntu-latest
                       apt_name: g++-7
                       build_type: Release
-                      generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
+                      generator: Unix Makefiles
+                      os: ubuntu-latest
 
 
                     - name: Ubuntu-latest/gcc-10/Debug
-                      os: ubuntu-latest
                       build_type: Debug
-                      generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
+                      generator: Unix Makefiles
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+                      os: ubuntu-latest
 
                     - name: Ubuntu-latest/gcc-10/Release
-                      os: ubuntu-latest
                       build_type: Release
-                      generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
+                      generator: Unix Makefiles
+                      os: ubuntu-latest
 
 
                     - name: Ubuntu-latest/clang-8/Debug
-                      os: ubuntu-latest
                       apt_name: clang-8
                       build_type: Debug
-                      generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_C_COMPILER=clang-8
+                      generator: Unix Makefiles
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+                      os: ubuntu-latest
 
                     - name: Ubuntu-latest/clang-8/Release
-                      os: ubuntu-latest
                       apt_name: clang-8
                       build_type: Release
-                      generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_C_COMPILER=clang-8
+                      generator: Unix Makefiles
+                      os: ubuntu-latest
 
 
                     - name: Ubuntu-latest/clang-9/Debug
-                      os: ubuntu-latest
                       build_type: Debug
-                      generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-9 -DCMAKE_C_COMPILER=clang-9
+                      generator: Unix Makefiles
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+                      os: ubuntu-latest
 
                     - name: Ubuntu-latest/clang-9/Release
-                      os: ubuntu-latest
                       build_type: Release
-                      generator: Unix Makefiles
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-9 -DCMAKE_C_COMPILER=clang-9
+                      generator: Unix Makefiles
+                      os: ubuntu-latest
 
 
                     - name: Windows-latest/MSVC/Debug
-                      os: windows-latest
                       build_type: Debug
                       generator: Visual Studio 16 2019
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+                      os: windows-latest
 
                     - name: Windows-latest/MSVC/Release
-                      os: windows-latest
                       build_type: Release
                       generator: Visual Studio 16 2019
+                      os: windows-latest
 
         name: ${{ matrix.name }}
         runs-on: ${{ matrix.os }}
