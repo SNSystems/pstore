@@ -111,11 +111,11 @@ jobs:
               shell: bash
               working-directory: ${{ runner.workspace }}/build
               run: |
-                  cmake $GITHUB_WORKSPACE \
-                        -G "${{ matrix.generator }}" \
-                        -D PSTORE_EXAMPLES=Yes \
-                        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-                        ${{ matrix.cxx_compiler }} \
+                  cmake $GITHUB_WORKSPACE                            \
+                        -G "${{ matrix.generator }}"                 \
+                        -D PSTORE_EXAMPLES=Yes                       \
+                        -D CMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+                        ${{ matrix.cxx_compiler }}                   \
                         ${{ matrix.options }}
 
             - name: Build
