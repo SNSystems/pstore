@@ -15,8 +15,8 @@ jobs:
 
             - name: Install tools
               run: |
-                  apt update
-                  apt install -y cmake ninja-build python3
+                  apt-get update
+                  apt-get install -y cmake ninja-build python3
 
             - name: Create Build Environment
               run: cmake -E make_directory ${{ runner.workspace }}/build
@@ -25,6 +25,7 @@ jobs:
               shell: bash
               working-directory: ${{ runner.workspace }}/build
               run: |
+                  cd ${{ runner.workspace }}
                   cmake ${{ runner.workspace }} \
                         -D PSTORE_EXAMPLES=Yes \
                         -D CMAKE_BUILD_TYPE=Release
