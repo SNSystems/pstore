@@ -24,10 +24,10 @@ jobs:
             - name: Configure CMake
               shell: bash
               run: |
-                  cd ${{ runner.workspace }}/build
-                  cmake ${{ runner.workspace }} \
-                        -D PSTORE_EXAMPLES=Yes \
-                        -D CMAKE_BUILD_TYPE=Release
+                  cd "${{ runner.workspace }}/build"
+                  cmake -D PSTORE_EXAMPLES=Yes      \
+                        -D CMAKE_BUILD_TYPE=Release \
+                        "$GITHUB_WORKSPACE"
 
             - name: Build
               working-directory: ${{ runner.workspace }}/build
