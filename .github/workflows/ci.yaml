@@ -18,22 +18,6 @@ jobs:
                       os: macos-latest
 
 
-                    - name: Ubuntu-latest/gcc-5/Debug
-                      apt_name: g++-5
-                      build_type: Debug
-                      cxx_compiler: -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_C_COMPILER=gcc-5
-                      generator: Unix Makefiles
-                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
-                      os: ubuntu-latest
-
-                    - name: Ubuntu-latest/gcc-5/Release
-                      apt_name: g++-5
-                      build_type: Release
-                      cxx_compiler: -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_C_COMPILER=gcc-5
-                      generator: Unix Makefiles
-                      os: ubuntu-latest
-
-
                     - name: Ubuntu-latest/gcc-7.5/Debug
                       apt_name: g++-7
                       build_type: Debug
