@@ -20,38 +20,39 @@ jobs:
 
             - name: Install CMake
               run: |
+                  mkdir /download
+                  cd /download
                   curl -o cmake.tar.gz \
                        --location \
                        https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.tar.gz
                   tar xzf cmake.tar.gz
+                  ln cmake-3.20.0-linux-x86_64/bin/cmake /cmake
 
             - name: Create Build Environment
               run: |
-                  /cmake-3.20.0-linux-x86_64/bin/cmake \
+                  /cmake \
                       -E make_directory ${{ runner.workspace }}/build
 
             - name: Configure CMake
               shell: bash
               run: |
                   cd "${{ runner.workspace }}/build"
-                  /cmake-3.20.0-linux-x86_64/bin/cmake \
-                      -D PSTORE_EXAMPLES=Yes           \
-                      -D CMAKE_BUILD_TYPE=Release      \
+                  /cmake \
+                      -D PSTORE_EXAMPLES=Yes      \
+                      -D CMAKE_BUILD_TYPE=Release \
                       "$GITHUB_WORKSPACE"
 
             - name: Build
               shell: bash
               run: |
                   cd "${{ runner.workspace }}/build"
-                  /cmake-3.20.0-linux-x86_64/bin/cmake \
-                      --build .                        \
-                      --config Release
+                  /cmake --build . --config Release
 
             - name: System Tests
               shell: bash
               run: |
                   cd "${{ runner.workspace }}/build"
-                  /cmake-3.20.0-linux-x86_64/bin/cmake \
-                      --build .                        \
-                      --config Release                 \
+                  /cmake                           \
+                      --build .                    \
+                      --config Release             \
                       --target pstore-system-tests
