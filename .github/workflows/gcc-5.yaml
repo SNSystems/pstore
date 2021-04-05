@@ -1,0 +1,40 @@
+name: CI Build/Test GCC-5
+# Triggers the workflow on push or pull request events
+on: [push, pull_request]
+jobs:
+    pstore-gcc-5:
+        runs-on: ubuntu-latest
+        container:
+            image: gcc:5.5.0
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 12
+
+            - name: Install tools
+              run: |
+                  apt update
+                  apt install -y cmake ninja-build python3
+
+            - name: Create Build Environment
+              run: cmake -E make_directory ${{ runner.workspace }}/build
+
+            - name: Configure CMake
+              shell: bash
+              working-directory: ${{ runner.workspace }}/build
+              run: |
+                  cmake $GITHUB_WORKSPACE \
+                        -D PSTORE_EXAMPLES=Yes \
+                        -D CMAKE_BUILD_TYPE=Release
+
+            - name: Build
+              working-directory: ${{ runner.workspace }}/build
+              shell: bash
+              run: cmake --build . --config ${{ matrix.build_type }}
+
+            - name: System Tests
+              working-directory: ${{ runner.workspace }}/build
+              shell: bash
+              run: cmake --build . --config ${{ matrix.build_type }} --target pstore-system-tests
+    
