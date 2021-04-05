@@ -127,3 +127,57 @@ jobs:
               working-directory: ${{ runner.workspace }}/build
               shell: bash
               run: cmake --build . --config ${{ matrix.build_type }} --target pstore-system-tests
+
+    gcc-5:
+        runs-on: ubuntu-latest
+        container:
+            image: gcc:5.5.0
+            options: -u 0
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 12
+
+            - name: Install tools
+              run: |
+                  apt-get update
+                  apt-get install -y ninja-build python3
+
+            - name: Install CMake
+              run: |
+                  mkdir /download
+                  cd /download
+                  curl -o cmake.tar.gz \
+                       --location \
+                       https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.tar.gz
+                  tar xzf cmake.tar.gz
+                  cp -r cmake-3.20.0-linux-x86_64/* /usr
+
+            - name: Create Build Environment
+              run: cmake -E make_directory ${{ runner.workspace }}/build
+
+            - name: Configure CMake
+              shell: bash
+              run: |
+                  cd "${{ runner.workspace }}/build"
+                  cmake                           \
+                      -G Ninja                    \
+                      -D PSTORE_EXAMPLES=Yes      \
+                      -D CMAKE_BUILD_TYPE=Release \
+                      "$GITHUB_WORKSPACE"
+
+            - name: Build
+              shell: bash
+              run: |
+                  cd "${{ runner.workspace }}/build"
+                  cmake --build . --config Release
+
+            - name: System Tests
+              shell: bash
+              run: |
+                  cd "${{ runner.workspace }}/build"
+                  cmake                            \
+                      --build .                    \
+                      --config Release             \
+                      --target pstore-system-tests
