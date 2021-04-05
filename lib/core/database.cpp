@@ -356,7 +356,7 @@ namespace pstore {
                     [] (std::uint8_t * const dest, std::uint8_t const * const src,
                         std::size_t const n) { std::memcpy (dest, src, n); });
             }
-            delete[](p);
+            delete[] p;
         };
 
         // Create the memory block that we'll be returning, attaching a suitable deleter
