@@ -25,7 +25,7 @@
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
-#include "pstore/exchange/import_names_array.hpp"
+#include "pstore/exchange/import_strings_array.hpp"
 
 #include <gmock/gmock.h>
 
@@ -37,7 +37,7 @@ namespace {
     using internal_fixup_collection = std::vector<pstore::repo::internal_fixup>;
     using internal_fixup_array_root =
         pstore::exchange::import_ns::array_rule<pstore::exchange::import_ns::ifixups_object,
-                                                pstore::exchange::import_ns::name_mapping *,
+                                                pstore::exchange::import_ns::string_mapping *,
                                                 internal_fixup_collection *>;
 
     class ExchangeSectionFixups : public ::testing::Test {
@@ -67,7 +67,7 @@ TEST_F (ExchangeSectionFixups, RoundTripInternalEmpty) {
                           std::end (ifixups));
 
     // Setup the parse.
-    pstore::exchange::import_ns::name_mapping names;
+    pstore::exchange::import_ns::string_mapping names;
     internal_fixup_collection imported_ifixups;
     auto parser = pstore::json::make_parser (
         pstore::exchange::import_ns::callbacks::make<internal_fixup_array_root> (
@@ -100,7 +100,7 @@ TEST_F (ExchangeSectionFixups, RoundTripInternalCollection) {
                           std::end (ifixups));
 
     // Setup the parse.
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     internal_fixup_collection imported_ifixups;
     auto parser = pstore::json::make_parser (
         pstore::exchange::import_ns::callbacks::make<internal_fixup_array_root> (
@@ -135,7 +135,7 @@ namespace {
         decltype (auto) parse (std::string const & src,
                                not_null<internal_fixup_collection *> const fixups) {
             using namespace pstore::exchange::import_ns;
-            name_mapping names;
+            string_mapping names;
             auto parser =
                 pstore::json::make_parser (callbacks::make<ifixups_object> (&db_, &names, fixups));
             parser.input (src).eof ();
@@ -306,7 +306,7 @@ namespace {
         using transaction_lock = std::unique_lock<mock_mutex>;
         using xfixup_array_root =
             pstore::exchange::import_ns::array_rule<pstore::exchange::import_ns::xfixups_object,
-                                                    pstore::exchange::import_ns::name_mapping *,
+                                                    pstore::exchange::import_ns::string_mapping *,
                                                     xfixup_collection *>;
 
         InMemoryStore export_store_;
@@ -319,22 +319,22 @@ namespace {
 } // end anonymous namespace
 
 TEST_F (ExchangeExternalFixups, ExternalEmpty) {
+    using namespace pstore::exchange;
+
     // Start with an empty collection of external fixups.
     xfixup_collection xfixups;
 
     // Export the internal fixup array to the 'os' string-stream.
-    pstore::exchange::export_ns::ostringstream os;
-    pstore::exchange::export_ns::name_mapping names{export_db_,
-                                                    pstore::exchange::export_ns::name_index_tag ()};
-    emit_external_fixups (os, pstore::exchange::export_ns::indent{}, export_db_, names,
-                          std::begin (xfixups), std::end (xfixups), false);
+    export_ns::ostringstream os;
+    export_ns::string_mapping names{export_db_, export_ns::name_index_tag ()};
+    emit_external_fixups (os, export_ns::indent{}, export_db_, names, std::begin (xfixups),
+                          std::end (xfixups), false);
 
     // Setup the parse.
     xfixup_collection imported_xfixups;
-    pstore::exchange::import_ns::name_mapping imported_names;
-    auto parser =
-        pstore::json::make_parser (pstore::exchange::import_ns::callbacks::make<xfixup_array_root> (
-            &import_db_, &imported_names, &imported_xfixups));
+    import_ns::string_mapping imported_names;
+    auto parser = pstore::json::make_parser (import_ns::callbacks::make<xfixup_array_root> (
+        &import_db_, &imported_names, &imported_xfixups));
 
     // Import the data that we just exported.
     parser.input (os.str ());
@@ -347,6 +347,8 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
 }
 
 TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
+    using namespace pstore::exchange;
+
     constexpr auto name_index = pstore::trailer::indices::name;
     std::vector<pstore::gsl::czstring> strings{"foo", "bar"};
 
@@ -358,12 +360,10 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
 
 
     // Write the names that we just created as JSON.
-    pstore::exchange::export_ns::name_mapping exported_names{
-        export_db_, pstore::exchange::export_ns::name_index_tag ()};
-    pstore::exchange::export_ns::ostringstream exported_names_stream;
-    pstore::exchange::export_ns::emit_strings<name_index> (
-        exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
-        export_db_.get_current_revision (), &exported_names);
+    export_ns::string_mapping exported_names{export_db_, export_ns::name_index_tag ()};
+    export_ns::ostringstream exported_names_stream;
+    export_ns::emit_strings<name_index> (exported_names_stream, export_ns::indent{}, export_db_,
+                                         export_db_.get_current_revision (), &exported_names);
 
 
 
@@ -378,9 +378,9 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
 
 
     // Export the external fixup array to the 'exported_fixups' string-stream.
-    pstore::exchange::export_ns::ostringstream exported_fixups;
-    emit_external_fixups (exported_fixups, pstore::exchange::export_ns::indent{}, export_db_,
-                          exported_names, std::begin (xfixups), std::end (xfixups), false);
+    export_ns::ostringstream exported_fixups;
+    emit_external_fixups (exported_fixups, export_ns::indent{}, export_db_, exported_names,
+                          std::begin (xfixups), std::end (xfixups), false);
 
 
 
@@ -388,11 +388,11 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     mock_mutex mutex;
     auto transaction = begin (import_db_, std::unique_lock<mock_mutex>{mutex});
 
-    pstore::exchange::import_ns::name_mapping imported_names;
+    import_ns::string_mapping imported_names;
     {
-        using namespace pstore::exchange::import_ns;
+        using namespace import_ns;
         auto parser = pstore::json::make_parser (
-            callbacks::make<array_rule<names_array_members, decltype (&transaction),
+            callbacks::make<array_rule<strings_array_members, decltype (&transaction),
                                        decltype (&imported_names)>> (&import_db_, &transaction,
                                                                      &imported_names));
         parser.input (exported_names_stream.str ()).eof ();
@@ -405,9 +405,8 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
         xfixup_collection imported_xfixups;
         imported_xfixups.reserve (2);
 
-        auto parser = pstore::json::make_parser (
-            pstore::exchange::import_ns::callbacks::make<xfixup_array_root> (
-                &import_db_, &imported_names, &imported_xfixups));
+        auto parser = pstore::json::make_parser (import_ns::callbacks::make<xfixup_array_root> (
+            &import_db_, &imported_names, &imported_xfixups));
         parser.input (exported_fixups.str ()).eof ();
 
         // Check the result.
@@ -435,7 +434,7 @@ namespace {
         using transaction_lock = std::unique_lock<mock_mutex>;
 
         static decltype (auto) parse (std::string const & src, pstore::database * const db,
-                                      pstore::exchange::import_ns::name_mapping const & names,
+                                      pstore::exchange::import_ns::string_mapping const & names,
                                       not_null<external_fixup_collection *> const fixups) {
             using namespace pstore::exchange::import_ns;
             auto parser =
@@ -446,7 +445,7 @@ namespace {
         }
 
         static decltype (auto) parse (std::string const & src, pstore::database * const db,
-                                      pstore::exchange::import_ns::name_mapping const & names) {
+                                      pstore::exchange::import_ns::string_mapping const & names) {
             external_fixup_collection fixups;
             return parse (src, db, names, &fixups);
         }
@@ -462,7 +461,7 @@ TEST_F (ExternalFixupMembersImport, Name) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
 
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
 
     // The name key is missing altogether.
     {
@@ -496,7 +495,7 @@ TEST_F (ExternalFixupMembersImport, Type) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
 
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     // Add a single name with index 0.
     ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
 
@@ -523,7 +522,7 @@ TEST_F (ExternalFixupMembersImport, IsWeak) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
 
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     // Add a single name with index 0.
     ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
 
@@ -548,7 +547,7 @@ TEST_F (ExternalFixupMembersImport, IsWeak) {
 TEST_F (ExternalFixupMembersImport, Offset) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
 
     // The offset key is missing altogether.
@@ -581,7 +580,7 @@ TEST_F (ExternalFixupMembersImport, Offset) {
 TEST_F (ExternalFixupMembersImport, Addend) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
 
     {
@@ -602,7 +601,7 @@ TEST_F (ExternalFixupMembersImport, Addend) {
 }
 
 TEST_F (ExternalFixupMembersImport, BadMember) {
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     auto const & parser = this->parse (R"({ "bad":true })", &db_, imported_names);
     EXPECT_TRUE (parser.has_error ()) << "Expected the parse to fail";
     EXPECT_EQ (parser.last_error (),

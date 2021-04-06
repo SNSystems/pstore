@@ -30,7 +30,7 @@
 
 #include <bitset>
 
-#include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/import_strings.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/linked_definitions_section.hpp"
 

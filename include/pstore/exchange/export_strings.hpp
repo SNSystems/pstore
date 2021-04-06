@@ -1,10 +1,10 @@
-//===- include/pstore/exchange/export_names.hpp -----------*- mode: C++ -*-===//
-//*                             _                                      *
-//*   _____  ___ __   ___  _ __| |_   _ __   __ _ _ __ ___   ___  ___  *
-//*  / _ \ \/ / '_ \ / _ \| '__| __| | '_ \ / _` | '_ ` _ \ / _ \/ __| *
-//* |  __/>  <| |_) | (_) | |  | |_  | | | | (_| | | | | | |  __/\__ \ *
-//*  \___/_/\_\ .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
-//*           |_|                                                      *
+//===- include/pstore/exchange/export_strings.hpp ---------*- mode: C++ -*-===//
+//*                             _         _        _                  *
+//*   _____  ___ __   ___  _ __| |_   ___| |_ _ __(_)_ __   __ _ ___  *
+//*  / _ \ \/ / '_ \ / _ \| '__| __| / __| __| '__| | '_ \ / _` / __| *
+//* |  __/>  <| |_) | (_) | |  | |_  \__ \ |_| |  | | | | | (_| \__ \ *
+//*  \___/_/\_\ .__/ \___/|_|   \__| |___/\__|_|  |_|_| |_|\__, |___/ *
+//*           |_|                                          |___/      *
 //===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
@@ -13,8 +13,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_EXCHANGE_EXPORT_NAMES_HPP
-#define PSTORE_EXCHANGE_EXPORT_NAMES_HPP
+#ifndef PSTORE_EXCHANGE_EXPORT_STRINGS_HPP
+#define PSTORE_EXCHANGE_EXPORT_STRINGS_HPP
 
 #include <unordered_map>
 
@@ -40,41 +40,40 @@ namespace pstore {
                 return index_tag<pstore::trailer::indices::path>{};
             }
 
-
-            //*                                             _            *
-            //*  _ _  __ _ _ __  ___   _ __  __ _ _ __ _ __(_)_ _  __ _  *
-            //* | ' \/ _` | '  \/ -_) | '  \/ _` | '_ \ '_ \ | ' \/ _` | *
-            //* |_||_\__,_|_|_|_\___| |_|_|_\__,_| .__/ .__/_|_||_\__, | *
-            //*                                  |_|  |_|         |___/  *
-            /// The name_mapping class is used to associate the addresses of a set of strings with
+            //*     _       _                                  _            *
+            //*  __| |_ _ _(_)_ _  __ _   _ __  __ _ _ __ _ __(_)_ _  __ _  *
+            //* (_-<  _| '_| | ' \/ _` | | '  \/ _` | '_ \ '_ \ | ' \/ _` | *
+            //* /__/\__|_| |_|_||_\__, | |_|_|_\__,_| .__/ .__/_|_||_\__, | *
+            //*                   |___/             |_|  |_|         |___/  *
+            /// The string_mapping class is used to associate the addresses of a set of strings with
             /// an index in the exported names array. The enables the exported JSON to simply
             /// reference a string by index rather than having to emit the string each time.
-            class name_mapping {
+            class string_mapping {
             public:
                 template <typename trailer::indices Index>
-                name_mapping (database const & db, index_tag<Index>) {
+                string_mapping (database const & db, index_tag<Index>) {
                     auto const index = index::get_index<Index> (db);
-                    names_.reserve (index->size ());
+                    strings_.reserve (index->size ());
                 }
 
                 /// Record the address of a string at \p addr and assign it the next index in in the
-                /// exported names array.
+                /// exported strings array.
                 ///
                 /// \param addr The address of a string being exported.
                 void add (address addr);
 
                 /// Returns the number of known addresss to index mappings.
-                std::size_t size () const noexcept { return names_.size (); }
+                std::size_t size () const noexcept { return strings_.size (); }
 
                 /// Convert the address of the string at \p addr to the corresponding index in the
-                /// exported names array.
+                /// exported strings array.
                 ///
                 /// \param addr  The address of a string previously passed to the add() method.
                 /// \result The index of the string at \p addr in the exported names array.
                 std::uint64_t index (typed_address<indirect_string> const addr) const;
 
             private:
-                std::unordered_map<address, std::uint64_t> names_;
+                std::unordered_map<address, std::uint64_t> strings_;
             };
 
             //*            _ _        _       _               *
@@ -94,7 +93,7 @@ namespace pstore {
             ///   string as it is dumped.
             template <typename trailer::indices Index>
             void emit_strings (ostream_base & os, indent const ind, database const & db,
-                               unsigned const generation, name_mapping * const string_table) {
+                               unsigned const generation, string_mapping * const string_table) {
                 if (generation == 0U) {
                     os << "[]";
                     return;
@@ -132,4 +131,4 @@ namespace pstore {
     }     // end namespace exchange
 } // end namespace pstore
 
-#endif // PSTORE_EXCHANGE_EXPORT_NAMES_HPP
+#endif // PSTORE_EXCHANGE_EXPORT_STRINGS_HPP

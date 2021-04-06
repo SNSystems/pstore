@@ -23,12 +23,13 @@ namespace pstore {
         namespace export_ns {
 
             void emit_fragment (ostream_base & os, indent const ind, class database const & db,
-                                name_mapping const & names,
+                                string_mapping const & strings,
                                 std::shared_ptr<repo::fragment const> const & fragment,
                                 bool comments);
 
             void emit_fragments (ostream & os, indent ind, class database const & db,
-                                 unsigned generation, name_mapping const & names, bool comments);
+                                 unsigned generation, string_mapping const & strings,
+                                 bool comments);
 
         } // end namespace export_ns
     }     // end namespace exchange

@@ -46,8 +46,8 @@ namespace {
         std::error_code end_object () override;
 
     private:
-        pstore::exchange::import_ns::name_mapping names_;
-        pstore::exchange::import_ns::name_mapping paths_;
+        pstore::exchange::import_ns::string_mapping names_;
+        pstore::exchange::import_ns::string_mapping paths_;
 
         enum { version, id, transactions };
         std::bitset<transactions + 1> seen_;

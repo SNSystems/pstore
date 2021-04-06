@@ -25,7 +25,7 @@
 #include "pstore/exchange/import_compilation.hpp"
 #include "pstore/exchange/import_debug_line_header.hpp"
 #include "pstore/exchange/import_fragment.hpp"
-#include "pstore/exchange/import_names_array.hpp"
+#include "pstore/exchange/import_strings_array.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -35,8 +35,8 @@ namespace pstore {
             class transaction_contents final : public rule {
             public:
                 transaction_contents (not_null<context *> const ctxt,
-                                      not_null<name_mapping *> const names,
-                                      not_null<name_mapping *> const paths)
+                                      not_null<string_mapping *> const names,
+                                      not_null<string_mapping *> const paths)
                         : rule (ctxt)
                         , transaction_{begin (*ctxt->db)}
                         , names_{names}
@@ -57,8 +57,8 @@ namespace pstore {
                 std::error_code apply_patches ();
 
                 transaction<TransactionLock> transaction_;
-                not_null<name_mapping *> names_;
-                not_null<name_mapping *> paths_;
+                not_null<string_mapping *> names_;
+                not_null<string_mapping *> paths_;
             };
 
             // name
@@ -74,10 +74,10 @@ namespace pstore {
             std::error_code transaction_contents<TransactionLock>::key (std::string const & s) {
                 // TODO: check that "names" is the first key that we see.
                 if (s == "names") {
-                    return push_array_rule<names_array_members> (this, &transaction_, names_);
+                    return push_array_rule<strings_array_members> (this, &transaction_, names_);
                 }
                 if (s == "paths") {
-                    return push_array_rule<names_array_members> (this, &transaction_, paths_);
+                    return push_array_rule<strings_array_members> (this, &transaction_, paths_);
                 }
                 if (s == "debugline") {
                     return push_object_rule<debug_line_index> (this, &transaction_);
@@ -115,8 +115,8 @@ namespace pstore {
             class transaction_object final : public rule {
             public:
                 transaction_object (not_null<context *> const ctxt,
-                                    not_null<name_mapping *> const names,
-                                    not_null<name_mapping *> const paths)
+                                    not_null<string_mapping *> const names,
+                                    not_null<string_mapping *> const paths)
                         : rule (ctxt)
                         , names_{names}
                         , paths_{paths} {}
@@ -137,8 +137,8 @@ namespace pstore {
                 std::error_code end_array () override { return pop (); }
 
             private:
-                not_null<name_mapping *> const names_;
-                not_null<name_mapping *> const paths_;
+                not_null<string_mapping *> const names_;
+                not_null<string_mapping *> const paths_;
             };
 
             //*  _                             _   _                                    *
@@ -149,8 +149,8 @@ namespace pstore {
             template <typename TransactionLock>
             class transaction_array final : public rule {
             public:
-                transaction_array (not_null<context *> ctxt, not_null<name_mapping *> names,
-                                   not_null<name_mapping *> paths);
+                transaction_array (not_null<context *> ctxt, not_null<string_mapping *> names,
+                                   not_null<string_mapping *> paths);
                 transaction_array (transaction_array const &) = delete;
                 transaction_array (transaction_array &&) noexcept = delete;
 
@@ -163,16 +163,16 @@ namespace pstore {
                 std::error_code begin_array () override;
 
             private:
-                not_null<name_mapping *> const names_;
-                not_null<name_mapping *> const paths_;
+                not_null<string_mapping *> const names_;
+                not_null<string_mapping *> const paths_;
             };
 
             // (ctor)
             // ~~~~~~
             template <typename TransactionLock>
             transaction_array<TransactionLock>::transaction_array (
-                not_null<context *> ctxt, not_null<name_mapping *> const names,
-                not_null<name_mapping *> const paths)
+                not_null<context *> ctxt, not_null<string_mapping *> const names,
+                not_null<string_mapping *> const paths)
                     : rule (ctxt)
                     , names_{names}
                     , paths_{paths} {}

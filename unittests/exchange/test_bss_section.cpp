@@ -21,8 +21,8 @@
 
 #include <gtest/gtest.h>
 
-#include "pstore/exchange/import_names_array.hpp"
 #include "pstore/exchange/import_section_to_importer.hpp"
+#include "pstore/exchange/import_strings_array.hpp"
 #include "pstore/json/json.hpp"
 
 #include "add_export_strings.hpp"
@@ -69,7 +69,7 @@ TEST_F (BssSection, RoundTripForAnEmptySection) {
     static_assert (std::is_same<section_type, pstore::repo::bss_section>::value,
                    "Expected bss to map to bss_section");
 
-    pstore::exchange::export_ns::name_mapping exported_names{
+    pstore::exchange::export_ns::string_mapping exported_names{
         export_db_, pstore::exchange::export_ns::name_index_tag ()};
     pstore::repo::section_content exported_content{kind};
     std::string const exported_json =
@@ -80,7 +80,7 @@ TEST_F (BssSection, RoundTripForAnEmptySection) {
     std::vector<std::unique_ptr<pstore::repo::section_creation_dispatcher>> dispatchers;
     auto inserter = std::back_inserter (dispatchers);
 
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     pstore::repo::section_content imported_content;
 
     // Find the rule that is used to import sections represented by an instance of section_type.
@@ -108,7 +108,7 @@ TEST_F (BssSection, RoundTripForPopulated) {
     static_assert (std::is_same<section_type, pstore::repo::bss_section>::value,
                    "Expected bss to map to bss_section");
 
-    pstore::exchange::export_ns::name_mapping exported_names{
+    pstore::exchange::export_ns::string_mapping exported_names{
         export_db_, pstore::exchange::export_ns::name_index_tag ()};
 
     pstore::repo::section_content exported_content{kind};
@@ -122,7 +122,7 @@ TEST_F (BssSection, RoundTripForPopulated) {
 
     // Parse the exported names JSON. The resulting index-to-string mappings are then available via
     // imported_names.
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
 
     // Now set up the import. We'll build two objects: an instance of a section-creation-dispatcher
     // which knows how to build a BSS section and a section-content which will describe the
@@ -161,7 +161,7 @@ namespace {
 
     template <pstore::repo::section_kind Kind, typename OutputIterator>
     decltype (auto) parse (std::string const & src, pstore::database * const db,
-                           pstore::exchange::import_ns::name_mapping const & names,
+                           pstore::exchange::import_ns::string_mapping const & names,
                            OutputIterator * const inserter,                        // out
                            not_null<pstore::repo::section_content *> const content // out
     ) {
@@ -201,8 +201,8 @@ TEST_F (BssSectionImport, ZeroSizeSuccess) {
     pstore::repo::section_content imported_content;
 
     auto const & parser = parse<pstore::repo::section_kind::bss> (
-        R"({ "align":8, "size":0 })", &db_, pstore::exchange::import_ns::name_mapping{}, &inserter,
-        &imported_content);
+        R"({ "align":8, "size":0 })", &db_, pstore::exchange::import_ns::string_mapping{},
+        &inserter, &imported_content);
     ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
 
     EXPECT_EQ (imported_content.kind, pstore::repo::section_kind::bss);
@@ -219,7 +219,7 @@ TEST_F (BssSectionImport, MissingAlign) {
 
     // The align value is missing.
     auto const & parser = parse<pstore::repo::section_kind::bss> (
-        R"({ "size":16 })", &db_, pstore::exchange::import_ns::name_mapping{}, &inserter,
+        R"({ "size":16 })", &db_, pstore::exchange::import_ns::string_mapping{}, &inserter,
         &imported_content);
     ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
     EXPECT_EQ (imported_content.align, 1U);
@@ -233,8 +233,8 @@ TEST_F (BssSectionImport, BadAlignValue) {
 
     // The align value must be a power of 2.
     auto const & parser = parse<pstore::repo::section_kind::bss> (
-        R"({ "align":7, "size":16 })", &db_, pstore::exchange::import_ns::name_mapping{}, &inserter,
-        &imported_content);
+        R"({ "align":7, "size":16 })", &db_, pstore::exchange::import_ns::string_mapping{},
+        &inserter, &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
                make_error_code (pstore::exchange::import_ns::error::alignment_must_be_power_of_2));
@@ -247,7 +247,7 @@ TEST_F (BssSectionImport, BadAlignType) {
 
     // The align value is a boolean rather than an integer.
     auto const & parser = parse<pstore::repo::section_kind::bss> (
-        R"({ "align":true, "data":"" })", &db_, pstore::exchange::import_ns::name_mapping{},
+        R"({ "align":true, "data":"" })", &db_, pstore::exchange::import_ns::string_mapping{},
         &inserter, &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
@@ -261,7 +261,7 @@ TEST_F (BssSectionImport, MissingSize) {
 
     // The data value is missing.
     auto const & parser = parse<pstore::repo::section_kind::bss> (
-        R"({ "align":8 })", &db_, pstore::exchange::import_ns::name_mapping{}, &inserter,
+        R"({ "align":8 })", &db_, pstore::exchange::import_ns::string_mapping{}, &inserter,
         &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
@@ -275,7 +275,7 @@ TEST_F (BssSectionImport, BadSizeType) {
 
     // The data value is a boolean rather than a string.
     auto const & parser = parse<pstore::repo::section_kind::bss> (
-        R"({ "align":8, "size":true })", &db_, pstore::exchange::import_ns::name_mapping{},
+        R"({ "align":8, "size":true })", &db_, pstore::exchange::import_ns::string_mapping{},
         &inserter, &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),

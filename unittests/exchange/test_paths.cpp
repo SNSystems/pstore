@@ -13,8 +13,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "pstore/exchange/export_names.hpp"
-#include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/export_strings.hpp"
+#include "pstore/exchange/import_strings.hpp"
 
 // Standard library includes
 #include <array>
@@ -27,8 +27,8 @@
 // pstore includes
 #include "pstore/core/database.hpp"
 #include "pstore/core/indirect_string.hpp"
-#include "pstore/exchange/export_names.hpp"
-#include "pstore/exchange/import_names_array.hpp"
+#include "pstore/exchange/export_strings.hpp"
+#include "pstore/exchange/import_strings_array.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/json/json.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
@@ -68,11 +68,12 @@ namespace {
             callbacks::make<array_rule<ImportRule, Args...>> (db, args...));
     }
 
-    // Parse the exported names JSON. The resulting index-to-string mappings are then available via
-    // imported_names.
-    decltype (auto) import_name_parser (transaction * const transaction,
-                                        pstore::exchange::import_ns::name_mapping * const names) {
-        return make_json_array_parser<pstore::exchange::import_ns::names_array_members> (
+    // Parse the exported strings JSON. The resulting index-to-string mappings are then available
+    // via 'names'.
+    decltype (auto)
+    import_strings_parser (transaction * const transaction,
+                           pstore::exchange::import_ns::string_mapping * const names) {
+        return make_json_array_parser<pstore::exchange::import_ns::strings_array_members> (
             &transaction->db (), transaction, names);
     }
 
@@ -81,14 +82,14 @@ namespace {
 TEST_F (ExchangePaths, ExportEmpty) {
     using namespace pstore::exchange::export_ns;
 
-    name_mapping exported_names{export_db_, path_index_tag ()};
-    ostringstream exported_names_stream;
-    emit_strings<pstore::trailer::indices::path> (exported_names_stream, indent{}, export_db_,
+    string_mapping exported_strings{export_db_, path_index_tag ()};
+    ostringstream exported_strings_stream;
+    emit_strings<pstore::trailer::indices::path> (exported_strings_stream, indent{}, export_db_,
                                                   export_db_.get_current_revision (),
-                                                  &exported_names);
+                                                  &exported_strings);
 
-    EXPECT_EQ (exported_names_stream.str (), "[]");
-    EXPECT_EQ (exported_names.size (), 0U);
+    EXPECT_EQ (exported_strings_stream.str (), "[]");
+    EXPECT_EQ (exported_strings.size (), 0U);
 }
 
 TEST_F (ExchangePaths, ImportEmpty) {
@@ -97,9 +98,9 @@ TEST_F (ExchangePaths, ImportEmpty) {
     mock_mutex mutex;
     auto transaction = begin (import_db_, transaction_lock{mutex});
 
-    pstore::exchange::import_ns::name_mapping imported_paths;
+    pstore::exchange::import_ns::string_mapping imported_paths;
     {
-        auto name_parser = import_name_parser (&transaction, &imported_paths);
+        auto name_parser = import_strings_parser (&transaction, &imported_paths);
         name_parser.input (exported_paths).eof ();
         ASSERT_FALSE (name_parser.has_error ())
             << "JSON error was: " << name_parser.last_error ().message () << ' '
@@ -127,7 +128,7 @@ TEST_F (ExchangePaths, RoundTripForTwoPaths) {
             std::inserter (indir_strings, std::end (indir_strings)));
 
         // Write the paths that we just created as JSON.
-        pstore::exchange::export_ns::name_mapping exported_names{
+        pstore::exchange::export_ns::string_mapping exported_names{
             export_db_, pstore::exchange::export_ns::path_index_tag ()};
         pstore::exchange::export_ns::emit_strings<pstore::trailer::indices::path> (
             exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
@@ -135,7 +136,7 @@ TEST_F (ExchangePaths, RoundTripForTwoPaths) {
     }
 
     // The output from the import phase: the mapping from path index to address.
-    pstore::exchange::import_ns::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
 
     // The import phase. Read the JSON produced by the export phase and populate a database
     // accordingly.
@@ -143,7 +144,7 @@ TEST_F (ExchangePaths, RoundTripForTwoPaths) {
         mock_mutex mutex;
         auto transaction = begin (import_db_, transaction_lock{mutex});
         {
-            auto name_parser = import_name_parser (&transaction, &imported_names);
+            auto name_parser = import_strings_parser (&transaction, &imported_names);
             name_parser.input (exported_names_stream.str ()).eof ();
             ASSERT_FALSE (name_parser.has_error ())
                 << "JSON error was: " << name_parser.last_error ().message () << ' '

@@ -24,9 +24,9 @@ set (pstore_exchange_includes
     export_fixups.hpp
     export_fragment.hpp
     export_ostream.hpp
-    export_names.hpp
     export_paths.hpp
     export_section.hpp
+    export_strings.hpp
     import_bss_section.hpp
     import_compilation.hpp
     import_context.hpp
@@ -37,12 +37,12 @@ set (pstore_exchange_includes
     import_fragment.hpp
     import_generic_section.hpp
     import_linked_definitions_section.hpp
-    import_names.hpp
-    import_names_array.hpp
     import_non_terminals.hpp
     import_root.hpp
     import_rule.hpp
     import_section_to_importer.hpp
+    import_strings_array.hpp
+    import_strings.hpp
     import_terminals.hpp
     import_transaction.hpp
     import_uuid.hpp
@@ -53,18 +53,18 @@ set (pstore_exchange_sources
     export_emit.cpp
     export_fixups.cpp
     export_fragment.cpp
-    export_names.cpp
-    export_paths.cpp
     export_ostream.cpp
+    export_paths.cpp
+    export_strings.cpp
     import_compilation.cpp
     import_debug_line_header.cpp
     import_error.cpp
     import_fixups.cpp
     import_fragment.cpp
-    import_names.cpp
-    import_names_array.cpp
     import_root.cpp
     import_rule.cpp
+    import_strings.cpp
+    import_strings_array.cpp
     import_terminals.cpp
     import_uuid.cpp
 )

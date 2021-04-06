@@ -24,7 +24,7 @@
 
 #include <bitset>
 
-#include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/import_strings.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 
@@ -36,7 +36,7 @@ namespace pstore {
             class bss_section : public rule {
             public:
                 bss_section (not_null<context *> const ctxt, repo::section_kind const kind,
-                             not_null<name_mapping const *> const /*names*/,
+                             not_null<string_mapping const *> const /*names*/,
                              not_null<repo::section_content *> const content,
                              not_null<OutputIterator *> const out) noexcept
                         : rule (ctxt)

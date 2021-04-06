@@ -75,7 +75,7 @@ namespace pstore {
             // ~~~~~~
             fragment_sections::fragment_sections (not_null<context *> const ctxt,
                                                   not_null<transaction_base *> const transaction,
-                                                  not_null<name_mapping const *> const names,
+                                                  not_null<string_mapping const *> const names,
                                                   not_null<index::digest const *> const digest)
                     : rule (ctxt)
                     , transaction_{transaction}
@@ -151,7 +151,7 @@ namespace pstore {
             // ~~~~~~
             fragment_index::fragment_index (not_null<context *> const ctxt,
                                             not_null<transaction_base *> const transaction,
-                                            not_null<name_mapping const *> const names)
+                                            not_null<string_mapping const *> const names)
                     : rule (ctxt)
                     , transaction_{transaction}
                     , names_{names} {

@@ -59,13 +59,13 @@ namespace pstore {
                 struct section_content_exporter<repo::generic_section> {
                     template <typename OStream>
                     OStream & operator() (OStream & os, indent const ind, class database const & db,
-                                          name_mapping const & names,
+                                          string_mapping const & strings,
                                           repo::generic_section const & content,
                                           bool const comments) {
                         return emit_object (
                             os, ind, content,
-                            [&db, &names, comments] (OStream & os1, indent const ind1,
-                                                     repo::generic_section const & content1) {
+                            [&db, &strings, comments] (OStream & os1, indent const ind1,
+                                                       repo::generic_section const & content1) {
                                 auto const * separator = "";
                                 {
                                     auto const align = content1.align ();
@@ -98,7 +98,7 @@ namespace pstore {
                                         content1.xfixups ();
                                     if (!xfx.empty ()) {
                                         os1 << ",\n" << ind1 << R"("xfixups":)";
-                                        emit_external_fixups (os1, ind1, db, names,
+                                        emit_external_fixups (os1, ind1, db, strings,
                                                               std::begin (xfx), std::end (xfx),
                                                               comments);
                                     }
@@ -115,7 +115,7 @@ namespace pstore {
                     template <typename OStream>
                     OStream & operator() (OStream & os, indent const ind,
                                           class database const & /*db*/,
-                                          name_mapping const & /*names*/, bsss const & content,
+                                          string_mapping const & /*strings*/, bsss const & content,
                                           bool const /*comments*/) {
                         return emit_object (
                             os, ind, content,
@@ -143,7 +143,7 @@ namespace pstore {
                     template <typename OStream>
                     OStream & operator() (OStream & os, indent const ind,
                                           class database const & /*db*/,
-                                          name_mapping const & /*names*/, dls const & content,
+                                          string_mapping const & /*strings*/, dls const & content,
                                           bool const /*comments*/) {
                         return emit_object (
                             os, ind, content,
@@ -180,7 +180,7 @@ namespace pstore {
                     template <typename OStream>
                     OStream &
                     operator() (OStream & os, indent const ind, class database const & /*db*/,
-                                name_mapping const & /*names*/,
+                                string_mapping const & /*strings*/,
                                 repo::linked_definitions const & content, bool const /*comments*/) {
                         return emit_array (os, ind, std::begin (content), std::end (content),
                                            [] (OStream & os1, indent const ind1,
@@ -197,9 +197,9 @@ namespace pstore {
                 struct section_exporter {
                     template <typename OStream>
                     OStream & operator() (OStream & os, indent const ind, class database const & db,
-                                          name_mapping const & names, Content const & content,
+                                          string_mapping const & strings, Content const & content,
                                           bool comments) {
-                        return section_content_exporter<Content>{}(os, ind, db, names, content,
+                        return section_content_exporter<Content>{}(os, ind, db, strings, content,
                                                                    comments);
                     }
                 };
@@ -209,9 +209,9 @@ namespace pstore {
             template <repo::section_kind Kind, typename OStream,
                       typename Content = typename repo::enum_to_section<Kind>::type>
             OStream & emit_section (OStream & os, indent const ind, class database const & db,
-                                    name_mapping const & names, Content const & content,
+                                    string_mapping const & strings, Content const & content,
                                     bool const comments) {
-                return details::section_exporter<Kind>{}(os, ind, db, names, content, comments);
+                return details::section_exporter<Kind>{}(os, ind, db, strings, content, comments);
             }
 
         } // end namespace export_ns

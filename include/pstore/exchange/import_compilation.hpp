@@ -27,8 +27,8 @@
 
 #include <bitset>
 
-#include "pstore/exchange/import_names.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
+#include "pstore/exchange/import_strings.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/compilation.hpp"
 
@@ -49,7 +49,7 @@ namespace pstore {
                 using container = std::vector<repo::definition>;
 
                 definition (not_null<context *> ctxt, not_null<container *> definitions,
-                            not_null<name_mapping const *> names,
+                            not_null<string_mapping const *> names,
                             fragment_index_pointer const & fragments);
                 definition (definition const &) = delete;
                 definition (definition &&) noexcept = delete;
@@ -69,7 +69,7 @@ namespace pstore {
 
             private:
                 not_null<container *> const definitions_;
-                not_null<name_mapping const *> const names_;
+                not_null<string_mapping const *> const names_;
                 fragment_index_pointer const fragments_;
 
                 enum { digest_index, name_index, linkage_index, visibility_index, last_index };
@@ -91,7 +91,7 @@ namespace pstore {
             public:
                 definition_object (not_null<context *> ctxt,
                                    not_null<definition::container *> definitions,
-                                   not_null<name_mapping const *> names,
+                                   not_null<string_mapping const *> names,
                                    fragment_index_pointer const & fragments);
                 definition_object (definition_object const &) = delete;
                 definition_object (definition_object &&) noexcept = delete;
@@ -108,7 +108,7 @@ namespace pstore {
 
             private:
                 not_null<definition::container *> const definitions_;
-                not_null<name_mapping const *> const names_;
+                not_null<string_mapping const *> const names_;
                 fragment_index_pointer const fragments_;
             };
 
@@ -127,7 +127,7 @@ namespace pstore {
                 /// \param fragments  The fragment index.
                 /// \param digest  The compilation's digest.
                 compilation (not_null<context *> ctxt, not_null<transaction_base *> transaction,
-                             not_null<name_mapping const *> names,
+                             not_null<string_mapping const *> names,
                              fragment_index_pointer const & fragments,
                              index::digest const & digest);
                 compilation (compilation const &) = delete;
@@ -147,7 +147,7 @@ namespace pstore {
                 not_null<transaction_base *> const transaction_;
                 /// An object for converting string indices in the JSON (such as the triple string)
                 /// to the corresponding string in the database name index.
-                not_null<name_mapping const *> const names_;
+                not_null<string_mapping const *> const names_;
                 /// The fragment index.
                 fragment_index_pointer const fragments_;
                 /// The compilation digest.
@@ -173,7 +173,7 @@ namespace pstore {
             public:
                 compilations_index (not_null<context *> ctxt,
                                     not_null<transaction_base *> transaction,
-                                    not_null<name_mapping const *> names);
+                                    not_null<string_mapping const *> names);
                 compilations_index (compilations_index const &) = delete;
                 compilations_index (compilations_index &&) noexcept = delete;
                 ~compilations_index () noexcept override = default;
@@ -187,7 +187,7 @@ namespace pstore {
 
             private:
                 not_null<transaction_base *> const transaction_;
-                not_null<name_mapping const *> const names_;
+                not_null<string_mapping const *> const names_;
                 fragment_index_pointer const fragments_;
             };
 

@@ -78,8 +78,8 @@ namespace pstore {
         namespace export_ns {
 
             void emit_database (database & db, ostream & os, bool const comments) {
-                name_mapping string_table{db, name_index_tag ()};
-                name_mapping path_table{db, path_index_tag ()};
+                string_mapping string_table{db, name_index_tag ()};
+                string_mapping path_table{db, path_index_tag ()};
 
                 auto const ind = indent{}.next ();
                 os << "{\n";

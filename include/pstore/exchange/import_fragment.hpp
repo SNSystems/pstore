@@ -66,7 +66,7 @@ namespace pstore {
             public:
                 fragment_sections (not_null<context *> const ctxt,
                                    not_null<transaction_base *> const transaction,
-                                   not_null<name_mapping const *> const names,
+                                   not_null<string_mapping const *> const names,
                                    not_null<index::digest const *> const digest);
 
                 gsl::czstring name () const noexcept override;
@@ -75,7 +75,7 @@ namespace pstore {
 
             private:
                 not_null<transaction_base *> const transaction_;
-                not_null<name_mapping const *> const names_;
+                not_null<string_mapping const *> const names_;
                 not_null<index::digest const *> const digest_;
 
                 std::array<repo::section_content, repo::num_section_kinds> contents_;
@@ -125,7 +125,7 @@ namespace pstore {
             class fragment_index final : public rule {
             public:
                 fragment_index (not_null<context *> ctxt, not_null<transaction_base *> transaction,
-                                not_null<name_mapping const *> names);
+                                not_null<string_mapping const *> names);
                 fragment_index (fragment_index const &) = delete;
                 fragment_index (fragment_index &&) noexcept = delete;
 
@@ -140,7 +140,7 @@ namespace pstore {
 
             private:
                 not_null<transaction_base *> const transaction_;
-                not_null<name_mapping const *> const names_;
+                not_null<string_mapping const *> const names_;
 
                 std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
                 index::digest digest_;

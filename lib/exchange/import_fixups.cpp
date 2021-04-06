@@ -50,7 +50,7 @@ namespace pstore {
             // (ctor)
             // ~~~~~~
             internal_fixup::internal_fixup (not_null<context *> const ctxt,
-                                            not_null<name_mapping const *> const /*names*/,
+                                            not_null<string_mapping const *> const /*names*/,
                                             fixups_pointer const fixups)
                     : rule (ctxt)
                     , fixups_{fixups} {}
@@ -102,7 +102,7 @@ namespace pstore {
             // (ctor)
             // ~~~~~~
             external_fixup::external_fixup (not_null<context *> const ctxt,
-                                            not_null<name_mapping const *> const names,
+                                            not_null<string_mapping const *> const names,
                                             fixups_pointer const fixups)
                     : rule (ctxt)
                     , names_{names}

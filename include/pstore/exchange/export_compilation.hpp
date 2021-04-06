@@ -24,7 +24,7 @@
 #ifndef PSTORE_EXCHANGE_EXPORT_COMPILATION_HPP
 #define PSTORE_EXCHANGE_EXPORT_COMPILATION_HPP
 
-#include "pstore/exchange/export_names.hpp"
+#include "pstore/exchange/export_strings.hpp"
 #include "pstore/mcrepo/compilation.hpp"
 
 namespace pstore {
@@ -35,10 +35,10 @@ namespace pstore {
 
             void emit_compilation (ostream_base & os, indent const ind, database const & db,
                                    repo::compilation const & compilation,
-                                   name_mapping const & names, bool comments);
+                                   string_mapping const & strings, bool comments);
 
             void emit_compilation_index (ostream_base & os, indent const ind, database const & db,
-                                         unsigned const generation, name_mapping const & names,
+                                         unsigned const generation, string_mapping const & strings,
                                          bool comments);
 
         } // end namespace export_ns

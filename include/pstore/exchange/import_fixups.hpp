@@ -20,7 +20,7 @@
 
 #include <bitset>
 
-#include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/import_strings.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
 
@@ -70,7 +70,7 @@ namespace pstore {
             public:
                 using fixups_pointer = not_null<std::vector<repo::internal_fixup> *>;
 
-                internal_fixup (not_null<context *> ctxt, not_null<name_mapping const *> names,
+                internal_fixup (not_null<context *> ctxt, not_null<string_mapping const *> names,
                                 fixups_pointer fixups);
                 internal_fixup (internal_fixup const &) = delete;
                 internal_fixup (internal_fixup &&) noexcept = delete;
@@ -107,7 +107,7 @@ namespace pstore {
             public:
                 using fixups_pointer = not_null<std::vector<repo::external_fixup> *>;
 
-                external_fixup (not_null<context *> ctxt, not_null<name_mapping const *> names,
+                external_fixup (not_null<context *> ctxt, not_null<string_mapping const *> names,
                                 fixups_pointer fixups);
                 external_fixup (external_fixup const &) = delete;
                 external_fixup (external_fixup &&) noexcept = delete;
@@ -124,7 +124,7 @@ namespace pstore {
             private:
                 enum { name_index, type, is_weak, offset, addend };
                 std::bitset<addend + 1> seen_;
-                not_null<name_mapping const *> names_;
+                not_null<string_mapping const *> names_;
                 fixups_pointer const fixups_;
 
                 std::uint64_t name_ = 0;
@@ -146,7 +146,7 @@ namespace pstore {
                 using fixups_pointer = not_null<std::vector<Fixup> *>;
 
                 fixups_object (not_null<context *> const ctxt,
-                               not_null<name_mapping const *> const names,
+                               not_null<string_mapping const *> const names,
                                fixups_pointer const fixups)
                         : rule (ctxt)
                         , names_{names}
@@ -166,7 +166,7 @@ namespace pstore {
                 std::error_code end_array () override { return pop (); }
 
             private:
-                not_null<name_mapping const *> const names_;
+                not_null<string_mapping const *> const names_;
                 fixups_pointer const fixups_;
             };
 

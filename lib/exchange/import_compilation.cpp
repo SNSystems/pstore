@@ -34,7 +34,7 @@ namespace pstore {
             // ~~~~
             definition::definition (not_null<context *> const ctxt,
                                     not_null<container *> const definitions,
-                                    not_null<name_mapping const *> const names,
+                                    not_null<string_mapping const *> const names,
                                     fragment_index_pointer const & fragments)
                     : rule (ctxt)
                     , definitions_{definitions}
@@ -142,7 +142,7 @@ namespace pstore {
             // ~~~~~~
             definition_object::definition_object (
                 not_null<context *> const ctxt, not_null<definition::container *> const definitions,
-                not_null<name_mapping const *> const names,
+                not_null<string_mapping const *> const names,
                 fragment_index_pointer const & fragments)
                     : rule (ctxt)
                     , definitions_{definitions}
@@ -173,7 +173,7 @@ namespace pstore {
             // ~~~~~~
             compilation::compilation (not_null<context *> const ctxt,
                                       not_null<transaction_base *> const transaction,
-                                      not_null<name_mapping const *> const names,
+                                      not_null<string_mapping const *> const names,
                                       fragment_index_pointer const & fragments,
                                       index::digest const & digest)
                     : rule (ctxt)
@@ -231,7 +231,7 @@ namespace pstore {
             // ~~~~~~
             compilations_index::compilations_index (not_null<context *> const ctxt,
                                                     not_null<transaction_base *> const transaction,
-                                                    not_null<name_mapping const *> const names)
+                                                    not_null<string_mapping const *> const names)
                     : rule (ctxt)
                     , transaction_{transaction}
                     , names_{names}

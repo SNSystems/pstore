@@ -1,10 +1,10 @@
-//===- lib/exchange/import_names.cpp --------------------------------------===//
-//*  _                            _                                      *
-//* (_)_ __ ___  _ __   ___  _ __| |_   _ __   __ _ _ __ ___   ___  ___  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __| | '_ \ / _` | '_ ` _ \ / _ \/ __| *
-//* | | | | | | | |_) | (_) | |  | |_  | | | | (_| | | | | | |  __/\__ \ *
-//* |_|_| |_| |_| .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
-//*             |_|                                                      *
+//===- lib/exchange/import_strings.cpp ------------------------------------===//
+//*  _                            _         _        _                  *
+//* (_)_ __ ___  _ __   ___  _ __| |_   ___| |_ _ __(_)_ __   __ _ ___  *
+//* | | '_ ` _ \| '_ \ / _ \| '__| __| / __| __| '__| | '_ \ / _` / __| *
+//* | | | | | | | |_) | (_) | |  | |_  \__ \ |_| |  | | | | | (_| \__ \ *
+//* |_|_| |_| |_| .__/ \___/|_|   \__| |___/\__|_|  |_|_| |_|\__, |___/ *
+//*             |_|                                          |___/      *
 //===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
@@ -16,7 +16,7 @@
 /// \file import_names.cpp
 /// \brief Implements the class which maps from string indexes to their store address.
 
-#include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/import_strings.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -25,7 +25,7 @@ namespace pstore {
             // lookup
             // ~~~~~~
             error_or<typed_address<indirect_string>>
-            name_mapping::lookup (std::uint64_t const index) const {
+            string_mapping::lookup (std::uint64_t const index) const {
                 using result_type = error_or<typed_address<indirect_string>>;
 
                 auto const pos = lookup_.find (index);
@@ -36,8 +36,8 @@ namespace pstore {
             // add string
             // ~~~~~~~~~~
             std::error_code
-            name_mapping::add_string (not_null<transaction_base *> const transaction,
-                                      std::string const & str) {
+            string_mapping::add_string (not_null<transaction_base *> const transaction,
+                                        std::string const & str) {
                 strings_.push_back (str);
                 std::string const & x = strings_.back ();
 
@@ -59,7 +59,7 @@ namespace pstore {
 
             // flush
             // ~~~~~
-            void name_mapping::flush (not_null<transaction_base *> const transaction) {
+            void string_mapping::flush (not_null<transaction_base *> const transaction) {
                 adder_.flush (*transaction);
             }
 

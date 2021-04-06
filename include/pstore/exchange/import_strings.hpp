@@ -1,10 +1,10 @@
-//===- include/pstore/exchange/import_names.hpp -----------*- mode: C++ -*-===//
-//*  _                            _                                      *
-//* (_)_ __ ___  _ __   ___  _ __| |_   _ __   __ _ _ __ ___   ___  ___  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __| | '_ \ / _` | '_ ` _ \ / _ \/ __| *
-//* | | | | | | | |_) | (_) | |  | |_  | | | | (_| | | | | | |  __/\__ \ *
-//* |_|_| |_| |_| .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
-//*             |_|                                                      *
+//===- include/pstore/exchange/import_strings.hpp ---------*- mode: C++ -*-===//
+//*  _                            _         _        _                  *
+//* (_)_ __ ___  _ __   ___  _ __| |_   ___| |_ _ __(_)_ __   __ _ ___  *
+//* | | '_ ` _ \| '_ \ / _ \| '__| __| / __| __| '__| | '_ \ / _` / __| *
+//* | | | | | | | |_) | (_) | |  | |_  \__ \ |_| |  | | | | | (_| \__ \ *
+//* |_|_| |_| |_| .__/ \___/|_|   \__| |___/\__|_|  |_|_| |_|\__, |___/ *
+//*             |_|                                          |___/      *
 //===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
@@ -23,8 +23,8 @@
 /// The class in this module is responsible for gathering the strings in that exported array and
 /// then for converting a reference index to the string's indirect address in the store.
 
-#ifndef PSTORE_EXCHANGE_IMPORT_NAMES_HPP
-#define PSTORE_EXCHANGE_IMPORT_NAMES_HPP
+#ifndef PSTORE_EXCHANGE_IMPORT_STRINGS_HPP
+#define PSTORE_EXCHANGE_IMPORT_STRINGS_HPP
 
 #include <unordered_map>
 
@@ -37,16 +37,16 @@ namespace pstore {
     namespace exchange {
         namespace import_ns {
 
-            class name_mapping {
+            class string_mapping {
             public:
-                name_mapping () = default;
-                name_mapping (name_mapping const &) = delete;
-                name_mapping (name_mapping &&) noexcept = delete;
+                string_mapping () = default;
+                string_mapping (string_mapping const &) = delete;
+                string_mapping (string_mapping &&) noexcept = delete;
 
-                ~name_mapping () noexcept = default;
+                ~string_mapping () noexcept = default;
 
-                name_mapping & operator= (name_mapping const &) = delete;
-                name_mapping & operator= (name_mapping &&) noexcept = delete;
+                string_mapping & operator= (string_mapping const &) = delete;
+                string_mapping & operator= (string_mapping &&) noexcept = delete;
 
                 std::error_code add_string (not_null<transaction_base *> transaction,
                                             std::string const & str);
@@ -71,4 +71,4 @@ namespace pstore {
     }     // end namespace exchange
 } // namespace pstore
 
-#endif // PSTORE_EXCHANGE_IMPORT_NAMES_HPP
+#endif // PSTORE_EXCHANGE_IMPORT_STRINGS_HPP

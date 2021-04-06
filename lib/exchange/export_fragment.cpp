@@ -20,7 +20,7 @@ namespace pstore {
         namespace export_ns {
 
             void emit_fragment (ostream_base & os, indent const ind, class database const & db,
-                                name_mapping const & names,
+                                string_mapping const & strings,
                                 std::shared_ptr<repo::fragment const> const & fragment,
                                 bool const comments) {
                 os << "{\n";
@@ -31,7 +31,7 @@ namespace pstore {
                        << R"(":)";
 #define X(a)                                                                                       \
     case repo::section_kind::a:                                                                    \
-        emit_section<repo::section_kind::a> (os, object_indent, db, names,                         \
+        emit_section<repo::section_kind::a> (os, object_indent, db, strings,                       \
                                              fragment->at<pstore::repo::section_kind::a> (),       \
                                              comments);                                            \
         break;
@@ -49,7 +49,7 @@ namespace pstore {
             }
 
             void emit_fragments (ostream & os, indent const ind, database const & db,
-                                 unsigned const generation, name_mapping const & names,
+                                 unsigned const generation, string_mapping const & strings,
                                  bool const comments) {
                 auto const fragments = index::get_index<trailer::indices::fragment> (db);
                 if (!fragments->empty ()) {
@@ -61,7 +61,7 @@ namespace pstore {
                         os << fragment_sep << ind;
                         emit_digest (os, kvp.first);
                         os << ':';
-                        emit_fragment (os, ind, db, names, db.getro (kvp.second), comments);
+                        emit_fragment (os, ind, db, strings, db.getro (kvp.second), comments);
                         fragment_sep = ",\n";
                     };
 

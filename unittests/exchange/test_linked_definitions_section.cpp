@@ -80,7 +80,7 @@ namespace {
 
         transaction.commit ();
 
-        exchange::export_ns::name_mapping exported_names{
+        exchange::export_ns::string_mapping exported_names{
             export_db_, pstore::exchange::export_ns::name_index_tag ()};
         exchange::export_ns::ostringstream str;
         emit_fragment (str, exchange::export_ns::indent{}, export_db_, exported_names,
@@ -164,7 +164,7 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
         mock_mutex mutex;
         auto transaction = begin (import_db_, transaction_lock{mutex});
         {
-            exchange::import_ns::name_mapping imported_names;
+            exchange::import_ns::string_mapping imported_names;
             auto parser = make_json_object_parser<exchange::import_ns::fragment_sections> (
                 &import_db_, &transaction, &imported_names, &imported_digest);
             parser.input (exported_json).eof ();

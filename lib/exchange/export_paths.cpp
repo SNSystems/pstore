@@ -31,7 +31,7 @@ namespace pstore {
 
             void emit_paths (ostream_base & os, indent const ind, database const & db,
                              unsigned const generation,
-                             gsl::not_null<name_mapping *> const string_table) {
+                             gsl::not_null<string_mapping *> const string_table) {
                 auto const paths_index = index::get_index<trailer::indices::path> (db);
                 PSTORE_ASSERT (generation > 0);
 
