@@ -20,6 +20,7 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file sstring_view_archive.hpp
+/// \brief Defines serializer<> specializations for strings.
 
 #ifndef PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP
 #define PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP
@@ -33,10 +34,20 @@
 namespace pstore {
     namespace serialize {
 
+        /// \param db  The database containing the string to be read.
+        /// \param addr  The pstore address of the string value.
+        /// \param length  The number of bytes occupied by the string.
+        /// \returns  A sstring_view<> object which provides a std::string_view-like view of the
+        ///   store-based string.
+        inline sstring_view<std::shared_ptr<char const>>
+        read_string_view (database const & db, typed_address<char> addr, std::size_t const length) {
+            return sstring_view<std::shared_ptr<char const>> (db.getro (addr, length), length);
+        }
+
         /// \brief A serializer for sstring_view<std::shared_ptr<char const>>.
         template <>
-        struct serializer<::pstore::sstring_view<std::shared_ptr<char const>>> {
-            using value_type = ::pstore::sstring_view<std::shared_ptr<char const>>;
+        struct serializer<sstring_view<std::shared_ptr<char const>>> {
+            using value_type = sstring_view<std::shared_ptr<char const>>;
 
             template <typename Archive>
             static auto write (Archive && archive, value_type const & str)
@@ -47,7 +58,7 @@ namespace pstore {
             /// \brief Reads an instance of `sstring_view` from an archiver.
             /// \param archive  The Archiver from which a string will be read.
             /// \param str  A reference to uninitialized memory that is suitable for a new string
-            /// instance.
+            ///   instance.
             /// \note This function only reads from the database.
             static void read (archive::database_reader && archive, value_type & str) {
                 readsv (archive, str);
@@ -61,16 +72,15 @@ namespace pstore {
             static void readsv (DBReader && archive, value_type & str) {
                 std::size_t const length =
                     string_helper::read_length (std::forward<DBReader> (archive));
-                new (&str) value_type (
-                    archive.get_db ().getro (typed_address<char> (archive.get_address ()), length),
-                    length);
+                new (&str) value_type (read_string_view (
+                    archive.get_db (), typed_address<char> (archive.get_address ()), length));
                 archive.skip (length);
             }
         };
 
         template <>
-        struct serializer<::pstore::sstring_view<char const *>> {
-            using value_type = ::pstore::sstring_view<char const *>;
+        struct serializer<sstring_view<char const *>> {
+            using value_type = sstring_view<char const *>;
 
             template <typename Archive>
             static auto write (Archive && archive, value_type const & str)
@@ -83,29 +93,27 @@ namespace pstore {
         /// Any two sstring_view instances with the same Pointer type have the same serialized
         /// representation.
         template <typename Pointer>
-        struct is_compatible<::pstore::sstring_view<Pointer>, ::pstore::sstring_view<Pointer>>
-                : std::true_type {};
+        struct is_compatible<sstring_view<Pointer>, sstring_view<Pointer>> : std::true_type {};
 
         /// Any two sstring_view instances with the different Pointer type have the same serialized
         /// representation.
         template <typename Pointer1, typename Pointer2>
-        struct is_compatible<::pstore::sstring_view<Pointer1>, ::pstore::sstring_view<Pointer2>>
-                : std::true_type {};
+        struct is_compatible<sstring_view<Pointer1>, sstring_view<Pointer2>> : std::true_type {};
 
         /// sstring_view instances are serialized using the same format as std::string.
         template <typename Pointer1>
-        struct is_compatible<::pstore::sstring_view<Pointer1>, std::string> : std::true_type {};
+        struct is_compatible<sstring_view<Pointer1>, std::string> : std::true_type {};
 
         /// sstring_view instances are serialized using the same format as std::string.
         template <typename Pointer1>
-        struct is_compatible<std::string, ::pstore::sstring_view<Pointer1>> : std::true_type {};
+        struct is_compatible<std::string, sstring_view<Pointer1>> : std::true_type {};
 
 
         /// \brief A serializer for sstring_view const. It delegates both read and write operations
         ///        to the sstring_view serializer.
         template <typename PointerType>
-        struct serializer<::pstore::sstring_view<PointerType> const> {
-            using value_type = ::pstore::sstring_view<PointerType>;
+        struct serializer<sstring_view<PointerType> const> {
+            using value_type = sstring_view<PointerType>;
             template <typename Archive>
             static auto write (Archive && archive, value_type const & str)
                 -> archive_result_type<Archive> {
@@ -117,7 +125,7 @@ namespace pstore {
             }
         };
 
-    } // namespace serialize
-} // namespace pstore
+    } // end namespace serialize
+} // end namespace pstore
 
 #endif // PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP

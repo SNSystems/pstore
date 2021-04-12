@@ -49,8 +49,8 @@ namespace pstore {
                 : db_{db}
                 , is_pointer_{false}
                 , address_{addr.absolute ()} {}
-        indirect_string (database const & db,
-                         gsl::not_null<raw_sstring_view const *> const str) noexcept
+        constexpr indirect_string (database const & db,
+                                   gsl::not_null<raw_sstring_view const *> const str) noexcept
                 : db_{db}
                 , is_pointer_{true}
                 , str_{str} {
@@ -80,8 +80,16 @@ namespace pstore {
             return this->as_string_view (&owner).to_string ();
         }
 
-        /// \returns True is the pointee is in the store rather than on the heap.
-        bool is_in_store () const noexcept { return !is_pointer_ && !(address_ & in_heap_mask); }
+        /// \returns True if the pointee is in the store rather than on the heap.
+        constexpr bool is_in_store () const noexcept {
+            return !is_pointer_ && !(address_ & in_heap_mask);
+        }
+
+        /// \returns The pstore address of the start of the string instance.
+        constexpr address::value_type in_store_address () const noexcept {
+            PSTORE_ASSERT (this->is_in_store ());
+            return address_;
+        }
 
         /// Write the body of a string and updates the indirect pointer so that it points to that
         /// body.
@@ -109,7 +117,7 @@ namespace pstore {
         /// in which case it is the heap address of the string.
         bool is_pointer_;
         union {
-            std::uint64_t address_;        ///< The in-store/in-heap string address.
+            address::value_type address_;  ///< The in-store/in-heap string address.
             raw_sstring_view const * str_; ///< The address of the in-heap string.
         };
     };
