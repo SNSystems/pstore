@@ -10,6 +10,13 @@
             "maximum": 255
         },
 
+        "unsigned32": {
+            "description": "An unsigned 32-bit integer",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+        },
+
         "unsigned64": {
             "description": "An unsigned 64-bit integer (no max declared!)",
             "type": "integer",
@@ -144,11 +151,11 @@
             "description": "An array of linked definitions",
             "type": "array",
             "items": {
-                "description": "An external (extra-fragment) fixup",
+                "description": "Represents the definitions linked to a fragment",
                 "type": "object",
                 "properties": {
                     "compilation": { "$ref": "#/definitions/digest" },
-                    "index": { "type": "number" }
+                    "index": { "$ref": "#/definitions/unsigned32" }
                 },
                 "required": ["compilation", "index"],
                 "additionalProperties": false
@@ -216,13 +223,13 @@
                                     "data": { "$ref": "#/definitions/generic_section" },
                                     "bss": { "$ref": "#/definitions/bss_section" },
                                     "rel_ro": { "$ref": "#/definitions/generic_section" },
-                                    "mergeable_1_byte_c_string": {},
-                                    "mergeable_2_byte_c_string": {},
-                                    "mergeable_4_byte_c_string": {},
-                                    "mergeable_const_4": {},
-                                    "mergeable_const_8": {},
-                                    "mergeable_const_16": {},
-                                    "mergeable_const_32": {},
+                                    "mergeable_1_byte_c_string": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_2_byte_c_string": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_4_byte_c_string": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_const_4": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_const_8": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_const_16": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_const_32": { "$ref": "#/definitions/generic_section" },
                                     "read_only": { "$ref": "#/definitions/generic_section" },
                                     "thread_data": { "$ref": "#/definitions/generic_section" },
                                     "thread_bss": { "$ref": "#/definitions/bss_section" },
