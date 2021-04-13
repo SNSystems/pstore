@@ -86,9 +86,9 @@ namespace pstore {
         }
 
         /// \returns The pstore address of the start of the string instance.
-        constexpr address::value_type in_store_address () const noexcept {
+        constexpr address in_store_address () const noexcept {
             PSTORE_ASSERT (this->is_in_store ());
-            return address_;
+            return address{address_};
         }
 
         /// Write the body of a string and updates the indirect pointer so that it points to that
@@ -277,12 +277,28 @@ namespace pstore {
     //* |_||_\___|_| .__/\___|_|   |_|  \_,_|_||_\__|\__|_\___/_||_| *
     //*            |_|                                               *
 
-    /// \param db  The database containing the string to be read.
+    /// \param db  The database containing the indirect string to be read.
     /// \param addr  The address of the indirect string pointer.
     /// \param owner  A pointer to the object which will own the memory containing the string.
     /// \result  A view of the requested string.
-    auto get_sstring_view (database const & db, typed_address<indirect_string> const addr,
-                           gsl::not_null<shared_sstring_view *> const owner) -> raw_sstring_view;
+    raw_sstring_view get_sstring_view (database const & db,
+                                       typed_address<indirect_string> const addr,
+                                       gsl::not_null<shared_sstring_view *> const owner);
+
+    /// \param db  The database containing the string to be read.
+    /// \param addr  The address of the string data.
+    /// \param owner  A pointer to the object which will own the memory containing the string.
+    /// \result  A view of the requested string.
+    raw_sstring_view get_sstring_view (database const & db, address addr,
+                                       gsl::not_null<shared_sstring_view *> const owner);
+
+    /// \param db  The database containing the string to be read.
+    /// \param addr  The address of the string data.
+    /// \param length  The number of bytes in the string data.
+    /// \param owner  A pointer to the object which will own the memory containing the string.
+    /// \result  A view of the requested string.
+    raw_sstring_view get_sstring_view (database const & db, address addr, std::size_t length,
+                                       gsl::not_null<shared_sstring_view *> owner);
 
 } // end namespace pstore
 

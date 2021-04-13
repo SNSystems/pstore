@@ -33,10 +33,7 @@ namespace pstore {
         if (address_ & in_heap_mask) {
             return *reinterpret_cast<sstring_view<char const *> const *> (address_ & ~in_heap_mask);
         }
-        PSTORE_ASSERT (this->is_in_store ());
-        *owner = serialize::read<shared_sstring_view> (
-            serialize::archive::make_reader (db_, address{address_}));
-        return {owner->data (), owner->length ()};
+        return get_sstring_view (db_, address{address_}, owner);
     }
 
     // length
@@ -177,9 +174,27 @@ namespace pstore {
     //*            |_|                                               *
     // get sstring view
     // ~~~~~~~~~~~~~~~~
-    auto get_sstring_view (database const & db, typed_address<indirect_string> const addr,
-                           gsl::not_null<shared_sstring_view *> const owner) -> raw_sstring_view {
+    raw_sstring_view get_sstring_view (database const & db,
+                                       typed_address<indirect_string> const addr,
+                                       gsl::not_null<shared_sstring_view *> const owner) {
         return indirect_string::read (db, addr).as_db_string_view (owner);
+    }
+
+    raw_sstring_view get_sstring_view (database const & db, address const addr,
+                                       gsl::not_null<shared_sstring_view *> const owner) {
+        *owner = serialize::read<shared_sstring_view> (serialize::archive::make_reader (db, addr));
+        return {owner->data (), owner->length ()};
+    }
+
+    raw_sstring_view get_sstring_view (database const & db, address const addr,
+                                       std::size_t const length,
+                                       gsl::not_null<shared_sstring_view *> const owner) {
+        *owner =
+            shared_sstring_view{db.getro (typed_address<char>::make (
+                                              addr + std::max (varint::encoded_size (length), 2U)),
+                                          length),
+                                length};
+        return {owner->data (), length};
     }
 
 } // end namespace pstore

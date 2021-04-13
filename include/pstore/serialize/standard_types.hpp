@@ -46,8 +46,8 @@ namespace pstore {
             /// \param archive  The Archiver to which the value 'str' should be written.
             /// \param str      The string whose content is to be written to the archive.
             /// \returns The value returned by writing the first byte of the string length.
-            /// By convention, this is the "address" of the string data (although the precise
-            /// meaning is determined by the archive type).
+            ///   By convention, this is the "address" of the string data (although the precise
+            ///   meaning is determined by the archive type).
             template <typename Archive, typename StringType>
             static auto write (Archive && archive, StringType const & str)
                 -> archive_result_type<Archive> {

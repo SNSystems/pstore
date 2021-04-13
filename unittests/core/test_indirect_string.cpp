@@ -114,6 +114,11 @@ TEST_F (IndirectString, StoreRoundTrip) {
     EXPECT_EQ (get_sstring_view (db_, pstore::typed_address<pstore::indirect_string> (pointer_addr),
                                  &owner),
                pstore::make_sstring_view (str));
+
+    EXPECT_EQ (get_sstring_view (db_, ind2.in_store_address (), &owner),
+               pstore::make_sstring_view (str));
+    EXPECT_EQ (get_sstring_view (db_, ind2.in_store_address (), std::strlen (str), &owner),
+               pstore::make_sstring_view (str));
 }
 
 namespace {
