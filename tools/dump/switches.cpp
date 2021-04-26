@@ -123,9 +123,14 @@ namespace {
                                  desc{"Emit address values as an explicit segment/offset object"},
                                  cat (how_cat)};
 
+#ifdef PSTORE_IS_INSIDE_LLVM
     opt<std::string> triple{"triple",
                             desc{"The target triple to use for disassembly if one is not known"},
                             init ("x86_64-pc-linux-gnu-repo"), cat (how_cat)};
+    opt<bool> no_disassembly{"no-disassembly",
+                             desc{"Emit executable sections as binary rather than disassembly"},
+                             cat (how_cat)};
+#endif // PSTORE_IS_INSIDE_LLVM
 
     list<std::string> paths{positional, usage{"filename..."}};
 
@@ -170,7 +175,10 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     result.hex = hex.get ();
     result.no_times = no_times.get ();
     result.expanded_addresses = expanded_addresses.get ();
+#ifdef PSTORE_IS_INSIDE_LLVM
     result.triple = triple.get ();
+    result.no_disassembly = no_disassembly.get ();
+#endif // PSTORE_IS_INSIDE_LLVM
     result.paths = paths.get ();
 
     return {result, EXIT_SUCCESS};

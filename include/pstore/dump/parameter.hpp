@@ -34,15 +34,15 @@ namespace pstore {
 
         struct parameters {
             parameters (database const & db_, bool const hex_mode_, bool const expanded_addresses_,
-                        bool const no_times_, std::string const & triple_)
+                        bool const no_times_, bool const no_disassembly_,
+                        std::string const & triple_)
                     : db{db_}
                     , hex_mode{hex_mode_}
                     , expanded_addresses{expanded_addresses_}
-                    , no_times {
-                no_times_
-            }
+                    , no_times{no_times_}
+                    , no_disassembly{no_disassembly_}
 #ifdef PSTORE_IS_INSIDE_LLVM
-            , triple { triple_ }
+                    , triple {triple_}
 #endif
             { (void) triple_; }
             parameters (parameters const &) = delete;
@@ -55,6 +55,7 @@ namespace pstore {
             bool const hex_mode;
             bool const expanded_addresses;
             bool const no_times;
+            bool const no_disassembly;
 #ifdef PSTORE_IS_INSIDE_LLVM
             llvm::Triple const triple;
 #endif

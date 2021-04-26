@@ -376,8 +376,8 @@ int main (int argc, char * argv[]) {
                                make_value (object::container{{"path", make_value (path)},
                                                              {"size", make_value (db.size ())}}));
 
-            pstore::dump::parameters parm{db, opt.hex, opt.expanded_addresses, opt.no_times,
-                                          opt.triple};
+            pstore::dump::parameters parm{
+                db, opt.hex, opt.expanded_addresses, opt.no_times, opt.no_disassembly, opt.triple};
 
             show_index<pstore::trailer::indices::fragment, dump_error_code::fragment_not_found,
                        dump_error_code::no_fragment_index> (
