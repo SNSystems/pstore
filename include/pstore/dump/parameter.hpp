@@ -40,9 +40,9 @@ namespace pstore {
                     , hex_mode{hex_mode_}
                     , expanded_addresses{expanded_addresses_}
                     , no_times{no_times_}
-                    , no_disassembly{no_disassembly_}
 #ifdef PSTORE_IS_INSIDE_LLVM
-                    , triple {triple_}
+                    , no_disassembly{no_disassembly_}
+                    , triple{triple_}
 #endif
             { (void) triple_; }
             parameters (parameters const &) = delete;
@@ -55,8 +55,8 @@ namespace pstore {
             bool const hex_mode;
             bool const expanded_addresses;
             bool const no_times;
-            bool const no_disassembly;
 #ifdef PSTORE_IS_INSIDE_LLVM
+            bool const no_disassembly;
             llvm::Triple const triple;
 #endif
         };
