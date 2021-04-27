@@ -143,12 +143,19 @@ TEST_F (MCRepoFixture, DumpFragment) {
 
     transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
-    std::array<section_content, 1> c = {{{section_kind::data, std::uint8_t{0x10} /*alignment*/}}};
+    std::array<section_content, 1> c = {{{section_kind::text, std::uint8_t{0x10} /*alignment*/}}};
     section_content & data = c.back ();
     pstore::typed_address<pstore::indirect_string> name = this->store_str (transaction, "foo");
     {
         // Build the data section's contents and fixups.
-        data.data.assign ({'t', 'e', 'x', 't'});
+
+        // The contents don't really matter, but this is x86_64 code that would disassemble to:
+        //  - 0: 55              pushq   %rbp
+        //  - 1: 48 89 E5        movq    %rsp, %rbp
+        //  - 4: B8 2B 00 00 00  movl    $43, %eax
+        //  - 9: 5D              popq    %rbp
+        //  - A: C3              retq
+        data.data.assign ({0x55, 0x48, 0x89, 0xE5, 0xB8, 0x2B, 0x00, 0x00, 0x00, 0x5D, 0xC3});
         data.ifixups.emplace_back (internal_fixup{section_kind::data, relocation_type{2},
                                                   UINT64_C (2) /*offset*/, INT64_C (2) /*addend*/});
         data.xfixups.emplace_back (external_fixup{name, relocation_type{3},
@@ -185,8 +192,9 @@ TEST_F (MCRepoFixture, DumpFragment) {
     constexpr bool hex_mode = false;
     constexpr bool expanded_addresses = false;
     constexpr bool no_times = false;
-    pstore::dump::parameters parms{*db_, hex_mode, expanded_addresses, no_times,
-                                   "x86_64-vendor-os"};
+    constexpr bool no_disassembly = true;
+    pstore::dump::parameters parms{*db_,     hex_mode,       expanded_addresses,
+                                   no_times, no_disassembly, "x86_64-pc-linux-gnu-repo"};
     std::ostringstream out;
     pstore::dump::value_ptr value = pstore::dump::make_fragment_value (*fragment, parms);
     value->write (out);
@@ -196,11 +204,11 @@ TEST_F (MCRepoFixture, DumpFragment) {
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "type", ":", "data"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "type", ":", "text"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("contents", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("align", ":", "0x10"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("data", ":", "!!binary", "|"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("dGV4dA=="));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("VUiJ5bgrAAAAXcM="));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("ifixups", ":"));
 
     // If building inside LLVM, dump will use the ELF name for the relocation rather than its raw
@@ -259,8 +267,9 @@ TEST_F (MCRepoFixture, DumpCompilation) {
     constexpr bool hex_mode = false;
     constexpr bool expanded_addresses = false;
     constexpr bool no_times = false;
-    pstore::dump::parameters parms{*db_, hex_mode, expanded_addresses, no_times,
-                                   "machine-vendor-os"};
+    constexpr bool no_disassembly = false;
+    pstore::dump::parameters parms{*db_,     hex_mode,       expanded_addresses,
+                                   no_times, no_disassembly, "machine-vendor-os"};
     pstore::dump::value_ptr addr = pstore::dump::make_value (compilation, parms);
     addr->write (out);
 
@@ -297,8 +306,9 @@ TEST_F (MCRepoFixture, DumpDebugLineHeader) {
     constexpr bool hex_mode = true;
     constexpr bool expanded_addresses = false;
     constexpr bool no_times = false;
-    pstore::dump::parameters parms{*db_, hex_mode, expanded_addresses, no_times,
-                                   "machine-vendor-os"};
+    constexpr bool no_disassembly = false;
+    pstore::dump::parameters parms{*db_,     hex_mode,       expanded_addresses,
+                                   no_times, no_disassembly, "machine-vendor-os"};
     pstore::dump::value_ptr addr =
         pstore::dump::make_index<pstore::trailer::indices::debug_line_header> (
             *db_, [&parms] (pstore::index::debug_line_header_index::value_type const & value) {
@@ -351,8 +361,9 @@ TEST_F (MCRepoFixture, DumpBssSection) {
     constexpr bool hex_mode = false;
     constexpr bool expanded_addresses = false;
     constexpr bool no_times = false;
-    pstore::dump::parameters parms{*db_, hex_mode, expanded_addresses, no_times,
-                                   "machine-vendor-os"};
+    constexpr bool no_disassembly = false;
+    pstore::dump::parameters parms{*db_,     hex_mode,       expanded_addresses,
+                                   no_times, no_disassembly, "machine-vendor-os"};
     pstore::dump::value_ptr value = pstore::dump::make_fragment_value (*frag, parms);
     value->write (out);
 

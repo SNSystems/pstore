@@ -60,6 +60,7 @@ struct switches {
     bool hex = false;
     bool expanded_addresses = false;
     bool no_times = false;
+    bool no_disassembly = false;
 
     std::list<std::string> paths;
 };
