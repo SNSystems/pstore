@@ -24,8 +24,13 @@ using namespace pstore::command_line;
 
 namespace {
 
-    opt<std::string> db_path (positional, usage ("repository"),
-                              desc ("Path of the pstore repository to be exported."), required);
+    opt<std::string> db_path{positional, usage{"repository"},
+                             desc{"Path of the pstore repository to be exported."}, required};
+
+    opt<bool> no_comments{
+        "no-comments",
+        desc{"Disable embedded comments. (Required for output to be ECMA-404 compliant.)"},
+        init (false)};
 
 } // end anonymous namespace.
 
@@ -40,7 +45,7 @@ int main (int argc, char * argv[]) {
 
         pstore::exchange::export_ns::ostream os{stdout};
         pstore::database db{db_path.get (), pstore::database::access_mode::read_only};
-        pstore::exchange::export_ns::emit_database (db, os, true);
+        pstore::exchange::export_ns::emit_database (db, os, !no_comments);
         os.flush ();
     }
     // clang-format off
