@@ -43,6 +43,6 @@ int main (int argc, char * argv[]) {
     v.resize (requested_size);
 
     auto io = IO{};
-    auto br = pstore::httpd::make_buffered_reader<decltype (io)> (refill, buffer_size);
+    auto br = pstore::http::make_buffered_reader<decltype (io)> (refill, buffer_size);
     br.get_span (io, pstore::gsl::make_span (v));
 }
