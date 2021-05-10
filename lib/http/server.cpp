@@ -296,7 +296,7 @@ namespace {
             std::string const date = pstore::http::http_date (std::chrono::system_clock::now ());
             std::string const accept = pstore::http::source_key (*header_contents.websocket_key);
 
-            std::array<czstring_pair, 6> headers{{
+            std::array<czstring_pair, 5> headers{{
                 {"Upgrade", "WebSocket"},
                 {"Connection", "Upgrade"},
                 {"Sec-WebSocket-Accept", accept.c_str ()},
