@@ -88,6 +88,7 @@ namespace pstore {
         /// preserved by import/export and strip/merge. External references may use this ID to
         /// check that they are referring to the correct database.
         uuid id () const noexcept { return a.id; }
+        void set_id (uuid const & id) noexcept;
 
         /// Returns the file format version number (major, minor).
         std::array<std::uint16_t, 2> const & version () const noexcept { return a.version; }

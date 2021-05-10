@@ -55,7 +55,7 @@ namespace pstore {
         crc = this->get_crc ();
     }
 
-    // is_valid
+    // is valid
     // ~~~~~~~~
     bool header::is_valid () const noexcept {
 #if PSTORE_CRC_CHECKS_ENABLED
@@ -65,10 +65,18 @@ namespace pstore {
 #endif
     }
 
-    // get_crc
+    // get crc
     // ~~~~~~~
     std::uint32_t header::get_crc () const noexcept {
         return crc32 (::pstore::gsl::make_span (&this->a, 1));
+    }
+
+    // set id
+    // ~~~~~~
+    void header::set_id (uuid const & id) noexcept {
+        a.id = id;
+        // Changing the UUID will invalidate the header CRC so recalculate it immediately.
+        crc = this->get_crc ();
     }
 
 

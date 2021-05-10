@@ -88,6 +88,8 @@ namespace {
         if (!seen_.all ()) {
             return error::root_object_was_incomplete;
         }
+
+        this->get_context ()->db->set_id (id_);
         return {};
     }
 

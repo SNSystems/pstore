@@ -304,6 +304,7 @@ namespace pstore {
         /// probability of the fuzzer uncovering a real bug. Always enabled otherwise.
         static bool crc_checks_enabled ();
 
+        void set_id (uuid const & id) noexcept { header_->set_id (id); }
 
         shared const * get_shared () const;
         shared * get_shared ();
