@@ -44,7 +44,10 @@ namespace pstore {
                     , no_disassembly{no_disassembly_}
                     , triple{triple_}
 #endif
-            { (void) triple_; }
+                    {
+                        (void) triple_;
+                        (void) no_disassembly_;
+                    }
             parameters (parameters const &) = delete;
             parameters (parameters &&) noexcept = delete;
 
