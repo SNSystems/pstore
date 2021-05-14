@@ -124,7 +124,7 @@ namespace {
         auto const status_line = build_status_line (error_no, "OK");
 
         auto const content_length = std::to_string (content_str.length ());
-        std::array<czstring_pair, 6> const h{{
+        std::array<czstring_pair, 5> const h{{
             {"Content-length", content_length.c_str ()},
             {"Connection", "close"}, // TODO remove this when we support persistent connections
             {"Content-type", "text/html"},
@@ -213,7 +213,7 @@ namespace {
         return sender (io, as_bytes (pstore::gsl::make_span (response_string))) >>=
                [&sender] (IO io2) {
                    auto const ws_version = std::to_string (pstore::http::ws_version);
-                   std::array<czstring_pair, 2> const headers{{
+                   std::array<czstring_pair, 1> const headers{{
                        {"Sec-WebSocket-Version", ws_version.c_str ()},
                    }};
                    std::string const h = build_headers (std::begin (headers), std::end (headers));
