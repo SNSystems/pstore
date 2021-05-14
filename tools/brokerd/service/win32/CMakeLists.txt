@@ -29,6 +29,9 @@ add_pstore_tool (pstore-broker-service
     service_base.hpp
     service_installer.cpp
     service_installer.hpp
+    switches.cpp
+    switches.hpp
+    "${pstore_http_fs_source}"
 )
 
 if (PSTORE_IS_INSIDE_LLVM)
@@ -38,3 +41,5 @@ if (PSTORE_IS_INSIDE_LLVM)
 else ()
     target_link_libraries (pstore-broker-service PRIVATE pstore-command-line)
 endif ()
+
+target_link_libraries (pstore-broker-service PRIVATE pstore-broker)
