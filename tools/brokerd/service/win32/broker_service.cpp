@@ -185,9 +185,7 @@ void broker_service::start_handler (DWORD argc, TCHAR * argv[]) {
     // Log a service start message to the Application log.
     this->write_event_log_entry ("broker service starting", event_type::information);
 
-    std::pair<switches, int> opts;
-
-    opts = get_switches (argc, argv);
+    std::pair<switches, int> opts = get_switches (argc, argv);
 
     create_thread ([this, opts] { this->worker (opts.first); });
 }
@@ -195,7 +193,6 @@ void broker_service::start_handler (DWORD argc, TCHAR * argv[]) {
 
 // worker
 // ~~~~~~
-/// The method performs the main function of the service. It runs on a thread pool worker thread.
 void broker_service::worker (switches opt) {
     this->write_event_log_entry ("Worker started", event_type::information);
 
@@ -203,6 +200,7 @@ void broker_service::worker (switches opt) {
         wsa_startup startup;
         if (!startup.started ()) {
             this->write_event_log_entry ("WSAStartup() failed, broker exited", event_type::error);
+            this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
             return;
         }
 
@@ -251,16 +249,17 @@ void broker_service::worker (switches opt) {
 
     } catch (std::exception const & ex) {
         this->write_event_log_entry (std::string("error: ", ex.what()).c_str(), event_type::error);
-        broker::exit_code = EXIT_FAILURE;
+        this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
         return;
     } catch (...) {
         this->write_event_log_entry ("unknown error!",
                                      event_type::error);
-        broker::exit_code = EXIT_FAILURE;
+        this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
         return;
     }
     this->write_event_log_entry ("worker thread exiting",
                                  event_type::information);
+    this->set_service_status (SERVICE_STOPPED, EXIT_SUCCESS);
 }
 
 // stop_handler
