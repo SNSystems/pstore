@@ -64,19 +64,6 @@ jobs:
                       os: ubuntu-latest
 
 
-#                    - name: Ubuntu-latest/clang-9/Debug
-#                      build_type: Debug
-#                      cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-9 -DCMAKE_C_COMPILER=clang-9
-#                      generator: Unix Makefiles
-#                      options: '-DPSTORE_ALWAYS_SPANNING=Yes -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold'
-#                      os: ubuntu-latest
-
-#                    - name: Ubuntu-latest/clang-9/Release
-#                      build_type: Release
-#                      cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-9 -DCMAKE_C_COMPILER=clang-9
-#                      generator: Unix Makefiles
-#                      os: ubuntu-latest
-
                     - name: Ubuntu-latest/clang-11/Debug
                       build_type: Debug
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-11 -DCMAKE_C_COMPILER=clang-11
@@ -90,6 +77,7 @@ jobs:
                       generator: Unix Makefiles
                       options: '-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold'
                       os: ubuntu-latest
+
 
                     - name: Windows-latest/MSVC/Debug
                       build_type: Debug
