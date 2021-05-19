@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "broker_service.hpp"
+#include "../../switches.hpp"
 
 #include "pstore/broker/command.hpp"
 #include "pstore/broker/gc.hpp"
@@ -44,6 +45,7 @@
 #include "pstore/os/wsa_startup.hpp"
 #include "pstore/support/utf.hpp"
 #include "pstore/broker/utils.hpp"
+#include "pstore/command_line/option.hpp"
 
 using namespace std::string_literals;
 using namespace pstore;
@@ -71,16 +73,27 @@ void broker_service::start_handler (DWORD argc, TCHAR * argv[]) {
     // Log a service start message to the Application log.
     this->write_event_log_entry ("broker service starting", event_type::information);
 
-    std::pair<switches, int> opts = get_switches (argc, argv);
+    command_line::option::reset_container ();
 
-    broker::create_thread ([this, opts] { this->worker (opts.first); });
+    switches opt;
+    std::tie (opt, broker::exit_code) = get_switches (argc, argv);
+
+    if (broker::exit_code != EXIT_SUCCESS) {
+        this->write_event_log_entry ("error: broker service failed to parse commandline options", event_type::error);
+        this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
+        return;
+    }
+
+    broker::create_thread ([this, opt] { this->worker (opt); });
+
+    this->write_event_log_entry ("broker service started successfully", event_type::information);
 }
 
 
 // worker
 // ~~~~~~
 void broker_service::worker (switches opt) {
-    this->write_event_log_entry ("Worker started", event_type::information);
+    this->write_event_log_entry ("worker started", event_type::information);
 
     try {
         wsa_startup startup;

@@ -23,7 +23,7 @@
 #include <future>
 
 #include "service_base.hpp"
-#include "switches.hpp"
+#include "../../switches.hpp"
 #include "pstore/support/maybe.hpp"
 
 // Platform includes
