@@ -135,6 +135,19 @@ namespace pstore {
             explicit option (num_occurrences_flag occurrences);
 
         private:
+            /// The location of this entry in the (global) options list. This iterator is a
+            /// reference into the list returned by the option::all() function. It's used simply to
+            /// remove the option from that container when the former is destroyed.
+            options_container::const_iterator container_pos_;
+
+            /// Adds the supplied option instance to the global container and returns a iterator
+            /// which references it.
+            ///
+            /// \param opt  The option to be added to the global container.
+            /// \returns  An iterator referencing the global option list which will yield opt when
+            ///   dereferenced.
+            static options_container::const_iterator add_to_global_list (option * const opt);
+
             std::string name_;
             std::string usage_;
             std::string description_;

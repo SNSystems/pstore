@@ -467,3 +467,22 @@ TEST_F (ClCommandLine, AliasBool) {
     EXPECT_EQ (opt.get (), true);
     EXPECT_EQ (opt2.get_num_occurrences (), 1U);
 }
+
+TEST_F (ClCommandLine, TwoCallsToParser) {
+    opt<std::string> option ("S");
+    this->add ("progname", "-Svalue");
+
+    string_stream output;
+    string_stream errors;
+    bool const res1 = this->parse_command_line_options (output, errors);
+    EXPECT_TRUE (res1);
+    bool const res2 = this->parse_command_line_options (output, errors);
+    EXPECT_TRUE (res2);
+
+    EXPECT_EQ (errors.str ().length (), 0U);
+    EXPECT_EQ (output.str ().length (), 0U);
+
+    EXPECT_EQ (option.get (), "value");
+    // We saw the -S switch twice because the arguments were parsed twice.
+    EXPECT_EQ (option.get_num_occurrences (), 2U);
+}

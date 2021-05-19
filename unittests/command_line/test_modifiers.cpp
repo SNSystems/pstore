@@ -65,41 +65,48 @@ namespace {
 
     class EnumerationParse : public testing::Test {
     public:
-        EnumerationParse ()
-                : enum_opt_{
-                      "enumeration",
-                      values (literal{"a", static_cast<int> (enumeration::a), "a description"},
-                              literal{"b", static_cast<int> (enumeration::b), "b description"},
-                              literal{"c", static_cast<int> (enumeration::c), "c description"})} {}
+        EnumerationParse () = default;
         ~EnumerationParse () override { option::reset_container (); }
-
-    protected:
-        opt<enumeration> enum_opt_;
     };
 
 } // end anonymous namespace
 
 TEST_F (EnumerationParse, SetA) {
+    opt<enumeration> enum_opt{
+        "enumeration", values (literal{"a", static_cast<int> (enumeration::a), "a description"},
+                               literal{"b", static_cast<int> (enumeration::b), "b description"},
+                               literal{"c", static_cast<int> (enumeration::c), "c description"})};
+
     std::vector<std::string> argv{"progname", "--enumeration=a"};
     string_stream output;
     string_stream errors;
     bool ok = details::parse_command_line_options (std::begin (argv), std::end (argv), "overview",
                                                    output, errors);
     ASSERT_TRUE (ok);
-    ASSERT_EQ (enum_opt_.get (), enumeration::a);
+    ASSERT_EQ (enum_opt.get (), enumeration::a);
 }
 
 TEST_F (EnumerationParse, SetC) {
+    opt<enumeration> enum_opt{
+        "enumeration", values (literal{"a", static_cast<int> (enumeration::a), "a description"},
+                               literal{"b", static_cast<int> (enumeration::b), "b description"},
+                               literal{"c", static_cast<int> (enumeration::c), "c description"})};
+
     std::vector<std::string> argv{"progname", "--enumeration=c"};
     string_stream output;
     string_stream errors;
     bool ok = details::parse_command_line_options (std::begin (argv), std::end (argv), "overview",
                                                    output, errors);
     ASSERT_TRUE (ok);
-    ASSERT_EQ (enum_opt_.get (), enumeration::c);
+    ASSERT_EQ (enum_opt.get (), enumeration::c);
 }
 
 TEST_F (EnumerationParse, ErrorBadValue) {
+    opt<enumeration> enum_opt{
+        "enumeration", values (literal{"a", static_cast<int> (enumeration::a), "a description"},
+                               literal{"b", static_cast<int> (enumeration::b), "b description"},
+                               literal{"c", static_cast<int> (enumeration::c), "c description"})};
+
     std::vector<std::string> argv{"progname", "--enumeration=bad"};
     string_stream output;
     string_stream errors;
@@ -110,6 +117,11 @@ TEST_F (EnumerationParse, ErrorBadValue) {
 }
 
 TEST_F (EnumerationParse, GoodValueAfterError) {
+    opt<enumeration> enum_opt{
+        "enumeration", values (literal{"a", static_cast<int> (enumeration::a), "a description"},
+                               literal{"b", static_cast<int> (enumeration::b), "b description"},
+                               literal{"c", static_cast<int> (enumeration::c), "c description"})};
+
     std::vector<std::string> argv{"progname", "--unknown", "--enumeration=a"};
     string_stream output;
     string_stream errors;
