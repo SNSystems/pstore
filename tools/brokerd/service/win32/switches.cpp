@@ -64,6 +64,7 @@ namespace {
 
 
 std::pair<switches, int> get_switches (int const argc, tchar * argv[]) {
+    pstore::command_line::option::reset_container ();
     parse_command_line_options (argc, argv, "pstore broker agent");
 
     switches result;
