@@ -36,7 +36,6 @@ else ()
         scavenger.hpp
         spawn.hpp
         uptime.hpp
-        utils.hpp
     )
 
     set (pstore_broker_lib_src

@@ -15,42 +15,16 @@
 //===----------------------------------------------------------------------===//
 
 #include <thread>
-#include <cstring>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <type_traits>
-#include <vector>
 
 #include "broker_service.hpp"
 #include "../../switches.hpp"
+#include "../../brokerd.hpp"
 
-#include "pstore/broker/command.hpp"
-#include "pstore/broker/gc.hpp"
 #include "pstore/broker/globals.hpp"
-#include "pstore/broker/quit.hpp"
-#include "pstore/broker/read_loop.hpp"
-#include "pstore/broker/recorder.hpp"
-#include "pstore/broker/scavenger.hpp"
-#include "pstore/broker/uptime.hpp"
-#include "pstore/brokerface/fifo_path.hpp"
-#include "pstore/brokerface/message_type.hpp"
-#include "pstore/config/config.hpp"
-#include "pstore/http/server.hpp"
-#include "pstore/http/server_status.hpp"
-#include "pstore/os/descriptor.hpp"
-#include "pstore/os/logging.hpp"
-#include "pstore/os/thread.hpp"
-#include "pstore/os/wsa_startup.hpp"
-#include "pstore/support/utf.hpp"
-#include "pstore/broker/utils.hpp"
 #include "pstore/command_line/option.hpp"
 
 using namespace std::string_literals;
 using namespace pstore;
-
-extern romfs::romfs fs;
 
 // (ctor)
 // ~~~~~~
@@ -70,7 +44,6 @@ broker_service::~broker_service () {}
 /// begun: it must not block.
 
 void broker_service::start_handler (DWORD argc, TCHAR * argv[]) {
-    // Log a service start message to the Application log.
     this->write_event_log_entry ("broker service starting", event_type::information);
 
     command_line::option::reset_container ();
@@ -79,86 +52,30 @@ void broker_service::start_handler (DWORD argc, TCHAR * argv[]) {
     std::tie (opt, broker::exit_code) = get_switches (argc, argv);
 
     if (broker::exit_code != EXIT_SUCCESS) {
-        this->write_event_log_entry ("error: broker service failed to parse commandline options", event_type::error);
+        this->write_event_log_entry ("error: broker service failed to parse commandline options",
+                                     event_type::error);
         this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
         return;
     }
 
-    broker::create_thread ([this, opt] { this->worker (opt); });
+    std::thread ([this, opt] { this->worker (opt); }).detach ();
 
     this->write_event_log_entry ("broker service started successfully", event_type::information);
 }
 
-
 // worker
 // ~~~~~~
 void broker_service::worker (switches opt) {
-    this->write_event_log_entry ("worker started", event_type::information);
-
     try {
-        wsa_startup startup;
-        if (!startup.started ()) {
-            this->write_event_log_entry ("WSAStartup() failed, broker exited", event_type::error);
-            this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
-            return;
-        }
-
-        this->write_event_log_entry ("opening pipe", event_type::information);
-        brokerface::fifo_path fifo{nullptr};
-
-        std::vector<std::future<void>> futures;
-        std::thread quit;
-        maybe<http::server_status> http_status = broker::get_http_server_status (opt.http_port);
-
-        std::atomic<bool> uptime_done{false};
-
-        std::shared_ptr<broker::recorder> record_file;
-
-        auto commands = std::make_shared<broker::command_processor> (
-            opt.num_read_threads, &http_status, &uptime_done, opt.scavenge_time);
-        auto scav = std::make_shared<broker::scavenger> (commands);
-        commands->attach_scavenger (scav);
-
-        this->write_event_log_entry ("starting threads", event_type::information);
-
-        quit = create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads,
-                                   &http_status, &uptime_done);
-
-        futures = create_worker_threads (commands, fifo, scav, &uptime_done);
-        broker::create_http_worker_thread (&futures, &http_status, opt.num_read_threads, fs);
-
-        for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
-            futures.push_back (broker::create_thread ([ctr, &fifo, &record_file, commands] () {
-                auto const name = "read"s + std::to_string (ctr);
-                threads::set_name (name.c_str ());
-                create_log_stream ("broker." + name);
-                read_loop (fifo, record_file, commands);
-            }));
-        }
-
-        this->write_event_log_entry ("waiting on threads", event_type::information);
-        for (auto & f : futures) {
-            PSTORE_ASSERT (f.valid ());
-            f.get ();
-        }
-
-        this->write_event_log_entry ("worker threads done, stopping quit thread",
-                                     event_type::information);
-        broker::notify_quit_thread ();
-        quit.join ();
-
+        broker::run_broker (opt);
     } catch (std::exception const & ex) {
         this->write_event_log_entry (std::string ("error: ", ex.what ()).c_str (),
                                      event_type::error);
         this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
-        return;
     } catch (...) {
         this->write_event_log_entry ("unknown error!", event_type::error);
         this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
-        return;
     }
-    this->write_event_log_entry ("worker thread exiting", event_type::information);
-    this->set_service_status (SERVICE_STOPPED, EXIT_SUCCESS);
 }
 
 // stop_handler

@@ -33,6 +33,8 @@ add_pstore_tool (pstore-broker-service
     service_installer.hpp
     ../../switches.cpp
     ../../switches.hpp
+    ../../brokerd.cpp
+    ../../brokerd.hpp
     "${pstore_http_fs_source}"
 )
 
