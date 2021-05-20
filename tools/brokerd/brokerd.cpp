@@ -30,24 +30,24 @@
 #    include <signal.h>
 #endif
 
+#include "pstore/config/config.hpp"
 #include "pstore/broker/command.hpp"
+#include "pstore/os/descriptor.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
 #include "pstore/broker/gc.hpp"
 #include "pstore/broker/globals.hpp"
+#include "pstore/os/logging.hpp"
+#include "pstore/brokerface/message_type.hpp"
 #include "pstore/broker/quit.hpp"
 #include "pstore/broker/read_loop.hpp"
 #include "pstore/broker/recorder.hpp"
 #include "pstore/broker/scavenger.hpp"
-#include "pstore/broker/uptime.hpp"
-#include "pstore/brokerface/fifo_path.hpp"
-#include "pstore/brokerface/message_type.hpp"
-#include "pstore/config/config.hpp"
 #include "pstore/http/server.hpp"
 #include "pstore/http/server_status.hpp"
-#include "pstore/os/descriptor.hpp"
-#include "pstore/os/logging.hpp"
 #include "pstore/os/thread.hpp"
-#include "pstore/os/wsa_startup.hpp"
+#include "pstore/broker/uptime.hpp"
 #include "pstore/support/utf.hpp"
+#include "pstore/os/wsa_startup.hpp"
 
 #include "switches.hpp"
 
