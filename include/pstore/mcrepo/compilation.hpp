@@ -137,7 +137,6 @@ namespace pstore {
             /// of a vector of definitions into it.
             ///
             /// \param transaction  The transaction to which the compilation will be appended.
-            /// \param path  A ticket file path address in the store.
             /// \param triple  The target-triple associated with this compilation.
             /// \param first_member  The first of a sequence of definition instances. The
             ///   range defined by \p first_member and \p last_member will be copied into the newly
@@ -147,7 +146,6 @@ namespace pstore {
             ///   the in-store location of the allocated compilation.
             template <typename TransactionType, typename Iterator>
             static extent<compilation> alloc (TransactionType & transaction,
-                                              typed_address<indirect_string> path,
                                               typed_address<indirect_string> triple,
                                               Iterator first_member, Iterator last_member);
 
@@ -205,8 +203,6 @@ namespace pstore {
             }
             ///@}
 
-            /// Returns the ticket file path.
-            typed_address<indirect_string> path () const noexcept { return path_; }
             /// Returns the target triple.
             typed_address<indirect_string> triple () const noexcept { return triple_; }
 
@@ -224,8 +220,8 @@ namespace pstore {
 
         private:
             template <typename Iterator>
-            compilation (typed_address<indirect_string> path, typed_address<indirect_string> triple,
-                         size_type size, Iterator first_member, Iterator last_member) noexcept;
+            compilation (typed_address<indirect_string> triple, size_type size,
+                         Iterator first_member, Iterator last_member) noexcept;
 
             struct nmembers {
                 size_type n;
@@ -242,15 +238,12 @@ namespace pstore {
                 {'C', 'm', 'p', 'l', '8', 'i', 'o', 'n'}};
 
             std::array<char, 8> signature_ = compilation_signature_;
-
-            /// The path containing the ticket file when it was created. (Used to guide the garbage
-            /// collector's ticket-file search.)
-            typed_address<indirect_string> path_;
             /// The target triple for this compilation.
             typed_address<indirect_string> triple_;
             /// The number of entries in the members_ array.
             size_type size_ = 0;
             std::uint32_t padding1_ = 0;
+
             definition members_[1];
         };
         PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation>::value);
@@ -258,19 +251,16 @@ namespace pstore {
         PSTORE_STATIC_ASSERT (alignof (compilation) == 16);
 
         template <typename Iterator>
-        compilation::compilation (typed_address<indirect_string> const path,
-                                  typed_address<indirect_string> const triple, size_type const size,
+        compilation::compilation (typed_address<indirect_string> const triple, size_type const size,
                                   Iterator const first_member, Iterator const last_member) noexcept
-                : path_{path}
-                , triple_{triple}
+                : triple_{triple}
                 , size_{size} {
-            // An assignment to suppress a warning from clang that the field is not used.
+            // Assignment to suppress a warning from clang that the field is not used.
             padding1_ = 0;
             PSTORE_STATIC_ASSERT (offsetof (compilation, signature_) == 0);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, path_) == 8);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, triple_) == 16);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, size_) == 24);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, padding1_) == 28);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, triple_) == 8);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, size_) == 16);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, padding1_) == 20);
             PSTORE_STATIC_ASSERT (offsetof (compilation, members_) == 32);
 
             // This check can safely be an assertion because the method is private and alloc(),
@@ -283,7 +273,7 @@ namespace pstore {
         // alloc
         // ~~~~~
         template <typename TransactionType, typename Iterator>
-        auto compilation::alloc (TransactionType & transaction, typed_address<indirect_string> path,
+        auto compilation::alloc (TransactionType & transaction,
                                  typed_address<indirect_string> triple, Iterator first_member,
                                  Iterator last_member) -> extent<compilation> {
             // First work out its size.
@@ -302,7 +292,7 @@ namespace pstore {
             auto ptr = std::static_pointer_cast<compilation> (transaction.getrw (addr, size));
 
             // Write the data to the store.
-            new (ptr.get ()) compilation{path, triple, num_members, first_member, last_member};
+            new (ptr.get ()) compilation{triple, num_members, first_member, last_member};
             return extent<compilation> (typed_address<compilation> (addr), size);
         }
 

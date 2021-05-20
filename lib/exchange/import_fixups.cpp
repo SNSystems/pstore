@@ -19,7 +19,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             namespace details {
 
@@ -28,12 +28,12 @@ namespace pstore {
                 std::error_code section_name::string_value (std::string const & s) {
                     // TODO: this map appears both here and in the fragment code.
 #define X(a) {#a, pstore::repo::section_kind::a},
-                    static std::unordered_map<std::string, pstore::repo::section_kind> map = {
+                    static std::unordered_map<std::string, repo::section_kind> map = {
                         PSTORE_MCREPO_SECTION_KINDS};
 #undef X
                     auto const pos = map.find (s);
                     if (pos == map.end ()) {
-                        return import::error::unknown_section_name;
+                        return error::unknown_section_name;
                     }
                     *section_ = pos->second;
                     return pop ();
@@ -50,7 +50,7 @@ namespace pstore {
             // (ctor)
             // ~~~~~~
             internal_fixup::internal_fixup (not_null<context *> const ctxt,
-                                            not_null<name_mapping const *> const /*names*/,
+                                            not_null<string_mapping const *> const /*names*/,
                                             fixups_pointer const fixups)
                     : rule (ctxt)
                     , fixups_{fixups} {}
@@ -102,7 +102,7 @@ namespace pstore {
             // (ctor)
             // ~~~~~~
             external_fixup::external_fixup (not_null<context *> const ctxt,
-                                            not_null<name_mapping const *> const names,
+                                            not_null<string_mapping const *> const names,
                                             fixups_pointer const fixups)
                     : rule (ctxt)
                     , names_{names}
@@ -160,6 +160,6 @@ namespace pstore {
                 return pop ();
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore

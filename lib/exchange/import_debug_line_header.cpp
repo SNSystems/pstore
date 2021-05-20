@@ -23,7 +23,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             // (ctor)
             // ~~~~~~
@@ -76,6 +76,6 @@ namespace pstore {
             // ~~~~~~~~~~
             std::error_code debug_line_index::end_object () { return pop (); }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore

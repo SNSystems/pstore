@@ -13,6 +13,6 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 #===----------------------------------------------------------------------===//
-add_pstore_executable (pstore-lock-test lock_test.cpp)
+add_pstore_executable (pstore-lock-test lock_test.cpp say.hpp)
 target_link_libraries (pstore-lock-test PUBLIC pstore-core pstore-command-line)
 add_clang_tidy_target (pstore-lock-test)

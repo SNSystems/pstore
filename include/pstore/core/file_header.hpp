@@ -88,12 +88,13 @@ namespace pstore {
         /// preserved by import/export and strip/merge. External references may use this ID to
         /// check that they are referring to the correct database.
         uuid id () const noexcept { return a.id; }
+        void set_id (uuid const & id) noexcept;
 
         /// Returns the file format version number (major, minor).
         std::array<std::uint16_t, 2> const & version () const noexcept { return a.version; }
 
         static constexpr std::uint16_t major_version = 1;
-        static constexpr std::uint16_t minor_version = 10;
+        static constexpr std::uint16_t minor_version = 11;
 
         static std::array<std::uint8_t, 4> const file_signature1;
         static std::uint32_t const file_signature2 = 0x0507FFFF;
@@ -138,6 +139,8 @@ namespace pstore {
         std::atomic<typed_address<trailer>> footer_pos;
     };
 
+    // Assert the size, offset, and alignment of the structure and its fields to ensure file format
+    // compatibility across compilers and hosts.
     PSTORE_STATIC_ASSERT (offsetof (header::body, signature1) == 0);
     PSTORE_STATIC_ASSERT (offsetof (header::body, signature2) == 4);
     PSTORE_STATIC_ASSERT (offsetof (header::body, version) == 8);
@@ -171,6 +174,8 @@ namespace pstore {
         }
     };
 
+    // Assert the size, offset, and alignment of the structure and its fields to ensure file format
+    // compatibility across compilers and hosts.
     PSTORE_STATIC_ASSERT (offsetof (lock_block, vacuum_lock) == 0);
     PSTORE_STATIC_ASSERT (offsetof (lock_block, transaction_lock) == 8);
     PSTORE_STATIC_ASSERT (alignof (lock_block) == 8);
@@ -187,6 +192,7 @@ namespace pstore {
     X (debug_line_header)                                                                          \
     X (fragment)                                                                                   \
     X (name)                                                                                       \
+    X (path)                                                                                       \
     X (write)
 
         struct header_block;
@@ -258,6 +264,8 @@ namespace pstore {
         std::array<std::uint8_t, 8> signature2 = default_signature2;
     };
 
+    // Assert the size, offset, and alignment of the structure and its fields to ensure file format
+    // compatibility across compilers and hosts.
     PSTORE_STATIC_ASSERT (offsetof (trailer::body, signature1) == 0);
     PSTORE_STATIC_ASSERT (offsetof (trailer::body, generation) == 8);
     PSTORE_STATIC_ASSERT (offsetof (trailer::body, unused1) == 12);
@@ -265,15 +273,16 @@ namespace pstore {
     PSTORE_STATIC_ASSERT (offsetof (trailer::body, time) == 24);
     PSTORE_STATIC_ASSERT (offsetof (trailer::body, prev_generation) == 32);
     PSTORE_STATIC_ASSERT (offsetof (trailer::body, index_records) == 40);
-    PSTORE_STATIC_ASSERT (offsetof (trailer::body, unused2) == 80);
-    PSTORE_STATIC_ASSERT (offsetof (trailer::body, unused3) == 84);
-    PSTORE_STATIC_ASSERT (sizeof (trailer::body) == 88);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, unused2) == 88);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, unused3) == 92);
+    PSTORE_STATIC_ASSERT (alignof (trailer::body) == 8);
+    PSTORE_STATIC_ASSERT (sizeof (trailer::body) == 96);
 
     PSTORE_STATIC_ASSERT (offsetof (trailer, a) == 0);
-    PSTORE_STATIC_ASSERT (offsetof (trailer, crc) == 88);
-    PSTORE_STATIC_ASSERT (offsetof (trailer, signature2) == 96);
+    PSTORE_STATIC_ASSERT (offsetof (trailer, crc) == 96);
+    PSTORE_STATIC_ASSERT (offsetof (trailer, signature2) == 104);
     PSTORE_STATIC_ASSERT (alignof (trailer) == 8);
-    PSTORE_STATIC_ASSERT (sizeof (trailer) == 104);
+    PSTORE_STATIC_ASSERT (sizeof (trailer) == 112);
 
 } // namespace pstore
 #endif // PSTORE_CORE_FILE_HEADER_HPP

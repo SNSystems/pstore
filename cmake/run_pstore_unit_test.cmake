@@ -36,6 +36,11 @@ function (run_pstore_unit_test prelink_target test_target)
     else ()
         set (OUT_XML "${CMAKE_BINARY_DIR}/${test_target}.xml")
 
+        set (command_line "$<TARGET_FILE:${test_target}>" "--gtest_output=xml:${OUT_XML}")
+        if (PSTORE_NOISY_UNIT_TESTS)
+            list (APPEND command_line "--loud")
+        endif ()
+
 	if (PSTORE_VALGRIND)
             add_custom_command (
                 TARGET ${prelink_target}
@@ -45,7 +50,7 @@ function (run_pstore_unit_test prelink_target test_target)
                         --undef-value-errors=yes --track-origins=no
                         --child-silent-after-fork=no --trace-children=no
                         --error-exitcode=13
-                        "$<TARGET_FILE:${test_target}>" "--gtest_output=xml:${OUT_XML}"
+                        ${command_line}
                 WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
                 COMMENT "Valgrind Running ${test_target}"
                 DEPENDS ${test_target}
@@ -58,8 +63,7 @@ function (run_pstore_unit_test prelink_target test_target)
                 PRE_LINK
                 COMMAND ${CMAKE_COMMAND}
                         -E env "LLVM_PROFILE_FILE=$<TARGET_FILE:${test_target}>.profraw"
-                        "$<TARGET_FILE:${test_target}>"
-                        "--gtest_output=xml:${OUT_XML}"
+                        ${command_line}
                 WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
                 COMMENT "Running ${test_target}"
                 DEPENDS ${test_target}
@@ -70,7 +74,7 @@ function (run_pstore_unit_test prelink_target test_target)
             add_custom_command (
                 TARGET ${prelink_target}
                 PRE_LINK
-                COMMAND "${test_target}" "--gtest_output=xml:${OUT_XML}"
+                COMMAND ${command_line}
                 WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
                 COMMENT "Running ${test_target}"
                 DEPENDS ${test_target}

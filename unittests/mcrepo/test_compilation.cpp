@@ -35,9 +35,8 @@ namespace {
 
 TEST_F (CompilationTest, Empty) {
     std::vector<definition> m;
-    pstore::extent<compilation> extent =
-        compilation::alloc (transaction_, indirect_string_address (0U),
-                            indirect_string_address (0U), std::begin (m), std::end (m));
+    pstore::extent<compilation> extent = compilation::alloc (
+        transaction_, indirect_string_address (0U), std::begin (m), std::end (m));
     auto t = reinterpret_cast<compilation const *> (extent.addr.absolute ());
 
     PSTORE_ASSERT (transaction_.get_storage ().begin ()->first ==
@@ -49,7 +48,6 @@ TEST_F (CompilationTest, Empty) {
 }
 
 TEST_F (CompilationTest, SingleMember) {
-    constexpr auto output_file_path = indirect_string_address (61U);
     constexpr auto triple = indirect_string_address (67U);
     constexpr auto digest = pstore::index::digest{28U};
     constexpr auto extent = pstore::extent<pstore::repo::fragment> (
@@ -61,13 +59,12 @@ TEST_F (CompilationTest, SingleMember) {
     definition sm{digest, extent, name, linkage, visibility};
 
     std::vector<definition> v{sm};
-    compilation::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
+    compilation::alloc (transaction_, triple, std::begin (v), std::end (v));
 
     auto t = reinterpret_cast<compilation const *> (transaction_.get_storage ().begin ()->first);
 
     EXPECT_EQ (1U, t->size ());
     EXPECT_FALSE (t->empty ());
-    EXPECT_EQ (output_file_path, t->path ());
     EXPECT_EQ (triple, t->triple ());
     EXPECT_EQ (sizeof (compilation), t->size_bytes ());
     EXPECT_EQ (digest, (*t)[0].digest);
@@ -78,7 +75,6 @@ TEST_F (CompilationTest, SingleMember) {
 }
 
 TEST_F (CompilationTest, MultipleMembers) {
-    constexpr auto output_file_path = indirect_string_address (32U);
     constexpr auto triple = indirect_string_address (33U);
     constexpr auto digest1 = pstore::index::digest{128U};
     constexpr auto digest2 = pstore::index::digest{144U};
@@ -94,7 +90,7 @@ TEST_F (CompilationTest, MultipleMembers) {
     definition mm2{digest2, extent2, name + 24U, linkage, visibility};
 
     std::vector<definition> v{mm1, mm2};
-    compilation::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
+    compilation::alloc (transaction_, triple, std::begin (v), std::end (v));
 
     auto t = reinterpret_cast<compilation const *> (transaction_.get_storage ().begin ()->first);
 

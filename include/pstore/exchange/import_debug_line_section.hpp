@@ -27,7 +27,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             //*     _     _                _ _                       _   _           *
             //*  __| |___| |__ _  _ __ _  | (_)_ _  ___   ___ ___ __| |_(_)___ _ _   *
@@ -39,7 +39,7 @@ namespace pstore {
             class debug_line_section final : public generic_section<OutputIterator> {
             public:
                 debug_line_section (not_null<context *> const ctxt, repo::section_kind kind,
-                                    not_null<name_mapping const *> const names,
+                                    not_null<string_mapping const *> const names,
                                     repo::section_content * const content,
                                     OutputIterator * const out)
                         : generic_section<OutputIterator> (ctxt, kind, names, content, out)
@@ -107,7 +107,7 @@ namespace pstore {
                 return this->pop ();
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

@@ -28,7 +28,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             /// We can map from the section_kind enum to the type of data used to represent a
             /// section of that kind. section_to_importer is used to convert from this type class
@@ -59,7 +59,7 @@ namespace pstore {
                 using type = debug_line_section<OutputIterator>;
             };
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

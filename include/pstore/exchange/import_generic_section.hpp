@@ -28,7 +28,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             //*                        _                 _   _           *
             //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *
@@ -40,7 +40,7 @@ namespace pstore {
             class generic_section : public rule {
             public:
                 generic_section (not_null<context *> const ctxt, repo::section_kind const kind,
-                                 not_null<name_mapping const *> const names,
+                                 not_null<string_mapping const *> const names,
                                  not_null<repo::section_content *> const content,
                                  not_null<OutputIterator *> const out) noexcept
                         : rule (ctxt)
@@ -66,7 +66,7 @@ namespace pstore {
 
             private:
                 repo::section_kind const kind_;
-                not_null<name_mapping const *> const names_;
+                not_null<string_mapping const *> const names_;
                 not_null<repo::section_content *> const content_;
                 not_null<OutputIterator *> const out_;
 
@@ -149,7 +149,7 @@ namespace pstore {
                 return pop ();
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

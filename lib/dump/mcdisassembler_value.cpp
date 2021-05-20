@@ -391,6 +391,10 @@ namespace pstore {
         value_ptr make_disassembled_value (std::uint8_t const * const first,
                                            std::uint8_t const * const last,
                                            parameters const & parm) {
+            if (parm.no_disassembly) {
+                return make_hex_dump_value (first, last, parm);
+            }
+
             array::container arr;
             if (!disasm_block (gsl::make_span (first, last), arr, parm)) {
                 return make_value (arr);

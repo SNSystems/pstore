@@ -32,13 +32,31 @@ namespace pstore {
             //* / _ \ '_ \  _| / _ \ ' \  *
             //* \___/ .__/\__|_\___/_||_| *
             //*     |_|                   *
-            option::option () { all ().push_back (this); }
+            // (ctor)
+            // ~~~~~~
+            option::option ()
+                    : container_pos_{option::add_to_global_list (this)} {}
             option::option (num_occurrences_flag const occurrences)
                     : option () {
                 occurrences_ = occurrences;
             }
 
-            option::~option () = default;
+            // (dtor)
+            // ~~~~~~
+            option::~option () {
+                // Remove this option from the global container.
+                options_container & all = option::all ();
+                all.erase (container_pos_);
+            }
+
+            // add to global list
+            // ~~~~~~~~~~~~~~~~~~
+            auto option::add_to_global_list (option * const opt)
+                -> options_container::const_iterator {
+                options_container & all = option::all ();
+                all.push_back (opt);
+                return std::prev (all.end ());
+            }
 
             void option::set_num_occurrences_flag (num_occurrences_flag const n) {
                 occurrences_ = n;

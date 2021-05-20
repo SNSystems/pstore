@@ -23,7 +23,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             //*     _      __ _      _ _   _           *
             //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
@@ -34,7 +34,7 @@ namespace pstore {
             // ~~~~
             definition::definition (not_null<context *> const ctxt,
                                     not_null<container *> const definitions,
-                                    not_null<name_mapping const *> const names,
+                                    not_null<string_mapping const *> const names,
                                     fragment_index_pointer const & fragments)
                     : rule (ctxt)
                     , definitions_{definitions}
@@ -142,7 +142,7 @@ namespace pstore {
             // ~~~~~~
             definition_object::definition_object (
                 not_null<context *> const ctxt, not_null<definition::container *> const definitions,
-                not_null<name_mapping const *> const names,
+                not_null<string_mapping const *> const names,
                 fragment_index_pointer const & fragments)
                     : rule (ctxt)
                     , definitions_{definitions}
@@ -173,9 +173,9 @@ namespace pstore {
             // ~~~~~~
             compilation::compilation (not_null<context *> const ctxt,
                                       not_null<transaction_base *> const transaction,
-                                      not_null<name_mapping const *> const names,
+                                      not_null<string_mapping const *> const names,
                                       fragment_index_pointer const & fragments,
-                                      index::digest const digest)
+                                      index::digest const & digest)
                     : rule (ctxt)
                     , transaction_{transaction}
                     , names_{names}
@@ -185,15 +185,12 @@ namespace pstore {
             // key
             // ~~~
             std::error_code compilation::key (std::string const & k) {
-                if (k == "path") {
-                    seen_[path_index] = true;
-                    return push<uint64_rule> (&path_);
-                }
                 if (k == "triple") {
                     seen_[triple_index] = true;
                     return push<uint64_rule> (&triple_);
                 }
                 if (k == "definitions") {
+                    seen_[definitions_index] = true;
                     return push_array_rule<definition_object> (this, &definitions_, names_,
                                                                fragments_);
                 }
@@ -206,19 +203,14 @@ namespace pstore {
                 if (!seen_.all ()) {
                     return error::incomplete_compilation_object;
                 }
-                auto const path = names_->lookup (path_);
-                if (!path) {
-                    return path.get_error ();
-                }
                 auto const triple = names_->lookup (triple_);
                 if (!triple) {
                     return triple.get_error ();
                 }
 
                 // Create the compilation record in the store.
-                extent<repo::compilation> const compilation_extent =
-                    repo::compilation::alloc (*transaction_, *path, *triple,
-                                              std::begin (definitions_), std::end (definitions_));
+                extent<repo::compilation> const compilation_extent = repo::compilation::alloc (
+                    *transaction_, *triple, std::begin (definitions_), std::end (definitions_));
 
                 // Insert this compilation into the compilations index.
                 auto const compilations =
@@ -239,7 +231,7 @@ namespace pstore {
             // ~~~~~~
             compilations_index::compilations_index (not_null<context *> const ctxt,
                                                     not_null<transaction_base *> const transaction,
-                                                    not_null<name_mapping const *> const names)
+                                                    not_null<string_mapping const *> const names)
                     : rule (ctxt)
                     , transaction_{transaction}
                     , names_{names}
@@ -267,6 +259,6 @@ namespace pstore {
             std::error_code compilations_index::end_object () { return pop (); }
 
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore

@@ -37,61 +37,112 @@
 #include "pstore/http/serve_static_content.hpp"
 #include "pstore/http/wskey.hpp"
 
+using namespace std::literals::string_literals;
+
 namespace {
 
-    using socket_descriptor = pstore::socket_descriptor;
+    using czstring_pair = std::pair<pstore::gsl::czstring, pstore::gsl::czstring>;
+
+    enum class http_status_code {
+        /// The requester has asked the server to switch protocols and the server has agreed to do
+        /// so.
+        switching_protocols = 101,
+        /// The server cannot or will not process the request due to an apparent client error (e.g.,
+        /// malformed request syntax, size too large, invalid request message framing, or deceptive
+        /// request routing).
+        bad_request = 400,
+        /// The requested resource could not be found but may be available in the future. Subsequent
+        /// requests by the client are permissible.
+        not_found = 404,
+        /// The client should switch to a different protocol such as TLS/1.3, given in the Upgrade
+        /// header field.
+        upgrade_required = 426,
+        /// A generic error message, given when an unexpected condition was encountered and no more
+        /// specific message is suitable.
+        internal_server_error = 500,
+        /// The server either does not recognize the request method, or it lacks the ability to
+        /// fulfil the request.
+        not_implemented = 501,
+    };
+
+    std::string build_status_line (http_status_code const code, pstore::gsl::czstring text) {
+        std::ostringstream str;
+        str << "HTTP/1.1 " << static_cast<std::underlying_type_t<http_status_code>> (code) << ' '
+            << text << pstore::http::crlf;
+        return str.str ();
+    }
+
+    template <typename InputIterator,
+              typename = std::enable_if_t<std::is_same<
+                  typename std::iterator_traits<InputIterator>::value_type, czstring_pair>::value>>
+    std::string build_headers (InputIterator first, InputIterator last) {
+        std::ostringstream os;
+        static constexpr auto crlf = pstore::http::crlf;
+        std::for_each (first, last, [&] (czstring_pair const & p) {
+            os << p.first << ": " << p.second << crlf;
+        });
+        os << "Server: " << pstore::http::server_name << crlf;
+        os << crlf;
+        return os.str ();
+    }
 
     template <typename Sender, typename IO>
     pstore::error_or<IO> cerror (Sender sender, IO io, pstore::gsl::czstring const cause,
-                                 unsigned const error_no, pstore::gsl::czstring const shortmsg,
+                                 http_status_code const error_no,
+                                 pstore::gsl::czstring const shortmsg,
                                  pstore::gsl::czstring const longmsg) {
         static constexpr auto crlf = pstore::http::crlf;
-        static constexpr auto server_name = pstore::http::server_name;
-
+        using status_type = std::underlying_type_t<http_status_code>;
         std::ostringstream content;
         content << "<!DOCTYPE html>\n"
                    "<html lang=\"en\">"
                    "<head>\n"
                    "<meta charset=\"utf-8\">\n"
                    "<title>"
-                << server_name
+                << pstore::http::server_name
                 << " Error</title>\n"
                    "</head>\n"
                    "<body>\n"
                    "<h1>"
-                << server_name
+                << pstore::http::server_name
                 << " Web Server Error</h1>\n"
                    "<p>"
-                << error_no << ": " << shortmsg
+                << static_cast<status_type> (error_no) << ": " << shortmsg
                 << "</p>"
                    "<p>"
                 << longmsg << ": " << cause
                 << "</p>\n"
                    "<hr>\n"
                    "<em>The "
-                << server_name
+                << pstore::http::server_name
                 << " Web server</em>\n"
                    "</body>\n"
                    "</html>\n";
         std::string const & content_str = content.str ();
-        auto const now = pstore::http::http_date (std::chrono::system_clock::now ());
 
-        std::ostringstream os;
-        // clang-format off
-        os << "HTTP/1.1 " << error_no << " OK" << crlf
-           << "Server: " << server_name << crlf
-           << "Content-length: " << content_str.length () << crlf
-           << "Connection: close" << crlf  // TODO remove this when we support persistent connections
-           << "Content-type: " << "text/html" << crlf
-           << "Date: " << now << crlf
-           << "Last-Modified: " << now << crlf
-           << crlf
-           << content_str;
-        // clang-format on
-        return pstore::http::send (sender, io, os);
+        auto const now = pstore::http::http_date (std::chrono::system_clock::now ());
+        auto const status_line = build_status_line (error_no, "OK");
+
+        auto const content_length = std::to_string (content_str.length ());
+        std::array<czstring_pair, 5> const h{{
+            {"Content-length", content_length.c_str ()},
+            {"Connection", "close"}, // TODO remove this when we support persistent connections
+            {"Content-type", "text/html"},
+            {"Date", now.c_str ()},
+            {"Last-Modified", now.c_str ()},
+        }};
+
+        // Send the three parts: the response line, the headers, and the HTML content.
+        return pstore::http::send (sender, io, status_line + crlf) >>= [&] (IO io2) {
+            return pstore::http::send (sender, io2,
+                                       build_headers (std::begin (h), std::end (h))) >>=
+                   [&] (IO io3) { return pstore::http::send (sender, io3, content_str); };
+        };
     }
 
-    // initialize_socket
+    using socket_descriptor = pstore::socket_descriptor;
+
+    // initialize socket
     // ~~~~~~~~~~~~~~~~~
     pstore::error_or<socket_descriptor> initialize_socket (in_port_t const port_number) {
         using eo = pstore::error_or<socket_descriptor>;
@@ -125,7 +176,8 @@ namespace {
         return eo{std::move (fd)};
     }
 
-
+    // get client name
+    // ~~~~~~~~~~~~~~~
     pstore::error_or<std::string> get_client_name (sockaddr_in const & client_addr) {
         std::array<char, 64> host_name{{'\0'}};
         constexpr std::size_t size = host_name.size ();
@@ -134,60 +186,74 @@ namespace {
 #else
         using size_type = std::size_t;
 #endif //!_WIN32
-        int const gni_err = ::getnameinfo (
-            reinterpret_cast<sockaddr const *> (&client_addr), sizeof (client_addr),
-            host_name.data (), static_cast<size_type> (size), nullptr, socklen_t{0}, 0 /*flags*/);
-        if (gni_err != 0) {
+
+        if (::getnameinfo (reinterpret_cast<sockaddr const *> (&client_addr), sizeof (client_addr),
+                           host_name.data (), static_cast<size_type> (size), nullptr, socklen_t{0},
+                           0 /*flags*/) != 0) {
             return pstore::error_or<std::string>{pstore::http::get_last_error ()};
         }
         host_name.back () = '\0'; // guarantee nul termination.
-        return pstore::error_or<std::string>{std::string{host_name.data ()}};
+        return pstore::error_or<std::string>{pstore::in_place, host_name.data ()};
     }
 
+    // send bad websocket version
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // From RFC 6455: "The |Sec-WebSocket-Version| header field in the client's handshake
+    // includes the version of the WebSocket Protocol with which the client is
+    // attempting to communicate. If this version does not match a version understood by
+    // the server, the server MUST abort the WebSocket handshake described in this
+    // section and instead send an appropriate HTTP error code (such as 426 Upgrade
+    // Required) and a |Sec-WebSocket-Version| header field indicating the version(s)
+    // the server is capable of understanding."
+    template <typename SenderFunction, typename IO>
+    pstore::error_or<IO> send_bad_websocket_version (SenderFunction const sender, IO io) {
+        std::string const response_string =
+            build_status_line (http_status_code::upgrade_required, "OK");
+
+        return sender (io, as_bytes (pstore::gsl::make_span (response_string))) >>=
+               [&sender] (IO io2) {
+                   auto const ws_version = std::to_string (pstore::http::ws_version);
+                   std::array<czstring_pair, 1> const headers{{
+                       {"Sec-WebSocket-Version", ws_version.c_str ()},
+                   }};
+                   std::string const h = build_headers (std::begin (headers), std::end (headers));
+                   return sender (io2, as_bytes (pstore::gsl::make_span (h)));
+               };
+    }
 
     // Here we bridge from the std::error_code world to HTTP status codes.
     void report_error (std::error_code const error, pstore::http::request_info const & request,
                        socket_descriptor & socket) {
-        static constexpr auto crlf = pstore::http::crlf;
         static constexpr auto sender = pstore::http::net::network_sender;
 
-        auto report = [&error, &request, &socket] (unsigned const code,
+        auto report = [&error, &request, &socket] (http_status_code const code,
                                                    pstore::gsl::czstring const message) {
             cerror (sender, std::ref (socket), request.uri ().c_str (), code, message,
                     error.message ().c_str ());
         };
 
         log (pstore::logger::priority::error, "http error: ", error.message ());
-        if (error.category () == pstore::http::get_error_category ()) {
+        auto const & cat = error.category ();
+        if (cat == pstore::http::get_error_category ()) {
             switch (static_cast<pstore::http::error_code> (error.value ())) {
-            case pstore::http::error_code::bad_request: report (400, "Bad request"); return;
+            case pstore::http::error_code::bad_request:
+                return report (http_status_code::bad_request, "Bad request");
 
-            case pstore::http::error_code::bad_websocket_version: {
-                // From rfc6455: "The |Sec-WebSocket-Version| header field in the client's handshake
-                // includes the version of the WebSocket Protocol with which the client is
-                // attempting to communicate. If this version does not match a version understood by
-                // the server, the server MUST abort the WebSocket handshake described in this
-                // section and instead send an appropriate HTTP error code (such as 426 Upgrade
-                // Required) and a |Sec-WebSocket-Version| header field indicating the version(s)
-                // the server is capable of understanding."
-                std::ostringstream os;
-                os << "HTTP/1.1 426 OK" << crlf //
-                   << "Sec-WebSocket-Version: " << pstore::http::ws_version << crlf
-                   << "Server: " << pstore::http::server_name << crlf //
-                   << crlf;
-                std::string const & reply = os.str ();
-                sender (socket, as_bytes (pstore::gsl::make_span (reply)));
-            }
+            case pstore::http::error_code::bad_websocket_version:
+                send_bad_websocket_version (sender, std::ref (socket));
                 return;
 
             case pstore::http::error_code::not_implemented:
+                return report (http_status_code::not_implemented, "Not implemented");
+
             case pstore::http::error_code::string_too_long:
             case pstore::http::error_code::refill_out_of_range: break;
             }
-        } else if (error.category () == pstore::romfs::get_romfs_error_category ()) {
+        } else if (cat == pstore::romfs::get_romfs_error_category ()) {
             switch (static_cast<pstore::romfs::error_code> (error.value ())) {
             case pstore::romfs::error_code::enoent:
-            case pstore::romfs::error_code::enotdir: report (404, "Not found"); return;
+            case pstore::romfs::error_code::enotdir:
+                return report (http_status_code::not_found, "Not found");
 
             case pstore::romfs::error_code::einval: break;
             }
@@ -196,7 +262,7 @@ namespace {
         // Some error that we don't know how to report properly.
         std::ostringstream message;
         message << "Server internal error: " << error.message ();
-        report (501, message.str ().c_str ());
+        report (http_status_code::internal_server_error, message.str ().c_str ());
     }
 
 
@@ -227,22 +293,25 @@ namespace {
         auto const accept_ws_connection = [&header_contents, &io] () {
             log (priority::info, "Accepting WebSockets upgrade");
 
-            static constexpr auto crlf = pstore::http::crlf;
             std::string const date = pstore::http::http_date (std::chrono::system_clock::now ());
-            std::ostringstream os;
-            // clang-format off
-            os << "HTTP/1.1 101 Switching Protocols" << crlf
-               << "Server: " << pstore::http::server_name << crlf
-               << "Upgrade: WebSocket" << crlf
-               << "Connection: Upgrade" << crlf
-               << "Sec-WebSocket-Accept: " << pstore::http::source_key (*header_contents.websocket_key) << crlf
-               << "Date: " << date << crlf
-               << "Last-Modified: " << date << crlf
-               << crlf;
-            // clang-format on
+            std::string const accept = pstore::http::source_key (*header_contents.websocket_key);
 
-            // Here I assume that the send() IO param is the same as the Reader's IO parameter.
-            return pstore::http::send (pstore::http::net::network_sender, std::ref (io), os);
+            std::array<czstring_pair, 5> headers{{
+                {"Upgrade", "WebSocket"},
+                {"Connection", "Upgrade"},
+                {"Sec-WebSocket-Accept", accept.c_str ()},
+                {"Date", date.c_str ()},
+                {"Last-Modified", date.c_str ()},
+            }};
+
+            auto const status_line =
+                build_status_line (http_status_code::switching_protocols, "Switching Protocols");
+
+            auto sender = pstore::http::net::network_sender;
+            return pstore::http::send (sender, io, status_line) >>= [&] (IO io2) {
+                return pstore::http::send (
+                    sender, io2, build_headers (std::begin (headers), std::end (headers)));
+            };
         };
 
         auto server_loop_thread = [&channels] (Reader && reader2, socket_descriptor io2,
@@ -308,7 +377,7 @@ namespace {
     }
 #endif
 
-    // wait_for_connection
+    // wait for connection
     // ~~~~~~~~~~~~~~~~~~~
     pstore::error_or<socket_descriptor> wait_for_connection (socket_descriptor const & parentfd) {
         using return_type = pstore::error_or<socket_descriptor>;
@@ -389,8 +458,8 @@ namespace pstore {
 
                 // We only currently support the GET method.
                 if (request.method () != "GET") {
-                    cerror (net::network_sender, std::ref (childfd), request.method ().c_str (),
-                            501, "Not Implemented", "httpd does not implement this method");
+                    report_error (make_error_code (pstore::http::error_code::not_implemented),
+                                  request, childfd);
                     continue;
                 }
 

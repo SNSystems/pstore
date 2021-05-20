@@ -36,7 +36,7 @@ add_pstore_library (
 add_clang_tidy_target (pstore-romfs)
 target_link_libraries (pstore-romfs PUBLIC pstore-adt pstore-support)
 
-if (NOT PSTORE_EXCEPTIONS)
+if (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
@@ -54,7 +54,7 @@ if (NOT PSTORE_EXCEPTIONS)
     set (PSTORE_EXCEPTIONS No)
 
     target_link_libraries (pstore-romfs-ex PUBLIC pstore-adt-ex pstore-support-ex)
-endif (NOT PSTORE_EXCEPTIONS)
+endif (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
     add_pstore_library (

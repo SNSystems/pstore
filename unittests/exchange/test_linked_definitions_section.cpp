@@ -80,7 +80,8 @@ namespace {
 
         transaction.commit ();
 
-        exchange::export_ns::name_mapping exported_names{export_db_};
+        exchange::export_ns::string_mapping exported_names{
+            export_db_, pstore::exchange::export_ns::name_index_tag ()};
         exchange::export_ns::ostringstream str;
         emit_fragment (str, exchange::export_ns::indent{}, export_db_, exported_names,
                        export_db_.getro (fext), true);
@@ -89,7 +90,7 @@ namespace {
 
     template <typename ImportRule, typename... Args>
     decltype (auto) make_json_object_parser (database * const db, Args... args) {
-        using namespace pstore::exchange::import;
+        using namespace pstore::exchange::import_ns;
         return json::make_parser (callbacks::make<object_rule<ImportRule, Args...>> (db, args...));
     }
 
@@ -150,11 +151,10 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
             auto compilation_index =
                 pstore::index::get_index<pstore::trailer::indices::compilation> (transaction.db ());
             compilation_index->insert (
-                transaction,
-                std::make_pair (referenced_compilation_digest,
-                                repo::compilation::alloc (transaction, str /*path*/, str /*triple*/,
-                                                          std::begin (definitions),
-                                                          std::end (definitions))));
+                transaction, std::make_pair (referenced_compilation_digest,
+                                             repo::compilation::alloc (transaction, str /*triple*/,
+                                                                       std::begin (definitions),
+                                                                       std::end (definitions))));
         }
         transaction.commit ();
     }
@@ -164,8 +164,8 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
         mock_mutex mutex;
         auto transaction = begin (import_db_, transaction_lock{mutex});
         {
-            exchange::import::name_mapping imported_names;
-            auto parser = make_json_object_parser<exchange::import::fragment_sections> (
+            exchange::import_ns::string_mapping imported_names;
+            auto parser = make_json_object_parser<exchange::import_ns::fragment_sections> (
                 &import_db_, &transaction, &imported_names, &imported_digest);
             parser.input (exported_json).eof ();
             ASSERT_FALSE (parser.has_error ())
@@ -173,7 +173,7 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
                 << parser.coordinate () << '\n'
                 << exported_json;
 
-            std::shared_ptr<exchange::import::context> const & ctxt =
+            std::shared_ptr<exchange::import_ns::context> const & ctxt =
                 parser.callbacks ().get_context ();
             ctxt->apply_patches (&transaction);
         }

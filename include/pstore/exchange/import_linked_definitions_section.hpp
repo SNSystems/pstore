@@ -30,13 +30,13 @@
 
 #include <bitset>
 
-#include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/import_strings.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/linked_definitions_section.hpp"
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             using linked_definitions_container = std::vector<repo::linked_definitions::value_type>;
 
@@ -163,7 +163,7 @@ namespace pstore {
                 return pop ();
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore
 

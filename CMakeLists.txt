@@ -90,6 +90,7 @@ option (PSTORE_VALGRIND "Run unit tests using Valgrind (if available).")
 option (PSTORE_COVERAGE "Enable generation of coverage reports.")
 option (PSTORE_DISABLE_UINT128_T "Disable support for __uint128_t")
 option (PSTORE_CLANG_TIDY_ENABLED "Enable generation of clang-tidy targets")
+option (PSTORE_NOISY_UNIT_TESTS "Produce complete ('noisy') output from the unit test executables")
 
 # The name of the vacuum (GC) executable.
 set (PSTORE_VACUUM_TOOL_NAME "pstore-vacuumd")

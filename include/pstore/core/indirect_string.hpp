@@ -30,13 +30,14 @@ namespace pstore {
     //*                                                  |___/  *
 
     /// The string address can come in three forms:
+    ///
     /// 1. An shared_sstring_view string that hasn't been added to the index yet. This is indicated
-    /// when is_pointer_ is true. The str_ member points to the string view.
+    ///    when is_pointer_ is true. The str_ member points to the string view.
     /// 2. A database address which points to an in-memory shared_sstring_view. This happens when
-    /// the string has been inserted, but the index has not yet been flushed. In this case,
-    /// is_pointer_ is false and the LBS of address_ is set.
+    ///    the string has been inserted, but the index has not yet been flushed. In this case,
+    ///    is_pointer_ is false and the LBS of address_ is set.
     /// 3. An address of a string in the store. In this case, is_pointer_ is false and the LSB of
-    /// address_ is clear.
+    ///    address_ is clear.
     ///
     /// The use of the LBS of the address field to distinguish between in-heap and in-store
     /// addresses means that the in-store string bodies must be 2-byte aligned.
@@ -48,8 +49,8 @@ namespace pstore {
                 : db_{db}
                 , is_pointer_{false}
                 , address_{addr.absolute ()} {}
-        indirect_string (database const & db,
-                         gsl::not_null<raw_sstring_view const *> const str) noexcept
+        constexpr indirect_string (database const & db,
+                                   gsl::not_null<raw_sstring_view const *> const str) noexcept
                 : db_{db}
                 , is_pointer_{true}
                 , str_{str} {
@@ -61,6 +62,8 @@ namespace pstore {
         bool operator< (indirect_string const & rhs) const;
 
         raw_sstring_view as_string_view (gsl::not_null<shared_sstring_view *> owner) const;
+
+        std::size_t length () const;
 
         /// When it is known that the string body is a store address use this function to carry out
         /// additional checks that the address is reasonable.
@@ -77,8 +80,16 @@ namespace pstore {
             return this->as_string_view (&owner).to_string ();
         }
 
-        /// \returns True is the pointee is in the store rather than on the heap.
-        bool is_in_store () const noexcept { return !is_pointer_ && !(address_ & in_heap_mask); }
+        /// \returns True if the pointee is in the store rather than on the heap.
+        constexpr bool is_in_store () const noexcept {
+            return !is_pointer_ && !(address_ & in_heap_mask);
+        }
+
+        /// \returns The pstore address of the start of the string instance.
+        constexpr address in_store_address () const noexcept {
+            PSTORE_ASSERT (this->is_in_store ());
+            return address{address_};
+        }
 
         /// Write the body of a string and updates the indirect pointer so that it points to that
         /// body.
@@ -106,7 +117,7 @@ namespace pstore {
         /// in which case it is the heap address of the string.
         bool is_pointer_;
         union {
-            std::uint64_t address_;        ///< The in-store/in-heap string address.
+            address::value_type address_;  ///< The in-store/in-heap string address.
             raw_sstring_view const * str_; ///< The address of the in-heap string.
         };
     };
@@ -266,12 +277,28 @@ namespace pstore {
     //* |_||_\___|_| .__/\___|_|   |_|  \_,_|_||_\__|\__|_\___/_||_| *
     //*            |_|                                               *
 
-    /// \param db  The database containing the string to be read.
+    /// \param db  The database containing the indirect string to be read.
     /// \param addr  The address of the indirect string pointer.
     /// \param owner  A pointer to the object which will own the memory containing the string.
     /// \result  A view of the requested string.
-    auto get_sstring_view (database const & db, typed_address<indirect_string> const addr,
-                           gsl::not_null<shared_sstring_view *> const owner) -> raw_sstring_view;
+    raw_sstring_view get_sstring_view (database const & db,
+                                       typed_address<indirect_string> const addr,
+                                       gsl::not_null<shared_sstring_view *> const owner);
+
+    /// \param db  The database containing the string to be read.
+    /// \param addr  The address of the string data.
+    /// \param owner  A pointer to the object which will own the memory containing the string.
+    /// \result  A view of the requested string.
+    raw_sstring_view get_sstring_view (database const & db, address addr,
+                                       gsl::not_null<shared_sstring_view *> const owner);
+
+    /// \param db  The database containing the string to be read.
+    /// \param addr  The address of the string data.
+    /// \param length  The number of bytes in the string data.
+    /// \param owner  A pointer to the object which will own the memory containing the string.
+    /// \result  A view of the requested string.
+    raw_sstring_view get_sstring_view (database const & db, address addr, std::size_t length,
+                                       gsl::not_null<shared_sstring_view *> owner);
 
 } // end namespace pstore
 

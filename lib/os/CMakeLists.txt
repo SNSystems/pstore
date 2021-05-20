@@ -73,7 +73,7 @@ add_clang_tidy_target (pstore-os)
 
 
 # Add the exception-handling-enabled pstore-os-ex
-if (NOT PSTORE_EXCEPTIONS)
+if (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
@@ -93,7 +93,7 @@ if (NOT PSTORE_EXCEPTIONS)
     if (WIN32)
         target_link_libraries (pstore-os-ex PUBLIC Ws2_32.dll)
     endif (WIN32)
-endif (NOT PSTORE_EXCEPTIONS)
+endif (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
     add_pstore_library (

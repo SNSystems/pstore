@@ -3,6 +3,26 @@
     "$id": "http://github.com/SNSystems/pstore.schema.json",
 
     "definitions": {
+        "unsigned8": {
+            "description": "An unsigned 8-bit integer",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+        },
+
+        "unsigned32": {
+            "description": "An unsigned 32-bit integer",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+        },
+
+        "unsigned64": {
+            "description": "An unsigned 64-bit integer (no max declared!)",
+            "type": "integer",
+            "minimum": 0
+        },
+
         "digest": {
             "description": "A 128 bit hash digest expressed as a hexadecimal value",
             "type": "string",
@@ -25,11 +45,11 @@
                 "properties": {
                     "name": {
                         "description": "The index of the name referenced by this fixup",
-                        "type": "number"
+                        "$ref": "#/definitions/unsigned64"
                     },
                     "type": {
                         "description": "The (platform-dependent) relocation to be applied when resolving this fixup",
-                        "type": "number"
+                        "$ref": "#/definitions/unsigned8"
                     },
                     "is_weak": {
                         "description": "True if the fixup can be resolved if the target symbol is undefined (false is assumed if the field is missing)",
@@ -77,7 +97,7 @@
                     },
                     "type": {
                         "description": "The (platform-dependent) relocation to be applied when resolving this fixup",
-                        "type": "number"
+                        "$ref": "#/definitions/unsigned8"
                     },
                     "offset": { "type": "number" },
                     "addend": { "type": "number" }
@@ -131,11 +151,11 @@
             "description": "An array of linked definitions",
             "type": "array",
             "items": {
-                "description": "An external (extra-fragment) fixup",
+                "description": "Represents the definitions linked to a fragment",
                 "type": "object",
                 "properties": {
                     "compilation": { "$ref": "#/definitions/digest" },
-                    "index": { "type": "number" }
+                    "index": { "$ref": "#/definitions/unsigned32" }
                 },
                 "required": ["compilation", "index"],
                 "additionalProperties": false
@@ -171,6 +191,13 @@
                         "uniqueItems": true
                     },
 
+                    "paths" : {
+                        "description": "The compilation paths defined by this transaction",
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "uniqueItems": true
+                    },
+
                     "debugline": {
                         "description": "Index associating a digest with a DWARF debug-line header",
                         "type": "object",
@@ -196,13 +223,13 @@
                                     "data": { "$ref": "#/definitions/generic_section" },
                                     "bss": { "$ref": "#/definitions/bss_section" },
                                     "rel_ro": { "$ref": "#/definitions/generic_section" },
-                                    "mergeable_1_byte_c_string": {},
-                                    "mergeable_2_byte_c_string": {},
-                                    "mergeable_4_byte_c_string": {},
-                                    "mergeable_const_4": {},
-                                    "mergeable_const_8": {},
-                                    "mergeable_const_16": {},
-                                    "mergeable_const_32": {},
+                                    "mergeable_1_byte_c_string": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_2_byte_c_string": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_4_byte_c_string": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_const_4": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_const_8": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_const_16": { "$ref": "#/definitions/generic_section" },
+                                    "mergeable_const_32": { "$ref": "#/definitions/generic_section" },
                                     "read_only": { "$ref": "#/definitions/generic_section" },
                                     "thread_data": { "$ref": "#/definitions/generic_section" },
                                     "thread_bss": { "$ref": "#/definitions/bss_section" },
@@ -225,7 +252,6 @@
                                 "description": "A compilation defining a collection of symbols",
                                 "type": "object",
                                 "properties": {
-                                    "path": { "type": "number" },
                                     "triple": { "type": "number" },
                                     "definitions": {
                                         "type": "array",
@@ -254,7 +280,7 @@
                                         }
                                     }
                                 },
-                                "required": ["definitions", "path", "triple" ]
+                                "required": ["definitions", "triple" ]
                             }
                         },
                         "additionalProperties": false

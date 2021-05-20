@@ -34,8 +34,7 @@ add_pstore_library (
 target_link_libraries (pstore-adt PUBLIC pstore-support)
 add_clang_tidy_target (pstore-adt)
 
-# Add the exception-handling-enabled pstore-adt-ex if we're building inside LLVM
-if (NOT PSTORE_EXCEPTIONS)
+if (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
@@ -51,7 +50,7 @@ if (NOT PSTORE_EXCEPTIONS)
     set (PSTORE_EXCEPTIONS No)
 
     target_link_libraries (pstore-adt-ex PUBLIC pstore-support-ex)
-endif (NOT PSTORE_EXCEPTIONS)
+endif (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
     add_pstore_library (

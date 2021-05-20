@@ -25,7 +25,7 @@
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
-#include "pstore/exchange/import_names_array.hpp"
+#include "pstore/exchange/import_strings_array.hpp"
 
 #include <gmock/gmock.h>
 
@@ -36,9 +36,9 @@ namespace {
 
     using internal_fixup_collection = std::vector<pstore::repo::internal_fixup>;
     using internal_fixup_array_root =
-        pstore::exchange::import::array_rule<pstore::exchange::import::ifixups_object,
-                                             pstore::exchange::import::name_mapping *,
-                                             internal_fixup_collection *>;
+        pstore::exchange::import_ns::array_rule<pstore::exchange::import_ns::ifixups_object,
+                                                pstore::exchange::import_ns::string_mapping *,
+                                                internal_fixup_collection *>;
 
     class ExchangeSectionFixups : public ::testing::Test {
     public:
@@ -67,11 +67,11 @@ TEST_F (ExchangeSectionFixups, RoundTripInternalEmpty) {
                           std::end (ifixups));
 
     // Setup the parse.
-    pstore::exchange::import::name_mapping names;
+    pstore::exchange::import_ns::string_mapping names;
     internal_fixup_collection imported_ifixups;
     auto parser = pstore::json::make_parser (
-        pstore::exchange::import::callbacks::make<internal_fixup_array_root> (&db_, &names,
-                                                                              &imported_ifixups));
+        pstore::exchange::import_ns::callbacks::make<internal_fixup_array_root> (
+            &db_, &names, &imported_ifixups));
 
     // Import the data that we just exported.
     parser.input (os.str ());
@@ -100,11 +100,11 @@ TEST_F (ExchangeSectionFixups, RoundTripInternalCollection) {
                           std::end (ifixups));
 
     // Setup the parse.
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     internal_fixup_collection imported_ifixups;
     auto parser = pstore::json::make_parser (
-        pstore::exchange::import::callbacks::make<internal_fixup_array_root> (&db_, &imported_names,
-                                                                              &imported_ifixups));
+        pstore::exchange::import_ns::callbacks::make<internal_fixup_array_root> (
+            &db_, &imported_names, &imported_ifixups));
 
     // Import the data that we just exported.
     parser.input (os.str ());
@@ -134,8 +134,8 @@ namespace {
 
         decltype (auto) parse (std::string const & src,
                                not_null<internal_fixup_collection *> const fixups) {
-            using namespace pstore::exchange::import;
-            name_mapping names;
+            using namespace pstore::exchange::import_ns;
+            string_mapping names;
             auto parser =
                 pstore::json::make_parser (callbacks::make<ifixups_object> (&db_, &names, fixups));
             parser.input (src).eof ();
@@ -194,8 +194,9 @@ TEST_F (InternalFixupMembersImport, SectionErrors) {
     {
         auto const & parser1 = this->parse (R"({ "type":17, "offset":19, "addend":23 })");
         ASSERT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
-        EXPECT_EQ (parser1.last_error (),
-                   make_error_code (pstore::exchange::import::error::ifixup_object_was_incomplete));
+        EXPECT_EQ (
+            parser1.last_error (),
+            make_error_code (pstore::exchange::import_ns::error::ifixup_object_was_incomplete));
     }
     // Section key has an unknown value.
     {
@@ -203,7 +204,7 @@ TEST_F (InternalFixupMembersImport, SectionErrors) {
             this->parse (R"({ "section":"bad", "type":17, "offset":19, "addend":23 })");
         EXPECT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
-                   make_error_code (pstore::exchange::import::error::unknown_section_name));
+                   make_error_code (pstore::exchange::import_ns::error::unknown_section_name));
     }
     // Section key has the wrong type.
     {
@@ -211,7 +212,7 @@ TEST_F (InternalFixupMembersImport, SectionErrors) {
             this->parse (R"({ "section":false, "type":17, "offset":19, "addend":23 })");
         EXPECT_TRUE (parser3.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser3.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_boolean));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_boolean));
     }
 }
 
@@ -220,8 +221,9 @@ TEST_F (InternalFixupMembersImport, TypeErrors) {
     {
         auto const & parser1 = this->parse (R"({ "section":"text", "offset":19, "addend":23 })");
         EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
-        EXPECT_EQ (parser1.last_error (),
-                   make_error_code (pstore::exchange::import::error::ifixup_object_was_incomplete));
+        EXPECT_EQ (
+            parser1.last_error (),
+            make_error_code (pstore::exchange::import_ns::error::ifixup_object_was_incomplete));
     }
     // The type key has the wrong type.
     {
@@ -229,7 +231,7 @@ TEST_F (InternalFixupMembersImport, TypeErrors) {
             this->parse (R"({ "section":"text", "type":true, "offset":19, "addend":23 })");
         ASSERT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_boolean));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_boolean));
     }
 }
 
@@ -238,8 +240,9 @@ TEST_F (InternalFixupMembersImport, OffsetErrors) {
     {
         auto const & parser1 = this->parse (R"({ "section":"text", "type":17, "addend":23 })");
         EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
-        EXPECT_EQ (parser1.last_error (),
-                   make_error_code (pstore::exchange::import::error::ifixup_object_was_incomplete));
+        EXPECT_EQ (
+            parser1.last_error (),
+            make_error_code (pstore::exchange::import_ns::error::ifixup_object_was_incomplete));
     }
     // The offset key has the wrong type.
     {
@@ -247,7 +250,7 @@ TEST_F (InternalFixupMembersImport, OffsetErrors) {
             this->parse (R"({ "section":"text", "type":17, "offset":true, "addend":23 })");
         EXPECT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_boolean));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_boolean));
     }
     // Offset is negative.
     {
@@ -255,7 +258,7 @@ TEST_F (InternalFixupMembersImport, OffsetErrors) {
             this->parse (R"({ "section":"text", "type":17, "offset":-3, "addend":23 })");
         EXPECT_TRUE (parser3.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser3.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_number));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_number));
     }
 }
 
@@ -263,15 +266,16 @@ TEST_F (InternalFixupMembersImport, AddendErrors) {
     {
         auto const & parser1 = this->parse (R"({ "section":"text", "type":17, "offset":19 })");
         EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
-        EXPECT_EQ (parser1.last_error (),
-                   make_error_code (pstore::exchange::import::error::ifixup_object_was_incomplete));
+        EXPECT_EQ (
+            parser1.last_error (),
+            make_error_code (pstore::exchange::import_ns::error::ifixup_object_was_incomplete));
     }
     {
         auto const & parser2 =
             this->parse (R"({ "section":"text", "type":17, "offset":19, "addend":true })");
         EXPECT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_boolean));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_boolean));
     }
 }
 
@@ -279,7 +283,7 @@ TEST_F (InternalFixupMembersImport, BadMember) {
     auto const & parser = this->parse (R"({ "bad":true })");
     EXPECT_TRUE (parser.has_error ()) << "Expected the parse to fail";
     EXPECT_EQ (parser.last_error (),
-               make_error_code (pstore::exchange::import::error::unrecognized_ifixup_key));
+               make_error_code (pstore::exchange::import_ns::error::unrecognized_ifixup_key));
 }
 
 
@@ -301,9 +305,9 @@ namespace {
 
         using transaction_lock = std::unique_lock<mock_mutex>;
         using xfixup_array_root =
-            pstore::exchange::import::array_rule<pstore::exchange::import::xfixups_object,
-                                                 pstore::exchange::import::name_mapping *,
-                                                 xfixup_collection *>;
+            pstore::exchange::import_ns::array_rule<pstore::exchange::import_ns::xfixups_object,
+                                                    pstore::exchange::import_ns::string_mapping *,
+                                                    xfixup_collection *>;
 
         InMemoryStore export_store_;
         pstore::database export_db_;
@@ -315,21 +319,22 @@ namespace {
 } // end anonymous namespace
 
 TEST_F (ExchangeExternalFixups, ExternalEmpty) {
+    using namespace pstore::exchange;
+
     // Start with an empty collection of external fixups.
     xfixup_collection xfixups;
 
     // Export the internal fixup array to the 'os' string-stream.
-    pstore::exchange::export_ns::ostringstream os;
-    pstore::exchange::export_ns::name_mapping names{export_db_};
-    emit_external_fixups (os, pstore::exchange::export_ns::indent{}, export_db_, names,
-                          std::begin (xfixups), std::end (xfixups), false);
+    export_ns::ostringstream os;
+    export_ns::string_mapping names{export_db_, export_ns::name_index_tag ()};
+    emit_external_fixups (os, export_ns::indent{}, export_db_, names, std::begin (xfixups),
+                          std::end (xfixups), false);
 
     // Setup the parse.
     xfixup_collection imported_xfixups;
-    pstore::exchange::import::name_mapping imported_names;
-    auto parser =
-        pstore::json::make_parser (pstore::exchange::import::callbacks::make<xfixup_array_root> (
-            &import_db_, &imported_names, &imported_xfixups));
+    import_ns::string_mapping imported_names;
+    auto parser = pstore::json::make_parser (import_ns::callbacks::make<xfixup_array_root> (
+        &import_db_, &imported_names, &imported_xfixups));
 
     // Import the data that we just exported.
     parser.input (os.str ());
@@ -342,20 +347,23 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
 }
 
 TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
+    using namespace pstore::exchange;
+
+    constexpr auto name_index = pstore::trailer::indices::name;
     std::vector<pstore::gsl::czstring> strings{"foo", "bar"};
 
     // Add these strings to the database.
     std::unordered_map<std::string, string_address> indir_strings;
-    add_export_strings (export_db_, std::begin (strings), std::end (strings),
-                        std::inserter (indir_strings, std::end (indir_strings)));
+    add_export_strings<name_index> (export_db_, std::begin (strings), std::end (strings),
+                                    std::inserter (indir_strings, std::end (indir_strings)));
 
 
 
     // Write the names that we just created as JSON.
-    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
-    pstore::exchange::export_ns::ostringstream exported_names_stream;
-    emit_names (exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
-                export_db_.get_current_revision (), &exported_names);
+    export_ns::string_mapping exported_names{export_db_, export_ns::name_index_tag ()};
+    export_ns::ostringstream exported_names_stream;
+    export_ns::emit_strings<name_index> (exported_names_stream, export_ns::indent{}, export_db_,
+                                         export_db_.get_current_revision (), &exported_names);
 
 
 
@@ -370,9 +378,9 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
 
 
     // Export the external fixup array to the 'exported_fixups' string-stream.
-    pstore::exchange::export_ns::ostringstream exported_fixups;
-    emit_external_fixups (exported_fixups, pstore::exchange::export_ns::indent{}, export_db_,
-                          exported_names, std::begin (xfixups), std::end (xfixups), false);
+    export_ns::ostringstream exported_fixups;
+    emit_external_fixups (exported_fixups, export_ns::indent{}, export_db_, exported_names,
+                          std::begin (xfixups), std::end (xfixups), false);
 
 
 
@@ -380,11 +388,11 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     mock_mutex mutex;
     auto transaction = begin (import_db_, std::unique_lock<mock_mutex>{mutex});
 
-    pstore::exchange::import::name_mapping imported_names;
+    import_ns::string_mapping imported_names;
     {
-        using namespace pstore::exchange::import;
+        using namespace import_ns;
         auto parser = pstore::json::make_parser (
-            callbacks::make<array_rule<names_array_members, decltype (&transaction),
+            callbacks::make<array_rule<strings_array_members, decltype (&transaction),
                                        decltype (&imported_names)>> (&import_db_, &transaction,
                                                                      &imported_names));
         parser.input (exported_names_stream.str ()).eof ();
@@ -397,9 +405,8 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
         xfixup_collection imported_xfixups;
         imported_xfixups.reserve (2);
 
-        auto parser = pstore::json::make_parser (
-            pstore::exchange::import::callbacks::make<xfixup_array_root> (
-                &import_db_, &imported_names, &imported_xfixups));
+        auto parser = pstore::json::make_parser (import_ns::callbacks::make<xfixup_array_root> (
+            &import_db_, &imported_names, &imported_xfixups));
         parser.input (exported_fixups.str ()).eof ();
 
         // Check the result.
@@ -427,9 +434,9 @@ namespace {
         using transaction_lock = std::unique_lock<mock_mutex>;
 
         static decltype (auto) parse (std::string const & src, pstore::database * const db,
-                                      pstore::exchange::import::name_mapping const & names,
+                                      pstore::exchange::import_ns::string_mapping const & names,
                                       not_null<external_fixup_collection *> const fixups) {
-            using namespace pstore::exchange::import;
+            using namespace pstore::exchange::import_ns;
             auto parser =
                 pstore::json::make_parser (callbacks::make<xfixups_object> (db, &names, fixups));
             parser.input (src);
@@ -438,7 +445,7 @@ namespace {
         }
 
         static decltype (auto) parse (std::string const & src, pstore::database * const db,
-                                      pstore::exchange::import::name_mapping const & names) {
+                                      pstore::exchange::import_ns::string_mapping const & names) {
             external_fixup_collection fixups;
             return parse (src, db, names, &fixups);
         }
@@ -454,15 +461,16 @@ TEST_F (ExternalFixupMembersImport, Name) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
 
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
 
     // The name key is missing altogether.
     {
         auto const & parser1 =
             this->parse (R"({ "type":13, "offset":19, "addend":23 })", &db_, imported_names);
         EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
-        EXPECT_EQ (parser1.last_error (),
-                   make_error_code (pstore::exchange::import::error::xfixup_object_was_incomplete));
+        EXPECT_EQ (
+            parser1.last_error (),
+            make_error_code (pstore::exchange::import_ns::error::xfixup_object_was_incomplete));
     }
     // The name key has the wrong type.
     {
@@ -470,7 +478,7 @@ TEST_F (ExternalFixupMembersImport, Name) {
             R"({ "name":"name", "type":13, "offset":19, "addend":23 })", &db_, imported_names);
         ASSERT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_string));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_string));
     }
     // The name key has a bad value.
     {
@@ -478,7 +486,7 @@ TEST_F (ExternalFixupMembersImport, Name) {
                                             &db_, imported_names);
         ASSERT_TRUE (parser3.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser3.last_error (),
-                   make_error_code (pstore::exchange::import::error::no_such_name));
+                   make_error_code (pstore::exchange::import_ns::error::no_such_name));
     }
 }
 
@@ -487,7 +495,7 @@ TEST_F (ExternalFixupMembersImport, Type) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
 
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     // Add a single name with index 0.
     ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
 
@@ -496,8 +504,9 @@ TEST_F (ExternalFixupMembersImport, Type) {
         auto const & parser1 =
             this->parse (R"({ "name":0, "offset":19, "addend":23 })", &db_, imported_names);
         EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
-        EXPECT_EQ (parser1.last_error (),
-                   make_error_code (pstore::exchange::import::error::xfixup_object_was_incomplete));
+        EXPECT_EQ (
+            parser1.last_error (),
+            make_error_code (pstore::exchange::import_ns::error::xfixup_object_was_incomplete));
     }
     // The type key has the wrong type.
     {
@@ -505,7 +514,7 @@ TEST_F (ExternalFixupMembersImport, Type) {
             R"({ "name":0, "type":true, "offset":19, "addend":23 })", &db_, imported_names);
         ASSERT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_boolean));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_boolean));
     }
 }
 
@@ -513,7 +522,7 @@ TEST_F (ExternalFixupMembersImport, IsWeak) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
 
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     // Add a single name with index 0.
     ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
 
@@ -531,14 +540,14 @@ TEST_F (ExternalFixupMembersImport, IsWeak) {
                          imported_names);
         ASSERT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_boolean));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_boolean));
     }
 }
 
 TEST_F (ExternalFixupMembersImport, Offset) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
 
     // The offset key is missing altogether.
@@ -546,8 +555,9 @@ TEST_F (ExternalFixupMembersImport, Offset) {
         auto const & parser1 =
             this->parse (R"({ "name":0, "type":17, "addend":23 })", &db_, imported_names);
         EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
-        EXPECT_EQ (parser1.last_error (),
-                   make_error_code (pstore::exchange::import::error::xfixup_object_was_incomplete));
+        EXPECT_EQ (
+            parser1.last_error (),
+            make_error_code (pstore::exchange::import_ns::error::xfixup_object_was_incomplete));
     }
     // The offset key has the wrong type.
     {
@@ -555,7 +565,7 @@ TEST_F (ExternalFixupMembersImport, Offset) {
             R"({ "name":0, "type":17, "offset":true, "addend":23 })", &db_, imported_names);
         EXPECT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_boolean));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_boolean));
     }
     // Offset is negative.
     {
@@ -563,36 +573,37 @@ TEST_F (ExternalFixupMembersImport, Offset) {
                                             &db_, imported_names);
         EXPECT_TRUE (parser3.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser3.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_number));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_number));
     }
 }
 
 TEST_F (ExternalFixupMembersImport, Addend) {
     mock_mutex mutex;
     auto transaction = begin (db_, transaction_lock{mutex});
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
 
     {
         auto const & parser1 =
             this->parse (R"({ "name":0, "type":17, "offset":19 })", &db_, imported_names);
         EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
-        EXPECT_EQ (parser1.last_error (),
-                   make_error_code (pstore::exchange::import::error::xfixup_object_was_incomplete));
+        EXPECT_EQ (
+            parser1.last_error (),
+            make_error_code (pstore::exchange::import_ns::error::xfixup_object_was_incomplete));
     }
     {
         auto const & parser2 = this->parse (
             R"({ "name":0, "type":17, "offset":19, "addend":true })", &db_, imported_names);
         EXPECT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
-                   make_error_code (pstore::exchange::import::error::unexpected_boolean));
+                   make_error_code (pstore::exchange::import_ns::error::unexpected_boolean));
     }
 }
 
 TEST_F (ExternalFixupMembersImport, BadMember) {
-    pstore::exchange::import::name_mapping imported_names;
+    pstore::exchange::import_ns::string_mapping imported_names;
     auto const & parser = this->parse (R"({ "bad":true })", &db_, imported_names);
     EXPECT_TRUE (parser.has_error ()) << "Expected the parse to fail";
     EXPECT_EQ (parser.last_error (),
-               make_error_code (pstore::exchange::import::error::unrecognized_xfixup_key));
+               make_error_code (pstore::exchange::import_ns::error::unrecognized_xfixup_key));
 }

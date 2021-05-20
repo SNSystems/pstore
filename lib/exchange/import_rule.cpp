@@ -47,7 +47,7 @@ namespace {
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             rule::~rule () = default;
 
@@ -77,6 +77,6 @@ namespace pstore {
                 log (logger::priority::notice, str.str ().c_str ());
             }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore

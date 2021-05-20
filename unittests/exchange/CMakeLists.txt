@@ -24,6 +24,8 @@ add_pstore_unit_test (pstore-exchange-unit-tests
     test_export_ostream.cpp
     test_generic_section.cpp
     test_linked_definitions_section.cpp
+    test_paths.cpp
+    test_root.cpp
     test_section_fixups.cpp
     test_terminal.cpp
     test_uuid.cpp

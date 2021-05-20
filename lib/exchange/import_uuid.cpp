@@ -18,7 +18,7 @@
 
 namespace pstore {
     namespace exchange {
-        namespace import {
+        namespace import_ns {
 
             uuid_rule::uuid_rule (not_null<context *> const ctxt, not_null<uuid *> const v) noexcept
                     : rule (ctxt)
@@ -34,6 +34,6 @@ namespace pstore {
 
             gsl::czstring uuid_rule::name () const noexcept { return "uuid"; }
 
-        } // end namespace import
+        } // end namespace import_ns
     }     // end namespace exchange
 } // end namespace pstore

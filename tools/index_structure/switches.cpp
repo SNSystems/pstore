@@ -35,11 +35,11 @@ namespace {
         revision ("revision", desc ("The starting revision number (or 'HEAD')"));
     alias revision2 ("r", desc ("Alias for --revision"), aliasopt (revision));
 
-    opt<std::string> db_path (positional, usage ("repository"), desc ("Database path"));
+    opt<std::string> db_path (positional, required, usage ("repository"), desc ("Database path"));
 
 #define X(a) literal (#a, static_cast<int> (pstore::trailer::indices::a), #a),
     list<pstore::trailer::indices> index_names_opt (positional, optional, one_or_more,
-                                                    desc ("[index-name]..."),
+                                                    usage ("[index-name...]"),
                                                     values ({PSTORE_INDICES}));
 #undef X
 

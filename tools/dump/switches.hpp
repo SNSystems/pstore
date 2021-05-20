@@ -13,6 +13,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file switches.hpp
+/// \brief Defines a structure which represents the dump tool's command-line switches.
 #ifndef PSTORE_DUMP_SWITCHES_HPP
 #define PSTORE_DUMP_SWITCHES_HPP
 
@@ -48,11 +50,17 @@ struct switches {
     bool show_log = false;
     bool show_shared = false;
 
+    /// True if --names was specified.
+    bool show_names = false;
+    /// True if --paths was specified.
+    bool show_paths = false;
+
     unsigned revision = pstore::head_revision;
 
     bool hex = false;
     bool expanded_addresses = false;
     bool no_times = false;
+    bool no_disassembly = false;
 
     std::list<std::string> paths;
 };

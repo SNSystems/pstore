@@ -35,6 +35,8 @@
 #include "pstore/core/database.hpp"
 #include "pstore/core/transaction.hpp"
 
+#include "say.hpp"
+
 using pstore::command_line::error_stream;
 using pstore::command_line::out_stream;
 
@@ -43,33 +45,6 @@ namespace {
     pstore::command_line::opt<std::string> path (pstore::command_line::positional,
                                                  pstore::command_line::required,
                                                  pstore::command_line::usage ("<repository>"));
-
-    //*                 *
-    //*  ___ __ _ _  _  *
-    //* (_-</ _` | || | *
-    //* /__/\__,_|\_, | *
-    //*           |__/  *
-
-    template <typename OStream, typename Arg>
-    inline void say_impl (OStream & os, Arg a) {
-        os << a;
-    }
-    template <typename OStream, typename Arg, typename... Args>
-    inline void say_impl (OStream & os, Arg a, Args... args) {
-        os << a;
-        say_impl (os, args...);
-    }
-
-    /// A wrapper around ostream operator<< which takes a lock to prevent output from different
-    /// threads from being interleaved.
-    template <typename OStream, typename... Args>
-    void say (OStream & os, Args... args) {
-        static std::mutex io_mut;
-        std::lock_guard<std::mutex> lock{io_mut};
-        say_impl (os, args...);
-        os << std::endl;
-    }
-
 
     //*  _    _         _          _            _   _  __ _          *
     //* | |__| |___  __| |_____ __| |  _ _  ___| |_(_)/ _(_)___ _ _  *

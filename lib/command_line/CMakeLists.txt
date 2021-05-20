@@ -55,7 +55,7 @@ add_pstore_library (TARGET pstore-command-line
 target_link_libraries (pstore-command-line PUBLIC pstore-adt pstore-os pstore-support)
 add_clang_tidy_target (pstore-command-line)
 
-if (NOT PSTORE_EXCEPTIONS)
+if (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
@@ -72,4 +72,4 @@ if (NOT PSTORE_EXCEPTIONS)
     set (PSTORE_EXCEPTIONS No)
 
     target_link_libraries (pstore-command-line-ex PUBLIC pstore-adt-ex pstore-os-ex pstore-support-ex)
-endif (NOT PSTORE_EXCEPTIONS)
+endif (PSTORE_ENABLE_BROKER AND NOT PSTORE_EXCEPTIONS)

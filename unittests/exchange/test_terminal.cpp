@@ -25,7 +25,7 @@
 // Local includes
 #include "empty_store.hpp"
 
-using namespace pstore::exchange::import;
+using namespace pstore::exchange::import_ns;
 
 namespace {
 

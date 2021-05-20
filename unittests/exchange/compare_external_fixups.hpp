@@ -37,9 +37,7 @@ void compare_external_fixups (pstore::database const & export_db,
 
     auto const load_string = [] (pstore::database const & db, string_address const addr,
                                  pstore::gsl::not_null<pstore::shared_sstring_view *> const owner) {
-        using namespace pstore::serialize;
-        return read<pstore::indirect_string> (archive::database_reader{db, addr.to_address ()})
-            .as_string_view (owner);
+        return pstore::indirect_string::read (db, addr).as_string_view (owner);
     };
 
     // The name fields are tricky here. The imported and exported fixups are from different

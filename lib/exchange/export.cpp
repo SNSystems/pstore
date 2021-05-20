@@ -78,7 +78,9 @@ namespace pstore {
         namespace export_ns {
 
             void emit_database (database & db, ostream & os, bool const comments) {
-                name_mapping string_table{db};
+                string_mapping string_table{db, name_index_tag ()};
+                string_mapping path_table{db, path_index_tag ()};
+
                 auto const ind = indent{}.next ();
                 os << "{\n";
                 os << ind << R"("version":1,)" << '\n';
@@ -87,33 +89,37 @@ namespace pstore {
 
                 auto const f = footers (db);
                 PSTORE_ASSERT (std::distance (std::begin (f), std::end (f)) >= 1);
-                emit_array (os, ind, std::next (std::begin (f)), std::end (f),
-                            [&] (ostream & os1, indent const ind1,
-                                 pstore::typed_address<pstore::trailer> const footer_pos) {
-                                auto const footer = db.getro (footer_pos);
-                                unsigned const generation = footer->a.generation;
-                                db.sync (generation);
-                                os1 << ind1 << "{\n";
-                                auto const object_indent = ind1.next ();
-                                if (comments) {
-                                    os1 << object_indent << "// generation " << generation << '\n';
-                                }
-                                os1 << object_indent << R"("names":)";
-                                emit_names (os1, object_indent, db, generation, &string_table);
-                                os1 << ",\n" << object_indent << R"("debugline":{)";
-                                emit_debug_line_headers (os1, object_indent.next (), db,
-                                                         generation);
-                                os1 << '\n' << object_indent << "},\n";
-                                os1 << object_indent << R"("fragments":{)";
-                                emit_fragments (os1, object_indent.next (), db, generation,
+                emit_array (
+                    os, ind, std::next (std::begin (f)), std::end (f),
+                    [&] (ostream & os1, indent const ind1,
+                         pstore::typed_address<pstore::trailer> const footer_pos) {
+                        auto const footer = db.getro (footer_pos);
+                        unsigned const generation = footer->a.generation;
+                        db.sync (generation);
+                        os1 << ind1 << "{\n";
+                        auto const object_indent = ind1.next ();
+                        if (comments) {
+                            os1 << object_indent << "// transaction #" << generation << '\n';
+                        }
+                        os1 << object_indent << R"("names":)";
+                        emit_strings<trailer::indices::name> (os1, object_indent, db, generation,
+                                                              &string_table);
+                        os1 << ",\n" << object_indent << R"("paths":)";
+                        emit_strings<trailer::indices::path> (os1, object_indent, db, generation,
+                                                              &path_table);
+                        os1 << ",\n" << object_indent << R"("debugline":{)";
+                        emit_debug_line_headers (os1, object_indent.next (), db, generation);
+                        os1 << '\n' << object_indent << "},\n";
+                        os1 << object_indent << R"("fragments":{)";
+                        emit_fragments (os1, object_indent.next (), db, generation, string_table,
+                                        comments);
+                        os1 << '\n' << object_indent << "},\n";
+                        os1 << object_indent << R"("compilations":{)";
+                        emit_compilation_index (os1, object_indent.next (), db, generation,
                                                 string_table, comments);
-                                os1 << '\n' << object_indent << "},\n";
-                                os1 << object_indent << R"("compilations":{)";
-                                emit_compilation_index (os1, object_indent.next (), db, generation,
-                                                        string_table, comments);
-                                os1 << '\n' << object_indent << "}\n";
-                                os1 << ind1 << '}';
-                            });
+                        os1 << '\n' << object_indent << "}\n";
+                        os1 << ind1 << '}';
+                    });
                 os << "\n}\n";
             }
 
