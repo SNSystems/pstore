@@ -17,6 +17,6 @@
 
 namespace pstore {
     namespace broker {
-        int run_broker (switches opt);
+        int run_broker (switches const & opt);
     }
 } // namespace pstore

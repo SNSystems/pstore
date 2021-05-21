@@ -34,7 +34,7 @@ broker_service::broker_service (TCHAR const * service_name, bool can_stop, bool 
 
 // (dtor)
 // ~~~~~~
-broker_service::~broker_service () {}
+broker_service::~broker_service () = default;
 
 // start_handler
 // ~~~~~~~~~~~~~
@@ -68,6 +68,9 @@ void broker_service::start_handler (DWORD argc, TCHAR * argv[]) {
 void broker_service::worker (switches opt) {
     try {
         broker::run_broker (opt);
+        if (broker::exit_code != EXIT_SUCCESS) {
+            this->write_event_log_entry ("broker service exited unsuccessfully", event_type::error);
+        }
     } catch (std::exception const & ex) {
         this->write_event_log_entry (std::string ("error: ", ex.what ()).c_str (),
                                      event_type::error);
@@ -84,6 +87,4 @@ void broker_service::worker (switches opt) {
 /// going to take long time.
 void broker_service::stop_handler () {
     this->write_event_log_entry ("broker service stopping", event_type::information);
-    // Indicate that the service is stopping and join the thread.
-    is_stopping_ = true;
 }

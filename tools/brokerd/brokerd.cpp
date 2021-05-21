@@ -24,11 +24,9 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <exception>
 
-// Platform includes
-#ifndef _WIN32
-#    include <signal.h>
-#endif
+# include <signal.h>
 
 #include "pstore/config/config.hpp"
 #include "pstore/broker/command.hpp"
@@ -167,7 +165,7 @@ namespace {
 
 namespace pstore {
     namespace broker {
-        int run_broker (switches opt) {
+        int run_broker (switches const & opt) {
             using priority = logger::priority;
 
             threads::set_name ("main");
@@ -177,7 +175,7 @@ namespace pstore {
 #ifdef _WIN32
             wsa_startup startup;
             if (!startup.started ()) {
-                throw new std::exception ("WSAStartup() failed, broker exited");
+                throw std::runtime_error ("WSAStartup() failed, broker exited");
             }
 #endif // _WIN32
 

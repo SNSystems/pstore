@@ -31,6 +31,11 @@ int main (int argc, char * argv[]) {
     switches opt;
     std::tie (opt, broker::exit_code) = get_switches (argc, argv);
 
+    if (broker::exit_code != EXIT_SUCCESS) {
+        log (priority::error, "unable to parse commandline arguments");
+        return broker::exit_code;
+    }
+
     try {
         broker::exit_code = pstore::broker::run_broker (opt);
     } catch (std::exception const & ex) {

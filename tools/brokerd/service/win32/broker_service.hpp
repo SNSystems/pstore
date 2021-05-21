@@ -42,10 +42,6 @@ protected:
     void stop_handler () override;
 
     void worker (switches opt);
-
-private:
-    std::atomic<bool> is_stopping_{false};
-    std::future<void> worker_thread_;
 };
 
 #endif // PSTORE_BROKER_SERVICE_HPP
