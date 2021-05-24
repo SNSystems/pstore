@@ -20,25 +20,31 @@
 #define PSTORE_BROKER_SERVICE_HPP
 
 #include <atomic>
-#include <thread>
+#include <future>
 
 #include "service_base.hpp"
+#include "../../switches.hpp"
+#include "pstore/support/maybe.hpp"
 
-class sample_service final : public service_base {
+// Platform includes
+#ifndef _WIN32
+#    include <signal.h>
+#endif
+
+class broker_service final : public service_base {
 public:
-    sample_service (TCHAR const * service_name, bool can_stop = true, bool can_shutdown = true,
+    broker_service (TCHAR const * service_name, bool can_stop = true, bool can_shutdown = true,
                     bool can_pause_continue = false);
-    ~sample_service () override;
+    ~broker_service () override;
 
 protected:
     void start_handler (DWORD argc, TCHAR * argv[]) override;
     void stop_handler () override;
 
-    void worker ();
+    void worker (switches opt);
 
 private:
-    std::atomic<bool> is_stopping_{false};
-    std::thread thread_;
+    std::thread worker_thread_;
 };
 
 #endif // PSTORE_BROKER_SERVICE_HPP

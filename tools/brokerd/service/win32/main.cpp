@@ -63,8 +63,8 @@ int _tmain (int argc, TCHAR * argv[]) {
         } else if (remove_opt) {
             uninstall_service (service_name);
         } else {
-            sample_service service{service_name};
-            sample_service::run (service);
+            broker_service service{service_name};
+            broker_service::run (service);
         }
     } catch (std::exception const & ex) {
         std::wcerr << L"Error: " << pstore::utf::to_native_string (ex.what ()) << std::endl;

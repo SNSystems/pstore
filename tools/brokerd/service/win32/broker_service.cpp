@@ -13,21 +13,29 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+
+#include <thread>
+
 #include "broker_service.hpp"
+#include "../../switches.hpp"
+#include "../../brokerd.hpp"
+
+#include "pstore/broker/globals.hpp"
+#include "pstore/command_line/option.hpp"
+#include "pstore/broker/quit.hpp"
+
+using namespace std::string_literals;
+using namespace pstore;
 
 // (ctor)
 // ~~~~~~
-sample_service::sample_service (TCHAR const * service_name, bool can_stop, bool can_shutdown,
+broker_service::broker_service (TCHAR const * service_name, bool can_stop, bool can_shutdown,
                                 bool can_pause_continue)
         : service_base (service_name, can_stop, can_shutdown, can_pause_continue) {}
 
 // (dtor)
 // ~~~~~~
-sample_service::~sample_service () {
-    if (thread_.joinable ()) {
-        thread_.detach ();
-    }
-}
+broker_service::~broker_service () = default;
 
 // start_handler
 // ~~~~~~~~~~~~~
@@ -36,24 +44,41 @@ sample_service::~sample_service () {
 /// \note start_handler() must return to the operating system after the service's operation has
 /// begun: it must not block.
 
-void sample_service::start_handler (DWORD /*argc*/, TCHAR * /*argv*/[]) {
-    // Log a service start message to the Application log.
-    this->write_event_log_entry ("CppWindowsService in OnStart", event_type::information);
-    thread_ = std::thread ([this] () { this->worker (); });
-}
+void broker_service::start_handler (DWORD argc, TCHAR * argv[]) {
+    this->write_event_log_entry ("broker service starting", event_type::information);
 
+    command_line::option::reset_container ();
+
+    switches opt;
+    std::tie (opt, broker::exit_code) = get_switches (argc, argv);
+
+    if (broker::exit_code != EXIT_SUCCESS) {
+        this->write_event_log_entry ("error: broker service failed to parse commandline options",
+                                     event_type::error);
+        this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
+        return;
+    }
+
+    this->worker_thread_ = std::thread ([this, opt] { this->worker (opt); });
+
+    this->write_event_log_entry ("broker service started successfully", event_type::information);
+}
 
 // worker
 // ~~~~~~
-/// The method performs the main function of the service. It runs on a thread pool worker thread.
-void sample_service::worker () {
-    // Periodically check if the service is stopping.
-    while (!is_stopping_) {
-        // Perform main service function here...
-        using namespace std::chrono_literals;
-
-        wprintf (TEXT ("Stopping %s."), this->name ().c_str ());
-        std::this_thread::sleep_for (2s); // Simulate some lengthy operations.
+void broker_service::worker (switches opt) {
+    try {
+        broker::run_broker (opt);
+        if (broker::exit_code != EXIT_SUCCESS) {
+            this->write_event_log_entry ("broker service exited unsuccessfully", event_type::error);
+        }
+    } catch (std::exception const & ex) {
+        this->write_event_log_entry (std::string ("error: ", ex.what ()).c_str (),
+                                     event_type::error);
+        this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
+    } catch (...) {
+        this->write_event_log_entry ("unknown error!", event_type::error);
+        this->set_service_status (SERVICE_STOPPED, EXIT_FAILURE);
     }
 }
 
@@ -61,10 +86,9 @@ void sample_service::worker () {
 // ~~~~~~~~~~~~
 /// \note Periodically call ReportServiceStatus() with SERVICE_STOP_PENDING if the procedure is
 /// going to take long time.
-void sample_service::stop_handler () {
-    this->write_event_log_entry ("CppWindowsService in stop_handler", event_type::information);
-
-    // Indicate that the service is stopping and join the thread.
-    is_stopping_ = true;
-    thread_.join ();
+void broker_service::stop_handler () {
+    this->write_event_log_entry ("broker quiting", event_type::information);
+    broker::notify_quit_thread ();
+    this->worker_thread_.join ();
+    this->write_event_log_entry ("broker threads quit successfully", event_type::information);
 }

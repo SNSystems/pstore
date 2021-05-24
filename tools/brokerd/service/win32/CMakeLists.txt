@@ -21,6 +21,8 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_RTTI Yes)
 endif ()
 
+set (pstore_http_fs_source "${CMAKE_CURRENT_BINARY_DIR}/fs.cpp")
+
 add_pstore_tool (pstore-broker-service
     main.cpp
     broker_service.cpp
@@ -29,6 +31,11 @@ add_pstore_tool (pstore-broker-service
     service_base.hpp
     service_installer.cpp
     service_installer.hpp
+    ../../switches.cpp
+    ../../switches.hpp
+    ../../brokerd.cpp
+    ../../brokerd.hpp
+    "${pstore_http_fs_source}"
 )
 
 if (PSTORE_IS_INSIDE_LLVM)
@@ -38,3 +45,15 @@ if (PSTORE_IS_INSIDE_LLVM)
 else ()
     target_link_libraries (pstore-broker-service PRIVATE pstore-command-line)
 endif ()
+
+target_link_libraries (pstore-broker-service PRIVATE pstore-broker)
+
+# Run pstore-genromfs to create the structures for the HTTP server's built-in file system.
+add_custom_command (
+    COMMENT "genromfs from ${CMAKE_CURRENT_SOURCE_DIR}/../../html to ${pstore_http_fs_source}"
+    COMMAND pstore-genromfs --var "::fs" "${CMAKE_CURRENT_SOURCE_DIR}/../../html" > "${pstore_http_fs_source}"
+    OUTPUT "${pstore_http_fs_source}"
+    DEPENDS pstore-genromfs
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    VERBATIM
+)

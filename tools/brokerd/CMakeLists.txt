@@ -39,6 +39,8 @@ else ()
         main.cpp
         switches.hpp
         switches.cpp
+        brokerd.cpp
+        brokerd.hpp
         "${pstore_http_fs_source}"
     )
 

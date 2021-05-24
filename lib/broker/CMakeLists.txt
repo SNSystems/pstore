@@ -89,7 +89,7 @@ else ()
             INCLUDES "${pstore_broker_includes}"
         )
         target_link_libraries (pstore-broker PUBLIC
-            pstore-adt        
+            pstore-adt
             pstore-brokerface
             pstore-http
             pstore-json-lib
