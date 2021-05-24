@@ -22,6 +22,7 @@
 
 #include "pstore/broker/globals.hpp"
 #include "pstore/command_line/option.hpp"
+#include "pstore/broker/quit.hpp"
 
 using namespace std::string_literals;
 using namespace pstore;
@@ -58,7 +59,7 @@ void broker_service::start_handler (DWORD argc, TCHAR * argv[]) {
         return;
     }
 
-    std::thread ([this, opt] { this->worker (opt); }).detach ();
+    this->worker_thread_ = std::thread ([this, opt] { this->worker (opt); });
 
     this->write_event_log_entry ("broker service started successfully", event_type::information);
 }
@@ -86,5 +87,10 @@ void broker_service::worker (switches opt) {
 /// \note Periodically call ReportServiceStatus() with SERVICE_STOP_PENDING if the procedure is
 /// going to take long time.
 void broker_service::stop_handler () {
-    this->write_event_log_entry ("broker service stopping", event_type::information);
+    this->write_event_log_entry ("broker quiting", event_type::information);
+    broker::notify_quit_thread ();
+    while (!this->worker_thread_.joinable()) {
+        this->set_service_status (SERVICE_STOP_PENDING);
+    }
+    this->write_event_log_entry ("broker threads quit successfully", event_type::information);
 }
