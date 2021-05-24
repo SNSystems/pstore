@@ -89,8 +89,6 @@ void broker_service::worker (switches opt) {
 void broker_service::stop_handler () {
     this->write_event_log_entry ("broker quiting", event_type::information);
     broker::notify_quit_thread ();
-    while (!this->worker_thread_.joinable()) {
-        this->set_service_status (SERVICE_STOP_PENDING);
-    }
+    this->worker_thread_.join ();
     this->write_event_log_entry ("broker threads quit successfully", event_type::information);
 }
