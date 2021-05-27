@@ -57,6 +57,9 @@
 /// Defined if <sys/syscall.h> is available.
 #cmakedefine PSTORE_HAVE_SYS_SYSCALL_H 1
 
+/// Defined if <linux/unistd.h> is available.
+#cmakedefine PSTORE_HAVE_LINUX_UNISTD_H 1
+
 /// Defined if the C11 localtime_s() API is available.
 #cmakedefine PSTORE_HAVE_LOCALTIME_S 1
 
@@ -80,6 +83,12 @@
 #cmakedefine PSTORE_PTHREAD_SETNAME_NP_2_ARGS 1
 #cmakedefine PSTORE_PTHREAD_SETNAME_NP_3_ARGS 1
 #cmakedefine PSTORE_PTHREAD_SET_NAME_NP 1
+
+/// Defined if the `pthread_getname_np' function is available.
+#cmakedefine PSTORE_PTHREAD_GETNAME_NP 1
+
+/// Defined if the `pthread_get_name_np' function is available.
+#cmakedefine PSTORE_PTHREAD_GET_NAME_NP 1
 
 /// Is the macOS _NSGetExecutablePath() function available?
 #cmakedefine PSTORE_HAVE_NSGETEXECUTABLEPATH 1

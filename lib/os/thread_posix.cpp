@@ -29,11 +29,15 @@
 // OS-specific includes
 #    include <pthread.h>
 
-#    ifdef __linux__
+
+#    ifdef PSTORE_HAVE_LINUX_UNISTD_H
 #        include <linux/unistd.h>
-#        include <sys/syscall.h>
-#        include <unistd.h>
 #    endif
+#    ifdef PSTORE_HAVE_SYS_SYSCALL_H
+#        include <sys/syscall.h>
+#    endif
+#    include <unistd.h>
+
 #    ifdef __FreeBSD__
 #        include <pthread_np.h>
 #    endif
@@ -44,10 +48,28 @@
 
 namespace pstore {
     namespace threads {
+#    if defined(PSTORE_PTHREAD_SETNAME_NP_1_ARG) || defined(PSTORE_PTHREAD_SETNAME_NP_2_ARGS) ||   \
+        defined(PSTORE_PTHREAD_SETNAME_NP_3_ARGS) || defined(PSTORE_PTHREAD_SET_NAME_NP)
+#        define PTHREAD_SETNAME_NP 1
+#    endif
 
-#    ifdef __FreeBSD__
+#    if defined(PSTORE_PTHREAD_GETNAME_NP) || defined(PSTORE_PTHREAD_GET_NAME_NP)
+#        define PTHREAD_GETNAME_NP 1
+#    endif
+
+// FIXME: The current musl libc library only includes the function `pthread_setname_np` but not
+// supports `pthread_getname_np` yet. Therefore, we use the fall back if either function is missing.
+// We will revisit when a version of musl supporting `pthread_getname_np` is released. Once musl
+// libc supports both functions, we could change the codes to use the fall back if both functions
+// aren’t supported. If there is a mismatch, we would like the compile to fail with a #error to
+// check whether there may be something to fix with the platform support.
+#    if !defined(PTHREAD_SETNAME_NP) || !defined(PTHREAD_SETNAME_NP)
+#        define USE_FALLBACK 1
+#    endif
+
+#    ifdef USE_FALLBACK
         static thread_local char thread_name[name_size];
-#    endif // __FreeBSD__
+#    endif
 
         void set_name (gsl::not_null<gsl::czstring> const name) {
             // pthread support for setting thread names comes in various non-portable forms.
@@ -56,26 +78,22 @@ namespace pstore {
             // - two argument form supported by Linux.
             // - three argument form supported by NetBSD.
             // - the slightly differently named form used in FreeBSD.
-#    ifdef __FreeBSD__
+            int err = 0;
+#    ifdef USE_FALLBACK
             std::strncpy (thread_name, name, name_size);
             thread_name[name_size - 1] = '\0';
-#    else
-            int err = 0;
-#        if defined(PSTORE_PTHREAD_SETNAME_NP_1_ARG)
+#    elif defined(PSTORE_PTHREAD_SETNAME_NP_1_ARG)
             err = pthread_setname_np (name);
-#        elif defined(PSTORE_PTHREAD_SETNAME_NP_2_ARGS)
+#    elif defined(PSTORE_PTHREAD_SETNAME_NP_2_ARGS)
             err = pthread_setname_np (pthread_self (), name);
-#        elif defined(PSTORE_PTHREAD_SETNAME_NP_3_ARGS)
+#    elif defined(PSTORE_PTHREAD_SETNAME_NP_3_ARGS)
             err = pthread_setname_np (pthread_self (), name, nullptr);
-#        elif defined(PSTORE_PTHREAD_SET_NAME_NP)
+#    elif defined(PSTORE_PTHREAD_SET_NAME_NP)
             pthread_set_name_np (pthread_self (), name);
-#        else
-#            error "pthread_setname was not available"
-#        endif
+#    endif
             if (err != 0) {
                 raise (errno_erc{err}, "pthread_set_name_np");
             }
-#    endif // __FreeBSD__
         }
 
         gsl::czstring get_name (gsl::span<char, name_size> const name /*out*/) {
@@ -83,16 +101,21 @@ namespace pstore {
             if (name.data () == nullptr || length < 1) {
                 raise (errno_erc{EINVAL});
             }
-#    ifdef __FreeBSD__
-            std::strncpy (name.data (), thread_name, static_cast<std::size_t> (length));
-#    else
+
             PSTORE_ASSERT (length == name.size_bytes ());
-            int const err = pthread_getname_np (pthread_self (), name.data (),
-                                                static_cast<std::size_t> (length));
+            int err = 0;
+#    ifdef USE_FALLBACK
+            std::strncpy (name.data (), thread_name, static_cast<std::size_t> (length));
+#    elif defined(PSTORE_PTHREAD_GETNAME_NP)
+            err = pthread_getname_np (pthread_self (), name.data (),
+                                      static_cast<std::size_t> (length));
+#    elif defined(PSTORE_PTHREAD_GET_NAME_NP)
+            err = pthread_get_name_np (pthread_self (), name.data (),
+                                       static_cast<std::size_t> (length));
+#    endif
             if (err != 0) {
                 raise (errno_erc{err}, "pthread_getname_np");
             }
-#    endif // __FreeBSD__
             name[length - 1] = '\0';
             return name.data ();
         }

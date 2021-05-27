@@ -43,6 +43,7 @@ endif ()
 check_include_files ("byteswap.h" PSTORE_HAVE_BYTESWAP_H)
 check_include_files ("linux/fs.h" PSTORE_HAVE_LINUX_FS_H)
 check_include_files ("linux/limits.h" PSTORE_HAVE_LINUX_LIMITS_H)
+check_include_files ("linux/unistd.h" PSTORE_HAVE_LINUX_UNISTD_H)
 check_include_files ("sys/endian.h" PSTORE_HAVE_SYS_ENDIAN_H)
 check_include_files ("sys/syscall.h" PSTORE_HAVE_SYS_SYSCALL_H)
 check_include_files ("sys/time.h;sys/types.h;sys/posix_shm.h" PSTORE_HAVE_SYS_POSIX_SHM_H)
@@ -222,6 +223,27 @@ check_cxx_source_compiles (
         pthread_set_name_np (pthread_self (), \"foo\");
     }"
     PSTORE_PTHREAD_SET_NAME_NP)
+
+check_cxx_source_compiles (
+    "#include <pthread.h>
+    #ifdef __FreeBSD__
+    #include <pthread_np.h>
+    #endif
+    int main () {
+        pthread_getname_np (pthread_self (), \"foo\", 4);
+    }"
+    PSTORE_PTHREAD_GETNAME_NP)
+
+check_cxx_source_compiles (
+    "#include <pthread.h>
+    #ifdef __FreeBSD__
+    #include <pthread_np.h>
+    #endif
+    int main () {
+        pthread_get_name_np (pthread_self (), \"foo\", 4);
+    }"
+    PSTORE_PTHREAD_GET_NAME_NP)
+
 set (CMAKE_REQUIRED_LIBRARIES )
 
 check_cxx_source_compiles (
@@ -230,7 +252,6 @@ check_cxx_source_compiles (
         return _NSGetExecutablePath (0, 0);
     }"
     PSTORE_HAVE_NSGETEXECUTABLEPATH)
-
 
 configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
