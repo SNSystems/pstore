@@ -1,4 +1,4 @@
-#===- unittests/adt/CMakeLists.txt ----------------------------------------===//
+#===- unittests/adt/klee/cv/CMakeLists.txt --------------------------------===//
 #*   ____ __  __       _        _     _     _        *
 #*  / ___|  \/  | __ _| | _____| |   (_)___| |_ ___  *
 #* | |   | |\/| |/ _` | |/ / _ \ |   | / __| __/ __| *
@@ -13,11 +13,4 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 #===----------------------------------------------------------------------===//
-add_pstore_unit_test (pstore-adt-unit-tests
-    test_chunked_vector.cpp
-    test_error_or.cpp
-    test_small_vector.cpp
-    test_sstring_view.cpp
-)
-target_link_libraries (pstore-adt-unit-tests PRIVATE pstore-adt)
-add_subdirectory (klee EXCLUDE_FROM_ALL)
+pstore_add_klee_test (CATEGORY cv NAME resize DEPENDS pstore-adt)
