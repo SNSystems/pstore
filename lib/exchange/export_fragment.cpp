@@ -56,7 +56,7 @@ namespace pstore {
                     auto const * fragment_sep = "\n";
                     PSTORE_ASSERT (generation > 0U);
 
-                    auto const out_fn = [&] (address addr) {
+                    auto const out_fn = [&] (address const addr) {
                         auto const & kvp = fragments->load_leaf_node (db, addr);
                         os << fragment_sep << ind;
                         emit_digest (os, kvp.first);

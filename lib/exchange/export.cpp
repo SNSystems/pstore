@@ -52,7 +52,7 @@ namespace {
             auto const * sep = "\n";
             PSTORE_ASSERT (generation > 0);
 
-            auto const out_fn = [&] (pstore::address addr) {
+            auto const out_fn = [&] (pstore::address const addr) {
                 auto const & kvp = debug_line_headers->load_leaf_node (db, addr);
                 os << sep << ind;
                 pstore::exchange::export_ns::emit_digest (os, kvp.first);
