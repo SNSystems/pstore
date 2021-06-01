@@ -428,7 +428,7 @@ namespace pstore {
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     void chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::shrink (
-        std::size_t new_size) noexcept {
+        std::size_t const new_size) noexcept {
         assert (new_size <= size_);
         for (auto ctr = new_size; ctr < size_; ++ctr) {
             (*this)[ctr].~T ();
