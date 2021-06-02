@@ -13,6 +13,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file import_root.hpp
+/// \brief Defines the root class which forms the initial rule for parsing pstore exchange files.
+
 #ifndef PSTORE_EXCHANGE_IMPORT_ROOT_HPP
 #define PSTORE_EXCHANGE_IMPORT_ROOT_HPP
 
@@ -44,7 +47,9 @@ namespace pstore {
                 std::error_code apply_patches ();
             };
 
-
+            /// Creates a JSON parser instance which will consume pstore exchange input.
+            /// \param db  The database into which the imported data will be written.
+            /// \returns A JSON parser instance.
             json::parser<callbacks> create_parser (database & db);
 
         } // end namespace import_ns
