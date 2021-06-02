@@ -237,9 +237,9 @@ TEST (ChunkedVectorResize, FillInitialChunkAndPartialSecond) {
     cvector_int cv;
     cv.emplace_back (17);
     // Before the resize we have a single chunk:
-    //     [ 13, _ ]
+    //     [ 17, _ ]
     // Extending this to three members will produce:
-    //     [ 13, 0 ] -> [ 0, _ ]
+    //     [ 17, 0 ] -> [ 0, _ ]
     cv.resize (3U);
     EXPECT_EQ (cv.size (), 3U);
     EXPECT_EQ (cv.capacity (), 4U);
