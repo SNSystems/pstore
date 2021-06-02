@@ -17,7 +17,6 @@
 
 #include "pstore/os/thread.hpp"
 
-#include <iostream>
 
 #ifndef _WIN32
 
