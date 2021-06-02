@@ -313,3 +313,16 @@ TEST (ChunkedVectorResize, FiveElementsDownToOne) {
     cvector_int::const_iterator it = cv.begin ();
     EXPECT_EQ (*it, 17) << "Element 0 (chunk 0, index 0)";
 }
+
+TEST (ChunkedVectorResize, ThreeElementsDownToZero) {
+    cvector_int cv;
+    cv.emplace_back (37);
+    cv.emplace_back (41);
+    cv.emplace_back (43);
+    // Before: [ 37, 41 ] -> [ 43, _ ]
+    // After: [ _, _ ]
+    cv.resize (0U);
+    EXPECT_EQ (cv.size (), 0U);
+    EXPECT_EQ (cv.capacity (), 2U);
+    EXPECT_TRUE (cv.empty ());
+}
