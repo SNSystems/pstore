@@ -38,7 +38,7 @@ namespace {
     void check (pstore::chunked_vector<int, elements_per_chunk> const & cv,
                 std::size_t const size) {
         assert (cv.size () == size);
-        assert (std::distance (std::begin (cv), std::end (cv) == size);
+        assert (std::distance (std::begin (cv), std::end (cv)) == size);
         assert (std::all_of (std::begin (cv), std::end (cv), [] (int x) { return x == 0; }));
     }
 
