@@ -17,6 +17,7 @@
 
 #include "pstore/os/thread.hpp"
 
+#include <iostream>
 
 #ifndef _WIN32
 
@@ -63,7 +64,7 @@ namespace pstore {
 // libc supports both functions, we could change the codes to use the fall back if both functions
 // aren’t supported. If there is a mismatch, we would like the compile to fail with a #error to
 // check whether there may be something to fix with the platform support.
-#    if !defined(PTHREAD_SETNAME_NP) || !defined(PTHREAD_SETNAME_NP)
+#    if !defined(PTHREAD_SETNAME_NP) || !defined(PTHREAD_GETNAME_NP)
 #        define USE_FALLBACK 1
 #    endif
 
