@@ -35,6 +35,12 @@ namespace pstore {
     /// ensure very fast append times at the expense of only permitting bi-directional iterators:
     /// random access is not supported, unlike std::deque<> or std::vector<>.
     ///
+    /// Each chunk has storage for a number of objects. This number is a compile-time constant and
+    /// is usually reasonably large and chosen so that the memory required is a multiple of the VM
+    /// page size. Appending is performed in amortized constant time where we either bump a pointer
+    /// in an existing chunk or allocate a new one. Unlike std::vector<>, no moving or copying
+    /// occurs after append, and only the past-the-end iterator is invalidated.
+    ///
     /// \tparam T The type of the elements.
     /// \tparam ElementsPerChunk The number of elements in an individual chunk.
     /// \tparam ActualSize The storage allocated to an individual element. Normally equal to
@@ -183,7 +189,7 @@ namespace pstore {
                                               ChunkedVector, iterator, const_iterator>::type>
         static Result end_impl (ChunkedVector & cv) noexcept;
 
-        /// Add default-initialized member to increase the number of elements held in the container
+        /// Add default-initialized members to increase the number of elements held in the container
         /// to \p count.
         ///
         /// \param count  The number of elements in the container after the resize operation.
