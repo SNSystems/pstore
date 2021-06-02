@@ -87,30 +87,20 @@ namespace pstore {
             return os << '(' << c.row << ':' << c.column << ')';
         }
 
-        enum parser_extensions : unsigned {
+        enum class extensions : unsigned {
             none = 0U,
             bash_comments = 1U << 0U,
             single_line_comments = 1U << 1U,
             multi_line_comments = 1U << 2U,
+            array_trailing_comma = 1U << 3U,
+            object_trailing_comma = 1U << 4U,
             all = ~none,
         };
 
-        constexpr bool bash_comments_enabled (parser_extensions const x) noexcept {
-            return (static_cast<std::underlying_type_t<parser_extensions>> (x) &
-                    static_cast<std::underlying_type_t<parser_extensions>> (bash_comments)) != 0U;
+        inline constexpr extensions operator| (extensions a, extensions b) noexcept {
+            return static_cast<extensions> (static_cast<unsigned> (a) | static_cast<unsigned> (b));
         }
 
-        constexpr bool single_line_comments_enabled (parser_extensions const x) noexcept {
-            return (static_cast<std::underlying_type_t<parser_extensions>> (x) &
-                    static_cast<std::underlying_type_t<parser_extensions>> (
-                        single_line_comments)) != 0U;
-        }
-
-        constexpr bool multi_line_comments_enabled (parser_extensions const x) noexcept {
-            return (static_cast<std::underlying_type_t<parser_extensions>> (x) &
-                    static_cast<std::underlying_type_t<parser_extensions>> (multi_line_comments)) !=
-                   0U;
-        }
 
         // clang-format off
         /// \tparam Callbacks  Should be a type containing the following members:
@@ -140,7 +130,8 @@ namespace pstore {
         public:
             using result_type = typename Callbacks::result_type;
 
-            explicit parser (Callbacks callbacks = Callbacks{}, parser_extensions extensions = none);
+            explicit parser (Callbacks callbacks = Callbacks{},
+                             extensions extensions = extensions::none);
 
             ///@{
             /// Parses a chunk of JSON input. This function may be called repeatedly with portions
@@ -194,7 +185,12 @@ namespace pstore {
             constexpr Callbacks const & callbacks () const noexcept { return callbacks_; }
             ///@}
 
-            constexpr enum parser_extensions extensions () const noexcept { return extensions_; }
+            /// \param flag  A selection of bits from the parser_extensions enum.
+            /// \returns True if any of the extensions given by \p flag are enabled by the parser.
+            constexpr bool extension_enabled (extensions const flag) const noexcept {
+                using ut = std::underlying_type_t<extensions>;
+                return (static_cast<ut> (extensions_) & static_cast<ut> (flag)) != 0U;
+            }
 
             /// Returns the parser's position in the input text.
             constexpr coord coordinate () const noexcept { return coordinate_; }
@@ -254,7 +250,7 @@ namespace pstore {
             std::stack<pointer> stack_;
             std::error_code error_;
             Callbacks callbacks_;
-            enum parser_extensions const extensions_;
+            extensions const extensions_;
 
             /// Each instance of the string matcher uses this string object to record its output.
             /// This avoids having to create a new instance each time we scan a string.
@@ -266,7 +262,7 @@ namespace pstore {
 
         template <typename Callbacks>
         inline parser<Callbacks> make_parser (Callbacks const & callbacks,
-                                              parser_extensions const extensions = none) {
+                                              extensions const extensions = extensions::none) {
             return parser<Callbacks>{callbacks, extensions};
         }
 
@@ -1213,7 +1209,12 @@ namespace pstore {
                         return {this->make_whitespace_matcher (parser), false};
                     }
                     switch (c) {
-                    case ',': this->set_state (object_state); break;
+                    case ',':
+                        this->set_state (
+                            (parser.extension_enabled (extensions::array_trailing_comma))
+                                ? first_object_state
+                                : object_state);
+                        return {this->make_whitespace_matcher (parser), true};
                     case ']': this->end_array (parser); break;
                     default: this->set_error (parser, error_code::expected_array_member); break;
                     }
@@ -1256,6 +1257,8 @@ namespace pstore {
                     value_state,
                     comma_state,
                 };
+
+                void end_object (parser<Callbacks> & parser);
             };
 
             // consume
@@ -1280,15 +1283,15 @@ namespace pstore {
                         break;
                     }
                     return {this->make_whitespace_matcher (parser), true};
-
                 case first_key_state:
+                    // We allow either a closing brace (to end the object) or a property name.
                     if (c == '}') {
-                        this->set_error (parser, parser.callbacks ().end_object ());
-                        this->set_state (done_state);
+                        this->end_object (parser);
                         break;
                     }
                     PSTORE_FALLTHROUGH;
                 case key_state:
+                    // Match a property name then expect a colon.
                     this->set_state (colon_state);
                     return {this->make_root_matcher (parser, true /*object key?*/), false};
                 case colon_state:
@@ -1311,17 +1314,35 @@ namespace pstore {
                         return {this->make_whitespace_matcher (parser), false};
                     }
                     if (c == ',') {
-                        this->set_state (key_state);
-                    } else if (c == '}') {
-                        this->set_error (parser, parser.callbacks ().end_object ());
-                        this->set_state (done_state);
+                        // Strictly conforming JSON requires a property name following a comma but
+                        // we have an extension to allow an trailing comma which may be followed by
+                        // the object's closing brace.
+                        this->set_state (
+                            (parser.extension_enabled (extensions::object_trailing_comma))
+                                ? first_key_state
+                                : key_state);
+                        // Consume the comma and any whitespace before the close brace or property
+                        // name.
+                        return {this->make_whitespace_matcher (parser), true};
+                    }
+                    if (c == '}') {
+                        this->end_object (parser);
                     } else {
                         this->set_error (parser, error_code::expected_object_member);
                     }
                     break;
                 case done_state: PSTORE_ASSERT (false); break;
                 }
+                // No change of matcher. Consume the input character.
                 return {nullptr, true};
+            }
+
+            // end object
+            // ~~~~~~~~~~~
+            template <typename Callbacks>
+            void object_matcher<Callbacks>::end_object (parser<Callbacks> & parser) {
+                this->set_error (parser, parser.callbacks ().end_object ());
+                this->set_state (done_state);
             }
 
             //*             *
@@ -1410,7 +1431,7 @@ namespace pstore {
                     case comment_start_state: return this->consume_comment_start (parser, c);
 
                     case multi_line_comment_ending_state:
-                        PSTORE_ASSERT (multi_line_comments_enabled (parser.extensions ()));
+                        PSTORE_ASSERT (parser.extension_enabled (extensions::multi_line_comments));
                         this->set_state (c == details::char_set::slash
                                              ? body_state
                                              : multi_line_comment_body_state);
@@ -1425,9 +1446,10 @@ namespace pstore {
                     case multi_line_comment_body_state:
                         return this->multi_line_comment_body (parser, c);
                     case single_line_comment_state:
-                        PSTORE_ASSERT (bash_comments_enabled (parser.extensions ()) ||
-                                       single_line_comments_enabled (parser.extensions ()) ||
-                                       multi_line_comments_enabled (parser.extensions ()));
+                        PSTORE_ASSERT (
+                            parser.extension_enabled (extensions::bash_comments) ||
+                            parser.extension_enabled (extensions::single_line_comments) ||
+                            parser.extension_enabled (extensions::multi_line_comments));
                         if (c == details::char_set::cr || c == details::char_set::lf) {
                             // This character marks a bash/single-line comment end. Go back to
                             // normal whitespace handling. Retry with the same character.
@@ -1463,14 +1485,14 @@ namespace pstore {
                 case char_set::cr: this->cr (parser, crlf_state); break;
                 case char_set::lf: this->lf (parser); break;
                 case char_set::hash:
-                    if (!bash_comments_enabled (parser.extensions ())) {
+                    if (!parser.extension_enabled (extensions::bash_comments)) {
                         return stop_retry ();
                     }
                     this->set_state (single_line_comment_state);
                     break;
                 case char_set::slash:
-                    if (!single_line_comments_enabled (parser.extensions ()) &&
-                        !multi_line_comments_enabled (parser.extensions ())) {
+                    if (!parser.extension_enabled (extensions::single_line_comments) &&
+                        !parser.extension_enabled (extensions::multi_line_comments)) {
                         return stop_retry ();
                     }
                     this->set_state (comment_start_state);
@@ -1494,10 +1516,11 @@ namespace pstore {
             whitespace_matcher<Callbacks>::consume_comment_start (parser<Callbacks> & parser,
                                                                   char c) {
                 using details::char_set;
-                auto const x = parser.extensions ();
-                if (c == char_set::slash && single_line_comments_enabled (x)) {
+                if (c == char_set::slash &&
+                    parser.extension_enabled (extensions::single_line_comments)) {
                     this->set_state (single_line_comment_state);
-                } else if (c == char_set::star && multi_line_comments_enabled (x)) {
+                } else if (c == char_set::star &&
+                           parser.extension_enabled (extensions::multi_line_comments)) {
                     this->set_state (multi_line_comment_body_state);
                 } else {
                     this->set_error (parser, error_code::expected_token);
@@ -1515,7 +1538,7 @@ namespace pstore {
             whitespace_matcher<Callbacks>::multi_line_comment_body (parser<Callbacks> & parser,
                                                                     char c) {
                 using details::char_set;
-                PSTORE_ASSERT (multi_line_comments_enabled (parser.extensions ()));
+                PSTORE_ASSERT (parser.extension_enabled (extensions::multi_line_comments));
                 PSTORE_ASSERT (this->get_state () == multi_line_comment_body_state);
                 switch (c) {
                 case char_set::star:
@@ -1709,7 +1732,7 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         template <typename Callbacks>
-        parser<Callbacks>::parser (Callbacks callbacks, enum parser_extensions const extensions)
+        parser<Callbacks>::parser (Callbacks callbacks, extensions const extensions)
                 : callbacks_ (std::move (callbacks))
                 , extensions_{extensions} {
 

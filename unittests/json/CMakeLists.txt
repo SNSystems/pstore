@@ -17,9 +17,12 @@ include (add_pstore)
 add_pstore_unit_test (pstore-json-unit-tests
     callbacks.cpp
     callbacks.hpp
+    test_array.cpp
     test_comment.cpp
     test_json.cpp
     test_number.cpp
+    test_object.cpp
+    test_string.cpp
 )
 target_link_libraries (pstore-json-unit-tests PRIVATE pstore-json-lib)
 
