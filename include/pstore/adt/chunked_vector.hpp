@@ -35,6 +35,12 @@ namespace pstore {
     /// ensure very fast append times at the expense of only permitting bi-directional iterators:
     /// random access is not supported, unlike std::deque<> or std::vector<>.
     ///
+    /// Each chunk has storage for a number of objects. This number is a compile-time constant and
+    /// is usually reasonably large and chosen so that the memory required is a multiple of the VM
+    /// page size. Appending is performed in amortized constant time where we either bump a pointer
+    /// in an existing chunk or allocate a new one. Unlike std::vector<>, no moving or copying
+    /// occurs after append, and only the past-the-end iterator is invalidated.
+    ///
     /// \tparam T The type of the elements.
     /// \tparam ElementsPerChunk The number of elements in an individual chunk.
     /// \tparam ActualSize The storage allocated to an individual element. Normally equal to
@@ -68,6 +74,9 @@ namespace pstore {
         // using reverse_iterator =
         // using const_reverse_iterator =
 
+        /// The number of elements in an individual chunk.
+        static constexpr std::size_t elements_per_chunk = ElementsPerChunk;
+
         chunked_vector ();
         chunked_vector (chunked_vector const &) = delete;
         chunked_vector (chunked_vector && other) noexcept;
@@ -100,7 +109,27 @@ namespace pstore {
         void reserve (std::size_t const /*size*/) {
             // TODO: Not currently implemented.
         }
+
+        /// Returns the number of elements that the container has currently allocated space for.
+        ///
+        /// \returns Capacity of the currently allocated storage.
         std::size_t capacity () const noexcept { return chunks_.size () * ElementsPerChunk; }
+
+        /// \brief Resizes the container to contain count elements.
+        ///
+        /// If the current size is greater than count, the container is reduced to its first \p
+        /// count elements. If the current size is less than \p count, additional default-inserted
+        /// elements are appended.
+        ///
+        /// \param count  The new size of the container.
+        void resize (size_type count) {
+            if (count > size_) {
+                return this->resize_grow (count);
+            }
+            if (count < size_) {
+                this->resize_shrink (count);
+            }
+        }
 
         template <typename... Args>
         reference emplace_back (Args &&... args);
@@ -160,6 +189,17 @@ namespace pstore {
                                               ChunkedVector, iterator, const_iterator>::type>
         static Result end_impl (ChunkedVector & cv) noexcept;
 
+        /// Add default-initialized members to increase the number of elements held in the container
+        /// to \p count.
+        ///
+        /// \param count  The number of elements in the container after the resize operation.
+        void resize_grow (size_type count);
+
+        /// Remove elements from the end of the container so that it contains \p count members.
+        ///
+        /// \param count  The number of elements in the container after the resize operation.
+        void resize_shrink (size_type count);
+
         chunk_list chunks_;
         size_type size_ = 0; ///< The number of elements.
     };
@@ -207,7 +247,6 @@ namespace pstore {
         return *this;
     }
 
-
     // emplace back
     // ~~~~~~~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
@@ -245,6 +284,75 @@ namespace pstore {
         return cv.begin ();
     }
 
+    // resize grow
+    // ~~~~~~~~~~~
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    void
+    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::resize_grow (size_type count) {
+        auto const grow_chunk = [this] (chunk * const c, std::size_t const limit) {
+            assert (limit <= c->capacity ());
+            for (auto ctr = limit; ctr > 0U; --ctr) {
+                c->emplace_back ();
+                // Increment size each time in case emplace_back() throws.
+                ++size_;
+            }
+            return limit;
+        };
+
+        if (count <= size_) {
+            return; // Nothing to do.
+        }
+
+        count -= size_;
+        {
+            // First we must fill the current tail chunk with new default-constructed elements.
+            auto & tail = chunks_.back ();
+            std::size_t const tc = tail.capacity ();
+            // If the last chunk partially occupied? If so, fill the rest of it.
+            std::size_t const limit = std::min (count, tc);
+            count -= grow_chunk (&tail, limit);
+            assert (tail.capacity () == tc - limit);
+        }
+
+        // Allocate as many chunks as necessary filling them with the correct number of
+        // default-initialized members.
+        while (count > 0U) {
+            // Append a new chunk.
+            chunks_.emplace_back ();
+            // Fill the chunk with default-constructed elements.
+            count -= grow_chunk (&chunks_.back (), std::min (ElementsPerChunk, count));
+        }
+    }
+
+    // resize shrink
+    // ~~~~~~~~~~~~~
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    void
+    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::resize_shrink (size_type count) {
+        if (count >= size_) {
+            return; // Nothing to do.
+        }
+
+        // 'count' becomes the number of elements to remove.
+        count = size_ - count;
+        auto & head = chunks_.front ();
+        while (count > 0U) {
+            auto & tail = chunks_.back ();
+            auto in_chunk = tail.size ();
+            // Note that we don't delete head: there is always at least one chunk.
+            if (count >= in_chunk && &tail != &head) {
+                chunks_.pop_back ();
+            } else {
+                in_chunk = count;
+                tail.shrink (in_chunk);
+            }
+            count -= in_chunk;
+            size_ -= in_chunk;
+        }
+    }
+
     //*     _             _    *
     //*  __| |_ _  _ _ _ | |__ *
     //* / _| ' \ || | ' \| / / *
@@ -277,7 +385,11 @@ namespace pstore {
             PSTORE_ASSERT (index < ElementsPerChunk);
             return reinterpret_cast<T const &> (membs_[index]);
         }
-        std::size_t size () const noexcept { return size_; }
+        constexpr std::size_t size () const noexcept { return size_; }
+
+        constexpr std::size_t capacity () const noexcept {
+            return ElementsPerChunk - this->size ();
+        }
 
         reference front () { return (*this)[0]; }
         const_reference front () const { return (*this)[0]; }
@@ -287,24 +399,23 @@ namespace pstore {
         template <typename... Args>
         reference emplace_back (Args &&... args);
 
+        void shrink (std::size_t new_size) noexcept;
+
     private:
         std::size_t size_ = 0U;
         std::array<typename std::aligned_storage<ActualSize, ActualAlign>::type, ElementsPerChunk>
             membs_;
     };
 
-    // dtor
-    // ~~~~
+    // (dtor)
+    // ~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::~chunk () noexcept {
-        for (auto ctr = std::size_t{0}; ctr < size_; ++ctr) {
-            (*this)[ctr].~T ();
-        }
-        size_ = 0U;
+        this->shrink (0U);
     }
 
-    // emplace_back
+    // emplace back
     // ~~~~~~~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
@@ -316,6 +427,19 @@ namespace pstore {
         new (&place) T (std::forward<Args> (args)...);
         ++size_;
         return place;
+    }
+
+    // shrink
+    // ~~~~~~
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    void chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::shrink (
+        std::size_t const new_size) noexcept {
+        assert (new_size <= size_);
+        for (auto ctr = new_size; ctr < size_; ++ctr) {
+            (*this)[ctr].~T ();
+        }
+        size_ = new_size;
     }
 
     //*  _ _                _             _                   *

@@ -29,9 +29,9 @@ namespace {
     // A class which simply wraps and int and doesn't have a default ctor.
     class simple {
     public:
-        explicit simple (int v)
+        constexpr explicit simple (int v) noexcept
                 : v_{v} {}
-        int get () const { return v_; }
+        constexpr int get () const noexcept { return v_; }
 
     private:
         int v_;
@@ -165,7 +165,6 @@ namespace {
     class CVIterator : public testing::Test {
     public:
         CVIterator () {
-            cv_.reserve (4);
             cv_.emplace_back (2);
             cv_.emplace_back (3);
             cv_.emplace_back (5);
@@ -213,4 +212,117 @@ TYPED_TEST (CVIterator, Predecrement) {
     --it;
     EXPECT_EQ (*it, 2);
     EXPECT_EQ (it, this->cv_.begin ());
+}
+
+//  - An underscore '_' indicates uninitialized storage.
+//  - An arrow '->' indicates the list of chunks.
+TEST (ChunkedVectorResize, FillCurrentTailChunk) {
+    cvector_int cv;
+    cv.emplace_back (13);
+    // Before the resize we have a single chunk:
+    //     [ 13, _ ]
+    // After it, we fill the tail chunk with default-initialized int:
+    //    [ 13, 0 ]
+    cv.resize (2U);
+    EXPECT_EQ (cv.size (), 2U);
+    EXPECT_EQ (cv.capacity (), 2U);
+
+    cvector_int::const_iterator it = cv.begin ();
+    EXPECT_EQ (*it, 13) << "Element 0 (chunk 0, index 0)";
+    std::advance (it, 1);
+    EXPECT_EQ (*it, 0) << "Element 0 (chunk 0, index 1)";
+}
+
+TEST (ChunkedVectorResize, FillInitialChunkAndPartialSecond) {
+    cvector_int cv;
+    cv.emplace_back (17);
+    // Before the resize we have a single chunk:
+    //     [ 17, _ ]
+    // Extending this to three members will produce:
+    //     [ 17, 0 ] -> [ 0, _ ]
+    cv.resize (3U);
+    EXPECT_EQ (cv.size (), 3U);
+    EXPECT_EQ (cv.capacity (), 4U);
+
+    cvector_int::const_iterator it = cv.begin ();
+    EXPECT_EQ (*it, 17) << "Element 0 (chunk 0, index 0)";
+    std::advance (it, 1);
+    EXPECT_EQ (*it, 0) << "Element 1 (chunk 0, index 1)";
+    std::advance (it, 1);
+    EXPECT_EQ (*it, 0) << "Element 2 (chunk 1, index 0)";
+}
+
+TEST (ChunkedVectorResize, ResizeWholeChunkPlus1) {
+    cvector_int cv;
+    // Resize from 0 to 5 elements:
+    //     [ 0, 0 ] -> [ 0, 0 ] -> [ 0, _ ]
+    cv.resize (5U);
+    EXPECT_EQ (cv.size (), 5U);
+    EXPECT_EQ (cv.capacity (), 6U);
+
+    cvector_int::const_iterator it = cv.begin ();
+    EXPECT_EQ (*it, 0) << "Element 0 (chunk 0, index 0)";
+    std::advance (it, 1);
+    EXPECT_EQ (*it, 0) << "Element 1 (chunk 0, index 1)";
+    std::advance (it, 1);
+    EXPECT_EQ (*it, 0) << "Element 2 (chunk 1, index 0)";
+    std::advance (it, 1);
+    EXPECT_EQ (*it, 0) << "Element 3 (chunk 1, index 1)";
+    std::advance (it, 1);
+    EXPECT_EQ (*it, 0) << "Element 4 (chunk 1, index 1)";
+}
+
+TEST (ChunkedVectorResize, TwoElementsDownToOne) {
+    cvector_int cv;
+    cv.emplace_back (17);
+    cv.emplace_back (19);
+    // Before: [ 17, 19 ]
+    // After: [ 17, _ ]
+    cv.resize (1U);
+    EXPECT_EQ (cv.size (), 1U);
+    EXPECT_EQ (cv.capacity (), 2U);
+
+    cvector_int::const_iterator it = cv.begin ();
+    EXPECT_EQ (*it, 17) << "Element 0 (chunk 0, index 0)";
+}
+
+TEST (ChunkedVectorResize, TwoElementsDownToZero) {
+    cvector_int cv;
+    cv.emplace_back (17);
+    cv.emplace_back (19);
+    // Before: [ 17, 19 ]
+    // After: [ _, _ ]
+    cv.resize (0U);
+    EXPECT_EQ (cv.size (), 0U);
+    EXPECT_EQ (cv.capacity (), 2U) << "There is always at least one chunk";
+}
+
+TEST (ChunkedVectorResize, FiveElementsDownToOne) {
+    cvector_int cv;
+    cv.emplace_back (17);
+    cv.emplace_back (19);
+    cv.emplace_back (23);
+    cv.emplace_back (29);
+    cv.emplace_back (31);
+    // Before: [ 17, 19 ] -> [ 23, 29 ] -> [ 31, _ ]
+    // After: [ 17, _ ]
+    cv.resize (1U);
+    EXPECT_EQ (cv.size (), 1U);
+    EXPECT_EQ (cv.capacity (), 2U);
+
+    cvector_int::const_iterator it = cv.begin ();
+    EXPECT_EQ (*it, 17) << "Element 0 (chunk 0, index 0)";
+}
+
+TEST (ChunkedVectorResize, ThreeElementsDownToZero) {
+    cvector_int cv;
+    cv.emplace_back (37);
+    cv.emplace_back (41);
+    cv.emplace_back (43);
+    // Before: [ 37, 41 ] -> [ 43, _ ]
+    // After: [ _, _ ]
+    cv.resize (0U);
+    EXPECT_EQ (cv.size (), 0U);
+    EXPECT_EQ (cv.capacity (), 2U);
+    EXPECT_TRUE (cv.empty ());
 }
