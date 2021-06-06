@@ -80,4 +80,68 @@ private:
     T & original_;
 };
 
+class json_out_callbacks {
+public:
+    using result_type = std::string;
+    result_type result () { return out_; }
+
+    std::error_code string_value (std::string const & s) {
+        append ('"' + s + '"');
+        return {};
+    }
+    std::error_code int64_value (std::int64_t v) {
+        append (std::to_string (v));
+        return {};
+    }
+    std::error_code uint64_value (std::uint64_t v) {
+        append (std::to_string (v));
+        return {};
+    }
+    std::error_code double_value (double v) {
+        append (std::to_string (v));
+        return {};
+    }
+    std::error_code boolean_value (bool v) {
+        append (v ? "true" : "false");
+        return {};
+    }
+    std::error_code null_value () {
+        append ("null");
+        return {};
+    }
+
+    std::error_code begin_array () {
+        append ("[");
+        return {};
+    }
+    std::error_code end_array () {
+        append ("]");
+        return {};
+    }
+
+    std::error_code begin_object () {
+        append ("{");
+        return {};
+    }
+    std::error_code key (std::string const & s) {
+        string_value (s);
+        return {};
+    }
+    std::error_code end_object () {
+        append ("}");
+        return {};
+    }
+
+private:
+    template <typename StringType>
+    void append (StringType && s) {
+        if (out_.length () > 0) {
+            out_ += ' ';
+        }
+        out_ += s;
+    }
+
+    std::string out_;
+};
+
 #endif // PSTORE_UNIT_TESTS_JSON_CALLBACKS_H
