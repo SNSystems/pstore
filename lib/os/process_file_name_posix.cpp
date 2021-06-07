@@ -50,7 +50,7 @@ namespace pstore {
 
 } // end namespace pstore
 
-#    elif defined(__FreeBSD__) || defined(__NetBSD__)
+#    elif defined(__FreeBSD__)
 
 // System-specific includes
 #        include <sys/types.h>
@@ -69,7 +69,7 @@ namespace pstore {
 
 } // end namespace pstore
 
-#    elif defined(__linux__) || defined(__sun__)
+#    elif defined(__linux__) || defined(__sun__) || defined(__NetBSD__)
 
 // Standard includes
 #        include <climits>
@@ -94,6 +94,8 @@ namespace {
         link_stream << "/proc/" << ::getpid () << "/path/a.out";
         return link_stream.str ();
     }
+#        elif defined(__NetBSD__)
+    std::string link_path () { return "/proc/curproc/exe"; }
 #        else
 #            error "Don't know how to build link path for this system"
 #        endif
