@@ -14,9 +14,10 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file thread_posix.cpp
+/// \brief  Implementation of functions to get and set the name of the current thread on POSIX
+///   systems.
 
 #include "pstore/os/thread.hpp"
-
 
 #ifndef _WIN32
 
@@ -28,7 +29,6 @@
 
 // OS-specific includes
 #    include <pthread.h>
-
 
 #    ifdef PSTORE_HAVE_LINUX_UNISTD_H
 #        include <linux/unistd.h>
@@ -45,6 +45,7 @@
 // pstore includes
 #    include "pstore/config/config.hpp"
 #    include "pstore/support/error.hpp"
+#    include "pstore/support/unsigned_cast.hpp"
 
 namespace pstore {
     namespace threads {
@@ -57,12 +58,12 @@ namespace pstore {
 #        define PTHREAD_GETNAME_NP 1
 #    endif
 
-// FIXME: The current musl libc library only includes the function `pthread_setname_np` but not
-// supports `pthread_getname_np` yet. Therefore, we use the fall back if either function is missing.
-// We will revisit when a version of musl supporting `pthread_getname_np` is released. Once musl
-// libc supports both functions, we could change the codes to use the fall back if both functions
-// aren’t supported. If there is a mismatch, we would like the compile to fail with a #error to
-// check whether there may be something to fix with the platform support.
+// FIXME: The current musl libc library includes pthread_setname_np() but not yet
+// pthread_getname_np(). Therefore, we use the fallback if either function is missing. We will
+// revisit when a version of musl supporting pthread_getname_np() is released. Once musl libc
+// supports both functions, we could change the code to use the fallback if both functions aren’t
+// supported. If there is a mismatch, we would like the compile to fail with a #error to indicate
+// that there may be something to fix with the platform support.
 #    if !defined(PTHREAD_SETNAME_NP) || !defined(PTHREAD_GETNAME_NP)
 #        define USE_FALLBACK 1
 #    endif
@@ -90,9 +91,11 @@ namespace pstore {
             err = pthread_setname_np (pthread_self (), name, nullptr);
 #    elif defined(PSTORE_PTHREAD_SET_NAME_NP)
             pthread_set_name_np (pthread_self (), name);
+#    else
+#        error "Don't know how to set the name of the current thread"
 #    endif
             if (err != 0) {
-                raise (errno_erc{err}, "pthread_set_name_np");
+                raise (errno_erc{err}, "threads::set_name");
             }
         }
 
@@ -103,18 +106,19 @@ namespace pstore {
             }
 
             PSTORE_ASSERT (length == name.size_bytes ());
+            auto const length_u = unsigned_cast (length);
             int err = 0;
 #    ifdef USE_FALLBACK
-            std::strncpy (name.data (), thread_name, static_cast<std::size_t> (length));
+            std::strncpy (name.data (), thread_name, length_u);
 #    elif defined(PSTORE_PTHREAD_GETNAME_NP)
-            err = pthread_getname_np (pthread_self (), name.data (),
-                                      static_cast<std::size_t> (length));
+            err = pthread_getname_np (pthread_self (), name.data (), length_u);
 #    elif defined(PSTORE_PTHREAD_GET_NAME_NP)
-            err = pthread_get_name_np (pthread_self (), name.data (),
-                                       static_cast<std::size_t> (length));
+            pthread_get_name_np (pthread_self (), name.data (), length_u);
+#    else
+#        error "Don't know how to get the name of the current thread"
 #    endif
             if (err != 0) {
-                raise (errno_erc{err}, "pthread_getname_np");
+                raise (errno_erc{err}, "threads::get_name");
             }
             name[length - 1] = '\0';
             return name.data ();
