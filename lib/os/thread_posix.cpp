@@ -61,7 +61,7 @@ namespace pstore {
 // FIXME: The current musl libc library includes pthread_setname_np() but not yet
 // pthread_getname_np(). Therefore, we use the fallback if either function is missing. We will
 // revisit when a version of musl supporting pthread_getname_np() is released. Once musl libc
-// supports both functions, we could change the code to use the fallback if both functions aren’t
+// supports both functions, we should change the code to use the fallback only if _both_ functions aren’t
 // supported. If there is a mismatch, we would like the compile to fail with a #error to indicate
 // that there may be something to fix with the platform support.
 #    if !defined(PTHREAD_SETNAME_NP) || !defined(PTHREAD_GETNAME_NP)
