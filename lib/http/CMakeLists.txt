@@ -21,6 +21,7 @@ set (pstore_http_includes
     buffered_reader.hpp
     endian.hpp
     error.hpp
+    error_reporting.hpp
     headers.hpp
     http_date.hpp
     media_type.hpp
@@ -38,6 +39,7 @@ set (pstore_http_includes
 )
 set (pstore_http_lib_src
     error.cpp
+    error_reporting.cpp
     headers.cpp
     http_date.cpp
     media_type.cpp

@@ -18,6 +18,7 @@ add_pstore_unit_test (pstore-http-unit-tests
     buffered_reader_mocks.hpp
 
     test_buffered_reader.cpp
+    test_error_reporting.cpp
     test_headers.cpp
     test_media_type.cpp
     test_query_to_kvp.cpp
