@@ -56,3 +56,20 @@ TEST (BuildHeaders, TwoSimple) {
     // Send the three parts: the response line, the headers, and the HTML content.
     EXPECT_EQ (pstore::http::build_headers (std::begin (h), std::end (h)), expected);
 }
+
+TEST (SendErrorPage, A) {
+    using testing::IsSubstring;
+
+    std::string acc;
+    auto const sender = [&acc] (int io, pstore::gsl::span<std::uint8_t const> const & s) {
+        std::transform (std::begin (s), std::end (s), std::back_inserter (acc),
+                        [] (std::uint8_t c) { return static_cast<char> (c); });
+        return pstore::error_or<int>{io};
+    };
+
+    pstore::http::send_error_page (sender, 0, "cause", pstore::http::http_status_code::not_found,
+                                   "short message", "this is a long message");
+    EXPECT_PRED_FORMAT2 (IsSubstring, "HTTP/1.1 404 OK\r\n", acc);
+    EXPECT_PRED_FORMAT2 (IsSubstring, "<p>404: short message</p>", acc);
+    EXPECT_PRED_FORMAT2 (IsSubstring, "<p>this is a long message: cause</p>", acc);
+}

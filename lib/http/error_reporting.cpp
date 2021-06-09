@@ -16,8 +16,9 @@
 /// \file error_reporting.cpp
 /// \brief Reporting HTTP server errors to the client.
 
-#include "pstore/http/error.hpp"
 #include "pstore/http/error_reporting.hpp"
+
+#include "pstore/http/error.hpp"
 #include "pstore/http/net_txrx.hpp"
 #include "pstore/http/request.hpp"
 #include "pstore/http/ws_server.hpp"
