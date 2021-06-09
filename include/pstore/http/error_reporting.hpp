@@ -16,6 +16,7 @@
 /// \file error_reporting.hpp
 /// \brief Reporting HTTP server errors to the client.
 
+#include <algorithm>
 #include <sstream>
 
 #include "pstore/http/http_date.hpp"
