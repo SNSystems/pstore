@@ -144,7 +144,7 @@ TEST_F (ExchangeCompilation, Empty) {
     export_ns::string_mapping exported_names{export_db_, export_ns::name_index_tag ()};
     export_ns::ostringstream exported_names_stream;
     export_ns::emit_strings<name_index> (exported_names_stream, export_ns::indent{}, export_db_,
-                                         export_db_.get_current_revision (), &exported_names);
+                                         export_db_.get_current_revision (), "", &exported_names);
 
     export_ns::ostringstream exported_compilation_stream;
     {
@@ -218,7 +218,7 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
     export_ns::string_mapping exported_names{export_db_, export_ns::name_index_tag ()};
     export_ns::ostringstream exported_names_stream;
     export_ns::emit_strings<name_index> (exported_names_stream, export_ns::indent{}, export_db_,
-                                         export_db_.get_current_revision (), &exported_names);
+                                         export_db_.get_current_revision (), "", &exported_names);
 
     // Now build a single fragment and a compilation that references it then export them.
     constexpr pstore::index::digest compilation_digest{0x12345678, 0x9ABCDEF0};

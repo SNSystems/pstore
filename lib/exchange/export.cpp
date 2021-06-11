@@ -78,6 +78,11 @@ namespace {
         return first;
     }
 
+    std::string prefix (bool prev_emitted, pstore::exchange::export_ns::indent const ind,
+                        std::string const & property) {
+        return (prev_emitted ? ",\n" : "") + ind.str () + '"' + property + "\":";
+    }
+
 } // end anonymous namespace
 
 namespace pstore {
@@ -108,13 +113,15 @@ namespace pstore {
                         if (comments) {
                             os1 << object_indent << "// transaction #" << generation << '\n';
                         }
-                        os1 << object_indent << R"("names":)";
-                        emit_strings<trailer::indices::name> (os1, object_indent, db, generation,
-                                                              &string_table);
-                        os1 << ",\n" << object_indent << R"("paths":)";
-                        emit_strings<trailer::indices::path> (os1, object_indent, db, generation,
-                                                              &path_table);
-                        os1 << ",\n";
+                        bool const names_emitted = emit_strings<trailer::indices::name> (
+                            os1, object_indent, db, generation,
+                            prefix (false, object_indent, "names"), &string_table);
+                        bool const paths_emitted = emit_strings<trailer::indices::path> (
+                            os1, object_indent, db, generation,
+                            prefix (names_emitted, object_indent, "paths"), &path_table);
+                        if (paths_emitted || names_emitted) {
+                            os1 << ",\n";
+                        }
                         if (emit_debug_line_headers (os1, object_indent, db, generation)) {
                             os1 << ",\n";
                         }

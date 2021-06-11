@@ -124,7 +124,7 @@ TEST_F (GenericSection, RoundTripForPopulated) {
     export_ns::string_mapping exported_names{export_db_, export_ns::name_index_tag ()};
     export_ns::ostringstream exported_names_stream;
     export_ns::emit_strings<names_index> (exported_names_stream, export_ns::indent{}, export_db_,
-                                          export_db_.get_current_revision (), &exported_names);
+                                          export_db_.get_current_revision (), "", &exported_names);
 
 
     pstore::repo::section_content exported_content;

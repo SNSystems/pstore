@@ -35,6 +35,10 @@ namespace pstore {
                 constexpr indent () noexcept = default;
                 constexpr indent next () const noexcept { return indent{distance_ + 1U}; }
                 constexpr unsigned distance () const noexcept { return distance_; }
+                std::string str () const {
+                    return std::string (static_cast<std::string::size_type> (distance () * 2U),
+                                        ' ');
+                }
 
             private:
                 explicit constexpr indent (unsigned const distance) noexcept

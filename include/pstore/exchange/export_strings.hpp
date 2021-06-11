@@ -89,42 +89,44 @@ namespace pstore {
             /// \p ind  The indentation of the output.
             /// \p db  The database instance whose strings are to be dumped.
             /// \p generation  The database generation number whose strings are to be dumped.
+            /// \p prefix  A string prefix emitted before the array.
             /// \p string_table  The string table accumulates the address-to-index mapping of each
             ///   string as it is dumped.
+            /// \returns True if one or more string were emitted, false otherwise.
             template <typename trailer::indices Index>
-            void emit_strings (ostream_base & os, indent const ind, database const & db,
-                               unsigned const generation, string_mapping * const string_table) {
+            bool emit_strings (ostream_base & os, indent const ind, database const & db,
+                               unsigned const generation, std::string const & prefix,
+                               string_mapping * const string_table) {
                 if (generation == 0U) {
-                    os << "[]";
-                    return;
+                    return false;
                 }
                 auto const names_index = index::get_index<Index> (db, false /*create*/);
                 if (names_index == nullptr) {
-                    os << "[]";
-                    return;
+                    return false;
                 }
 
-                auto const * separator = "";
-                auto const * tail_separator = "";
-                auto close_bracket_indent = indent{};
-
+                bool first = true;
                 auto const member_indent = ind.next ();
                 auto const out_fn = [&] (pstore::address const addr) {
-                    os << separator << '\n' << member_indent;
-                    {
-                        indirect_string const str = names_index->load_leaf_node (db, addr);
-                        shared_sstring_view owner;
-                        raw_sstring_view const view = str.as_db_string_view (&owner);
-                        emit_string (os, view);
-                        string_table->add (addr);
+                    if (first) {
+                        os << prefix << '[';
+                        first = false;
+                    } else {
+                        os << ',';
                     }
-                    separator = ",";
-                    tail_separator = "\n";
-                    close_bracket_indent = ind;
+                    os << '\n' << member_indent;
+
+                    indirect_string const str = names_index->load_leaf_node (db, addr);
+                    shared_sstring_view owner;
+                    raw_sstring_view const view = str.as_db_string_view (&owner);
+                    emit_string (os, view);
+                    string_table->add (addr);
                 };
-                os << '[';
                 diff (db, *names_index, generation - 1U, make_diff_out (&out_fn));
-                os << tail_separator << close_bracket_indent << ']';
+                if (!first) {
+                    os << '\n' << ind << ']';
+                }
+                return !first;
             }
 
         } // end namespace export_ns

@@ -85,10 +85,10 @@ TEST_F (ExchangePaths, ExportEmpty) {
     string_mapping exported_strings{export_db_, path_index_tag ()};
     ostringstream exported_strings_stream;
     emit_strings<pstore::trailer::indices::path> (exported_strings_stream, indent{}, export_db_,
-                                                  export_db_.get_current_revision (),
+                                                  export_db_.get_current_revision (), "",
                                                   &exported_strings);
 
-    EXPECT_EQ (exported_strings_stream.str (), "[]");
+    EXPECT_EQ (exported_strings_stream.str (), "");
     EXPECT_EQ (exported_strings.size (), 0U);
 }
 
@@ -132,7 +132,7 @@ TEST_F (ExchangePaths, RoundTripForTwoPaths) {
             export_db_, pstore::exchange::export_ns::path_index_tag ()};
         pstore::exchange::export_ns::emit_strings<pstore::trailer::indices::path> (
             exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
-            export_db_.get_current_revision (), &exported_names);
+            export_db_.get_current_revision (), "", &exported_names);
     }
 
     // The output from the import phase: the mapping from path index to address.
