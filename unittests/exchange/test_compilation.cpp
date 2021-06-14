@@ -131,8 +131,8 @@ namespace {
 
 TEST_F (ExchangeCompilation, Empty) {
     using namespace pstore::exchange;
-
-    constexpr auto name_index = pstore::trailer::indices::name;
+    static constexpr auto comments = false;
+    static constexpr auto name_index = pstore::trailer::indices::name;
 
     constexpr auto * triple = "triple";
     std::array<pstore::gsl::czstring, 1> names{{triple}};
@@ -144,7 +144,8 @@ TEST_F (ExchangeCompilation, Empty) {
     export_ns::string_mapping exported_names{export_db_, export_ns::name_index_tag ()};
     export_ns::ostringstream exported_names_stream;
     export_ns::emit_strings<name_index> (exported_names_stream, export_ns::indent{}, export_db_,
-                                         export_db_.get_current_revision (), "", &exported_names);
+                                         export_db_.get_current_revision (), "", &exported_names,
+                                         comments);
 
     export_ns::ostringstream exported_compilation_stream;
     {
@@ -156,7 +157,7 @@ TEST_F (ExchangeCompilation, Empty) {
                                               std::begin (definitions), std::end (definitions));
 
         emit_compilation (exported_compilation_stream, export_ns::indent{}, export_db_,
-                          *export_db_.getro (compilation), exported_names, false);
+                          *export_db_.getro (compilation), exported_names, comments);
         transaction.commit ();
     }
 
@@ -201,6 +202,7 @@ TEST_F (ExchangeCompilation, Empty) {
 
 TEST_F (ExchangeCompilation, TwoDefinitions) {
     using namespace pstore::exchange;
+    constexpr auto comments = false;
 
     // Add names to the store so that external fixups can use then. add_export_strings()
     // yields a mapping from each name to its indirect-address.
@@ -218,7 +220,8 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
     export_ns::string_mapping exported_names{export_db_, export_ns::name_index_tag ()};
     export_ns::ostringstream exported_names_stream;
     export_ns::emit_strings<name_index> (exported_names_stream, export_ns::indent{}, export_db_,
-                                         export_db_.get_current_revision (), "", &exported_names);
+                                         export_db_.get_current_revision (), "", &exported_names,
+                                         comments);
 
     // Now build a single fragment and a compilation that references it then export them.
     constexpr pstore::index::digest compilation_digest{0x12345678, 0x9ABCDEF0};
@@ -233,7 +236,7 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
         pstore::extent<pstore::repo::fragment> const fext =
             build_fragment (transaction, fragment_digest);
         emit_fragment (exported_fragment_stream, export_ns::indent{}, export_db_, exported_names,
-                       export_db_.getro (fext), false);
+                       export_db_.getro (fext), comments);
 
         std::vector<pstore::repo::definition> definitions{
             {fragment_digest, fext, indir_strings[name1], pstore::repo::linkage::external,
@@ -246,7 +249,7 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
                                               std::begin (definitions), std::end (definitions));
 
         emit_compilation (exported_compilation_stream, export_ns::indent{}, export_db_,
-                          *export_db_.getro (compilation), exported_names, false);
+                          *export_db_.getro (compilation), exported_names, comments);
         transaction.commit ();
     }
 

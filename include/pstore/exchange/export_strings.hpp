@@ -60,7 +60,8 @@ namespace pstore {
                 /// exported strings array.
                 ///
                 /// \param addr The address of a string being exported.
-                void add (address addr);
+                /// \returns The index assigned to the exported string.
+                std::uint64_t add (address addr);
 
                 /// Returns the number of known addresss to index mappings.
                 std::size_t size () const noexcept { return strings_.size (); }
@@ -92,11 +93,12 @@ namespace pstore {
             /// \p prefix  A string prefix emitted before the array.
             /// \p string_table  The string table accumulates the address-to-index mapping of each
             ///   string as it is dumped.
+            /// \p comments  Emit comments to the output.
             /// \returns True if one or more string were emitted, false otherwise.
             template <typename trailer::indices Index>
             bool emit_strings (ostream_base & os, indent const ind, database const & db,
                                unsigned const generation, std::string const & prefix,
-                               string_mapping * const string_table) {
+                               string_mapping * const string_table, bool const comments) {
                 if (generation == 0U) {
                     return false;
                 }
@@ -106,13 +108,14 @@ namespace pstore {
                 }
 
                 bool first = true;
+                std::string comment;
                 auto const member_indent = ind.next ();
                 auto const out_fn = [&] (pstore::address const addr) {
                     if (first) {
                         os << prefix << '[';
                         first = false;
                     } else {
-                        os << ',';
+                        os << ',' << comment;
                     }
                     os << '\n' << member_indent;
 
@@ -120,11 +123,14 @@ namespace pstore {
                     shared_sstring_view owner;
                     raw_sstring_view const view = str.as_db_string_view (&owner);
                     emit_string (os, view);
-                    string_table->add (addr);
+                    std::uint64_t const index = string_table->add (addr);
+                    if (comments) {
+                        comment = " // #" + std::to_string (index);
+                    }
                 };
                 diff (db, *names_index, generation - 1U, make_diff_out (&out_fn));
                 if (!first) {
-                    os << '\n' << ind << ']';
+                    os << comment << '\n' << ind << ']';
                 }
                 return !first;
             }

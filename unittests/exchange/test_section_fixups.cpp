@@ -320,6 +320,7 @@ namespace {
 
 TEST_F (ExchangeExternalFixups, ExternalEmpty) {
     using namespace pstore::exchange;
+    constexpr auto comments = false;
 
     // Start with an empty collection of external fixups.
     xfixup_collection xfixups;
@@ -328,7 +329,7 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
     export_ns::ostringstream os;
     export_ns::string_mapping names{export_db_, export_ns::name_index_tag ()};
     emit_external_fixups (os, export_ns::indent{}, export_db_, names, std::begin (xfixups),
-                          std::end (xfixups), false);
+                          std::end (xfixups), comments);
 
     // Setup the parse.
     xfixup_collection imported_xfixups;
@@ -348,6 +349,7 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
 
 TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     using namespace pstore::exchange;
+    constexpr auto comments = false;
 
     constexpr auto name_index = pstore::trailer::indices::name;
     std::vector<pstore::gsl::czstring> strings{"foo", "bar"};
@@ -363,7 +365,8 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     export_ns::string_mapping exported_names{export_db_, export_ns::name_index_tag ()};
     export_ns::ostringstream exported_names_stream;
     export_ns::emit_strings<name_index> (exported_names_stream, export_ns::indent{}, export_db_,
-                                         export_db_.get_current_revision (), "", &exported_names);
+                                         export_db_.get_current_revision (), "", &exported_names,
+                                         comments);
 
 
 
@@ -380,7 +383,7 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     // Export the external fixup array to the 'exported_fixups' string-stream.
     export_ns::ostringstream exported_fixups;
     emit_external_fixups (exported_fixups, export_ns::indent{}, export_db_, exported_names,
-                          std::begin (xfixups), std::end (xfixups), false);
+                          std::begin (xfixups), std::end (xfixups), comments);
 
 
 

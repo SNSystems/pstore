@@ -105,6 +105,7 @@ TEST_F (GenericSection, RoundTripForPopulated) {
 
     constexpr auto kind = pstore::repo::section_kind::text;
     constexpr auto names_index = pstore::trailer::indices::name;
+    constexpr auto comments = false;
 
     // The type used to store a text section's properties.
     using section_type = pstore::repo::enum_to_section_t<kind>;
@@ -124,7 +125,8 @@ TEST_F (GenericSection, RoundTripForPopulated) {
     export_ns::string_mapping exported_names{export_db_, export_ns::name_index_tag ()};
     export_ns::ostringstream exported_names_stream;
     export_ns::emit_strings<names_index> (exported_names_stream, export_ns::indent{}, export_db_,
-                                          export_db_.get_current_revision (), "", &exported_names);
+                                          export_db_.get_current_revision (), "", &exported_names,
+                                          comments);
 
 
     pstore::repo::section_content exported_content;
@@ -152,7 +154,7 @@ TEST_F (GenericSection, RoundTripForPopulated) {
 
 
     std::string const exported_json =
-        export_section<kind> (export_db_, exported_names, exported_content, false);
+        export_section<kind> (export_db_, exported_names, exported_content, comments);
 
 
 

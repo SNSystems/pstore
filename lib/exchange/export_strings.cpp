@@ -28,11 +28,12 @@ namespace pstore {
             //*                   |___/             |_|  |_|         |___/  *
             // add
             // ~~~
-            void string_mapping::add (address const addr) {
+            std::uint64_t string_mapping::add (address const addr) {
                 PSTORE_ASSERT (strings_.find (addr) == strings_.end ());
                 PSTORE_ASSERT (strings_.size () <= std::numeric_limits<std::uint64_t>::max ());
                 auto const index = static_cast<std::uint64_t> (strings_.size ());
                 strings_[addr] = index;
+                return index;
             }
 
             // index

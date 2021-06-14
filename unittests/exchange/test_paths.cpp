@@ -81,12 +81,12 @@ namespace {
 
 TEST_F (ExchangePaths, ExportEmpty) {
     using namespace pstore::exchange::export_ns;
-
+    static constexpr auto comments = false;
     string_mapping exported_strings{export_db_, path_index_tag ()};
     ostringstream exported_strings_stream;
     emit_strings<pstore::trailer::indices::path> (exported_strings_stream, indent{}, export_db_,
                                                   export_db_.get_current_revision (), "",
-                                                  &exported_strings);
+                                                  &exported_strings, comments);
 
     EXPECT_EQ (exported_strings_stream.str (), "");
     EXPECT_EQ (exported_strings.size (), 0U);
@@ -116,6 +116,7 @@ TEST_F (ExchangePaths, ImportEmpty) {
 
 TEST_F (ExchangePaths, RoundTripForTwoPaths) {
     // The output from the export phase.
+    static constexpr auto comments = false;
     pstore::exchange::export_ns::ostringstream exported_names_stream;
 
     // The export phase. We put two strings into the paths index and export it.
@@ -132,7 +133,7 @@ TEST_F (ExchangePaths, RoundTripForTwoPaths) {
             export_db_, pstore::exchange::export_ns::path_index_tag ()};
         pstore::exchange::export_ns::emit_strings<pstore::trailer::indices::path> (
             exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
-            export_db_.get_current_revision (), "", &exported_names);
+            export_db_.get_current_revision (), "", &exported_names, comments);
     }
 
     // The output from the import phase: the mapping from path index to address.

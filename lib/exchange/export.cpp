@@ -115,10 +115,10 @@ namespace pstore {
                         }
                         bool const names_emitted = emit_strings<trailer::indices::name> (
                             os1, object_indent, db, generation,
-                            prefix (false, object_indent, "names"), &string_table);
+                            prefix (false, object_indent, "names"), &string_table, comments);
                         bool const paths_emitted = emit_strings<trailer::indices::path> (
                             os1, object_indent, db, generation,
-                            prefix (names_emitted, object_indent, "paths"), &path_table);
+                            prefix (names_emitted, object_indent, "paths"), &path_table, comments);
                         if (paths_emitted || names_emitted) {
                             os1 << ",\n";
                         }
