@@ -47,8 +47,7 @@ namespace pstore {
             using const_reference = value_type const &;
 
             using difference_type = typename std::iterator_traits<Iterator>::difference_type;
-            using iterator_category =
-                typename std::iterator_traits<Iterator>::iterator_category;
+            using iterator_category = typename std::iterator_traits<Iterator>::iterator_category;
 
             pair_field_iterator (Iterator it, Accessor acc)
                     : it_{std::move (it)}
@@ -91,9 +90,7 @@ namespace pstore {
             bool operator== (pair_field_iterator const & other) const {
                 return it_ == other.it_ && acc_ == other.acc_;
             }
-            bool operator!= (pair_field_iterator const & other) const {
-                return !(*this == other);
-            }
+            bool operator!= (pair_field_iterator const & other) const { return !(*this == other); }
 
             const_reference operator* () const {
                 // Delegate the actual deferencing of the iterator to the accessor function.
@@ -143,7 +140,12 @@ namespace pstore {
     /// \brief A sparse array type.
     ///
     /// A sparse array implementation which uses a bitmap value (whose type is given by the
-    /// BitmapType template parameter) to manage the collection of members. Each position in that bitmap represents the presence or absence of a value at the corresponding index. A bitmap value of 1 would mean that a single element at index 0 is present; a bitmap value of 0b101 indices that members 0 and 2 are available. The array members are contiguous. The position of a specific index can be computed as: `P(v & ((1 << x) - 1))` where P is the population count function, v is the bitmap-value, and x is the required index.
+    /// BitmapType template parameter) to manage the collection of members. Each position in that
+    /// bitmap represents the presence or absence of a value at the corresponding index. A bitmap
+    /// value of 1 would mean that a single element at index 0 is present; a bitmap value of 0b101
+    /// indices that members 0 and 2 are available. The array members are contiguous. The position
+    /// of a specific index can be computed as: `P(v & ((1 << x) - 1))` where P is the population
+    /// count function, v is the bitmap-value, and x is the required index.
     template <typename ValueType, typename BitmapType = std::uint64_t>
     class sparse_array {
         template <typename V, typename B>
@@ -161,12 +163,17 @@ namespace pstore {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        /// Constructs a sparse array whose available indices are defined by the iterator range from [first_index,last_index) and the values assigned to those indices are given by [FirstValue, LastValue). If the number of elements in [first_value, last_value) is less than the number of elements in [first_index,last_index), the remaining values are default-constructed; if it is greater then the remaining values are ignored.
+        /// Constructs a sparse array whose available indices are defined by the iterator range from
+        /// [first_index,last_index) and the values assigned to those indices are given by
+        /// [FirstValue, LastValue). If the number of elements in [first_value, last_value) is less
+        /// than the number of elements in [first_index,last_index), the remaining values are
+        /// default-constructed; if it is greater then the remaining values are ignored.
         template <typename IteratorIdx, typename IteratorV>
         sparse_array (IteratorIdx first_index, IteratorIdx last_index, IteratorV first_value,
                       IteratorV last_value);
 
-        /// Constructs a sparse array whose available indices are defined by the iterator range from [first_index,last_index) and whose corresponding values are default constructed.
+        /// Constructs a sparse array whose available indices are defined by the iterator range from
+        /// [first_index,last_index) and whose corresponding values are default constructed.
         template <typename IteratorIdx>
         sparse_array (IteratorIdx first_index, IteratorIdx last_index);
 
@@ -181,7 +188,8 @@ namespace pstore {
 
         /// Constructs a sparse_array index instance where the indices are extraced from an
         /// iterator range [first_index, last_index) and the values at each index are given by
-        /// the range [first_value,last_value). The number of elements in each range must be the same.
+        /// the range [first_value,last_value). The number of elements in each range must be the
+        /// same.
         template <typename IteratorIdx, typename IteratorV>
         static auto make_unique (IteratorIdx first_index, IteratorIdx last_index,
                                  IteratorV first_value, IteratorV last_value)
@@ -437,8 +445,7 @@ namespace pstore {
     template <typename IteratorIdx, typename IteratorV>
     sparse_array<ValueType, BitmapType>::sparse_array (IteratorIdx first_index,
                                                        IteratorIdx last_index,
-                                                       IteratorV first_value,
-                                                       IteratorV last_value)
+                                                       IteratorV first_value, IteratorV last_value)
             : bitmap_{bitmap (first_index, last_index)} {
 
         // Deal with the first element. This is the odd-one-out becuase it's in the
@@ -492,8 +499,7 @@ namespace pstore {
 
         auto begin_first =
             details::make_pair_field_iterator (begin, details::first_accessor<Iterator>);
-        auto end_first =
-            details::make_pair_field_iterator (end, details::first_accessor<Iterator>);
+        auto end_first = details::make_pair_field_iterator (end, details::first_accessor<Iterator>);
         auto begin_second =
             details::make_pair_field_iterator (begin, details::second_accessor<Iterator>);
         auto end_second =
@@ -517,9 +523,8 @@ namespace pstore {
     }
 
     template <typename ValueType, typename BitmapType>
-    auto
-    sparse_array<ValueType, BitmapType>::make_unique (std::initializer_list<size_type> indices,
-                                                      std::initializer_list<ValueType> values)
+    auto sparse_array<ValueType, BitmapType>::make_unique (std::initializer_list<size_type> indices,
+                                                           std::initializer_list<ValueType> values)
         -> std::unique_ptr<sparse_array> {
 
         return make_unique (std::begin (indices), std::end (indices), std::begin (values),
@@ -528,10 +533,9 @@ namespace pstore {
 
     template <typename ValueType, typename BitmapType>
     template <typename IteratorIdx>
-    auto
-    sparse_array<ValueType, BitmapType>::make_unique (IteratorIdx first_index,
-                                                      IteratorIdx last_index,
-                                                      std::initializer_list<ValueType> values)
+    auto sparse_array<ValueType, BitmapType>::make_unique (IteratorIdx first_index,
+                                                           IteratorIdx last_index,
+                                                           std::initializer_list<ValueType> values)
         -> std::unique_ptr<sparse_array> {
 
         return std::unique_ptr<sparse_array<ValueType, BitmapType>>{
@@ -575,8 +579,7 @@ namespace pstore {
     // ~~~~~~~
     template <typename ValueType, typename BitmapType>
     template <typename SparseArray, typename ResultType>
-    ResultType & sparse_array<ValueType, BitmapType>::at_impl (SparseArray && sa,
-                                                               size_type pos) {
+    ResultType & sparse_array<ValueType, BitmapType>::at_impl (SparseArray && sa, size_type pos) {
         if (pos < max_size ()) {
             auto const bit_position = BitmapType{1} << pos;
             if ((sa.bitmap_ & bit_position) != 0) {
