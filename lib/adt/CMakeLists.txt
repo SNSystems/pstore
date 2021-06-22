@@ -21,6 +21,7 @@ set (pstore_adt_lib_includes
     chunked_vector.hpp
     error_or.hpp
     small_vector.hpp
+    sparse_array.hpp
     sstring_view.hpp
     utility.hpp
 )

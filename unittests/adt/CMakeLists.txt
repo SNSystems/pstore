@@ -17,6 +17,7 @@ add_pstore_unit_test (pstore-adt-unit-tests
     test_chunked_vector.cpp
     test_error_or.cpp
     test_small_vector.cpp
+    test_sparse_array.cpp
     test_sstring_view.cpp
 )
 target_link_libraries (pstore-adt-unit-tests PRIVATE pstore-adt)

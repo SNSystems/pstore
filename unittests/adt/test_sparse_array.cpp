@@ -1,4 +1,4 @@
-//===- unittests/mcrepo/test_sparse_array.cpp -----------------------------===//
+//===- unittests/adt/test_sparse_array.cpp --------------------------------===//
 //*                                                              *
 //*  ___ _ __   __ _ _ __ ___  ___    __ _ _ __ _ __ __ _ _   _  *
 //* / __| '_ \ / _` | '__/ __|/ _ \  / _` | '__| '__/ _` | | | | *
@@ -14,18 +14,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "pstore/mcrepo/sparse_array.hpp"
+#include "pstore/adt/sparse_array.hpp"
+
 #include <array>
 #include <set>
 #include <vector>
+
 #include "gmock/gmock.h"
 
-using namespace pstore::repo;
+using namespace pstore;
 
 namespace {
 
     template <typename T>
-    class RepoSparseArray : public ::testing::Test {};
+    class SparseArray : public ::testing::Test {};
 
     using bitmap_test_types =
         ::testing::Types<std::uint16_t, std::uint32_t, std::uint64_t, pstore::uint128>;
@@ -33,12 +35,12 @@ namespace {
 } // end anonymous namespace
 
 #ifdef PSTORE_IS_INSIDE_LLVM
-TYPED_TEST_CASE (RepoSparseArray, bitmap_test_types);
+TYPED_TEST_CASE (SparseArray, bitmap_test_types);
 #else
-TYPED_TEST_SUITE (RepoSparseArray, bitmap_test_types, );
+TYPED_TEST_SUITE (SparseArray, bitmap_test_types, );
 #endif
 
-TYPED_TEST (RepoSparseArray, InitializerListIndicesHasIndex) {
+TYPED_TEST (SparseArray, InitializerListIndicesHasIndex) {
     auto arrp = sparse_array<int, TypeParam>::make_unique ({0, 2, 4});
     std::array<bool, 256> indices{{true, false, true, false, true}};
 
@@ -47,7 +49,7 @@ TYPED_TEST (RepoSparseArray, InitializerListIndicesHasIndex) {
     }
 }
 
-TYPED_TEST (RepoSparseArray, InitializeWithIndexAndValue) {
+TYPED_TEST (SparseArray, InitializeWithIndexAndValue) {
     auto arrp = sparse_array<int, TypeParam>::make_unique ({0, 2, 4}, {1, 2, 3});
     auto & arr = *arrp;
 
@@ -62,7 +64,7 @@ TYPED_TEST (RepoSparseArray, InitializeWithIndexAndValue) {
     EXPECT_EQ (arr[4], 3);
 }
 
-TYPED_TEST (RepoSparseArray, Assign) {
+TYPED_TEST (SparseArray, Assign) {
     auto arrp = sparse_array<int, TypeParam>::make_unique ({0, 2, 4});
     auto & arr = *arrp;
 
@@ -79,7 +81,7 @@ TYPED_TEST (RepoSparseArray, Assign) {
     EXPECT_EQ (arr[4], 11);
 }
 
-TYPED_TEST (RepoSparseArray, IndexInitializationList) {
+TYPED_TEST (SparseArray, IndexInitializationList) {
     std::string empty;
 
     auto arr = sparse_array<std::string, TypeParam>::make_unique ({0, 2, 4});
@@ -91,16 +93,19 @@ TYPED_TEST (RepoSparseArray, IndexInitializationList) {
 }
 
 namespace {
+
     struct ctor_counter {
         ctor_counter ()
                 : v{ctors++} {}
         unsigned v;
         static unsigned ctors;
     };
+
     unsigned ctor_counter::ctors;
+
 } // namespace
 
-TYPED_TEST (RepoSparseArray, IndexInitializationListCtorCheck) {
+TYPED_TEST (SparseArray, IndexInitializationListCtorCheck) {
     ctor_counter::ctors = 0;
 
     auto arrp = sparse_array<ctor_counter, TypeParam>::make_unique ({0, 2, 4});
@@ -110,7 +115,7 @@ TYPED_TEST (RepoSparseArray, IndexInitializationListCtorCheck) {
     EXPECT_EQ (arr[4].v, 2U);
 }
 
-TYPED_TEST (RepoSparseArray, IteratorInitialization) {
+TYPED_TEST (SparseArray, IteratorInitialization) {
     std::array<std::size_t, 3> i1{{0, 2, 4}};
     std::array<int, 3> v1{{1, 2, 3}};
 
@@ -125,7 +130,7 @@ TYPED_TEST (RepoSparseArray, IteratorInitialization) {
     EXPECT_EQ (arr[4], 3);
 }
 
-TYPED_TEST (RepoSparseArray, IteratorInitializationTooFewValues) {
+TYPED_TEST (SparseArray, IteratorInitializationTooFewValues) {
     std::vector<std::size_t> i1{0, 2, 4};
     std::vector<int> v1{1};
 
@@ -140,7 +145,7 @@ TYPED_TEST (RepoSparseArray, IteratorInitializationTooFewValues) {
     EXPECT_EQ (arr[4], 0);
 }
 
-TYPED_TEST (RepoSparseArray, IteratorInitializationTooManyValues) {
+TYPED_TEST (SparseArray, IteratorInitializationTooManyValues) {
     std::vector<std::size_t> i1{3, 5};
     std::vector<int> v1{3, 5, 7};
 
@@ -156,7 +161,7 @@ TYPED_TEST (RepoSparseArray, IteratorInitializationTooManyValues) {
     EXPECT_EQ (arr[5], 5);
 }
 
-TYPED_TEST (RepoSparseArray, PairInitialization) {
+TYPED_TEST (SparseArray, PairInitialization) {
     std::vector<std::pair<std::size_t, char const *>> const src{
         {0, "zero"}, {2, "two"}, {4, "four"}};
     auto arrp =
@@ -170,7 +175,7 @@ TYPED_TEST (RepoSparseArray, PairInitialization) {
     EXPECT_EQ (arr[4], "four");
 }
 
-TYPED_TEST (RepoSparseArray, Iterator) {
+TYPED_TEST (SparseArray, Iterator) {
     auto arr =
         sparse_array<char const *, TypeParam>::make_unique ({{0, "zero"}, {2, "two"}, {4, "four"}});
 
@@ -181,7 +186,7 @@ TYPED_TEST (RepoSparseArray, Iterator) {
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 }
 
-TYPED_TEST (RepoSparseArray, ReverseIterator) {
+TYPED_TEST (SparseArray, ReverseIterator) {
     auto arr =
         sparse_array<char const *, TypeParam>::make_unique ({{0, "zero"}, {2, "two"}, {4, "four"}});
 
@@ -192,7 +197,7 @@ TYPED_TEST (RepoSparseArray, ReverseIterator) {
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 }
 
-TYPED_TEST (RepoSparseArray, Fill) {
+TYPED_TEST (SparseArray, Fill) {
     auto arr =
         sparse_array<std::string, TypeParam>::make_unique ({{0, "zero"}, {2, "two"}, {4, "four"}});
     arr->fill ("foo");
@@ -203,25 +208,25 @@ TYPED_TEST (RepoSparseArray, Fill) {
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 }
 
-TYPED_TEST (RepoSparseArray, Equal) {
+TYPED_TEST (SparseArray, Equal) {
     auto arr1 = sparse_array<int, TypeParam>::make_unique ({{0, 0}, {2, 2}, {4, 4}});
     auto arr2 = sparse_array<int, TypeParam>::make_unique ({{0, 0}, {2, 2}, {4, 4}});
     EXPECT_TRUE (*arr1 == *arr2);
 }
 
-TYPED_TEST (RepoSparseArray, Equal2) {
+TYPED_TEST (SparseArray, Equal2) {
     auto arr1 = sparse_array<int, TypeParam>::make_unique ({{0, 0}, {2, 2}, {4, 5}});
     auto arr2 = sparse_array<int, TypeParam>::make_unique ({{0, 0}, {2, 2}, {4, 4}});
     EXPECT_FALSE (*arr1 == *arr2);
 }
 
-TYPED_TEST (RepoSparseArray, Equal3) {
+TYPED_TEST (SparseArray, Equal3) {
     auto arr1 = sparse_array<int, TypeParam>::make_unique ({{0, 1}, {2, 2}, {5, 4}});
     auto arr2 = sparse_array<int, TypeParam>::make_unique ({{0, 0}, {2, 2}, {4, 4}});
     EXPECT_FALSE (*arr1 == *arr2);
 }
 
-TYPED_TEST (RepoSparseArray, HasIndex) {
+TYPED_TEST (SparseArray, HasIndex) {
     std::set<std::size_t> indices{2, 3, 5, 7};
     auto arr =
         sparse_array<int, TypeParam>::make_unique (std::begin (indices), std::end (indices), {});
@@ -235,7 +240,7 @@ TYPED_TEST (RepoSparseArray, HasIndex) {
     EXPECT_EQ (arr->has_index (7), indices.find (7) != indices.end ());
 }
 
-TYPED_TEST (RepoSparseArray, Indices) {
+TYPED_TEST (SparseArray, Indices) {
     std::set<std::size_t> indices{2, 3, 5, 7};
     auto arr =
         sparse_array<int, TypeParam>::make_unique (std::begin (indices), std::end (indices), {});
@@ -247,7 +252,7 @@ TYPED_TEST (RepoSparseArray, Indices) {
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 }
 
-TYPED_TEST (RepoSparseArray, SizeBytesAgree) {
+TYPED_TEST (SparseArray, SizeBytesAgree) {
     std::vector<std::pair<int, int>> empty;
     EXPECT_EQ ((sparse_array<int, TypeParam>::make_unique (std::begin (empty), std::end (empty))
                     ->size_bytes ()),
@@ -261,7 +266,7 @@ TYPED_TEST (RepoSparseArray, SizeBytesAgree) {
                (sparse_array<int, TypeParam>::size_bytes (5)));
 }
 
-TYPED_TEST (RepoSparseArray, FrontAndBack) {
+TYPED_TEST (SparseArray, FrontAndBack) {
     std::vector<std::size_t> indices{2, 3, 5, 7};
     auto arr = sparse_array<int, TypeParam>::make_unique (std::begin (indices), std::end (indices),
                                                           {11, 13, 17, 19});

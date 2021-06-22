@@ -16,10 +16,10 @@
 #ifndef PSTORE_MCREPO_FRAGMENT_HPP
 #define PSTORE_MCREPO_FRAGMENT_HPP
 
+#include "pstore/adt/sparse_array.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
 #include "pstore/mcrepo/linked_definitions_section.hpp"
-#include "pstore/mcrepo/sparse_array.hpp"
 #include "pstore/support/pointee_adaptor.hpp"
 
 namespace pstore {
