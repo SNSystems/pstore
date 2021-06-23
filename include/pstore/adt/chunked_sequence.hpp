@@ -1,10 +1,16 @@
-//===- include/pstore/adt/chunked_vector.hpp --------------*- mode: C++ -*-===//
-//*       _                 _            _                  _              *
-//*   ___| |__  _   _ _ __ | | _____  __| | __   _____  ___| |_ ___  _ __  *
-//*  / __| '_ \| | | | '_ \| |/ / _ \/ _` | \ \ / / _ \/ __| __/ _ \| '__| *
-//* | (__| | | | |_| | | | |   <  __/ (_| |  \ V /  __/ (__| || (_) | |    *
-//*  \___|_| |_|\__,_|_| |_|_|\_\___|\__,_|   \_/ \___|\___|\__\___/|_|    *
-//*                                                                        *
+//===- include/pstore/adt/chunked_sequence.hpp ------------*- mode: C++ -*-===//
+//*       _                 _            _  *
+//*   ___| |__  _   _ _ __ | | _____  __| | *
+//*  / __| '_ \| | | | '_ \| |/ / _ \/ _` | *
+//* | (__| | | | |_| | | | |   <  __/ (_| | *
+//*  \___|_| |_|\__,_|_| |_|_|\_\___|\__,_| *
+//*                                         *
+//*                                            *
+//*  ___  ___  __ _ _   _  ___ _ __   ___ ___  *
+//* / __|/ _ \/ _` | | | |/ _ \ '_ \ / __/ _ \ *
+//* \__ \  __/ (_| | |_| |  __/ | | | (_|  __/ *
+//* |___/\___|\__, |\__,_|\___|_| |_|\___\___| *
+//*              |_|                           *
 //===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
@@ -13,13 +19,13 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-/// \file chunked_vector.hpp
-/// \brief Defines the chunked_vector sequence container.
+/// \file chunked_sequence.hpp
+/// \brief Defines the chunked_sequence<> container.
 ///
-/// Chunked vector ensures very fast append times at the expense of only permitting bi-directional
-/// iterators. Insertion preserves iterators.
-#ifndef PSTORE_ADT_CHUNKED_VECTOR_HPP
-#define PSTORE_ADT_CHUNKED_VECTOR_HPP
+/// chunked_sequence<> ensures very fast append times at the expense of only permitting
+/// bi-directional iterators. Insertion preserves iterators.
+#ifndef PSTORE_ADT_CHUNKED_SEQUENCE_HPP
+#define PSTORE_ADT_CHUNKED_SEQUENCE_HPP
 
 #include <algorithm>
 #include <array>
@@ -31,7 +37,7 @@
 
 namespace pstore {
 
-    /// Chunked-vector is a sequence-container which uses a list of large blocks ("chunks") to
+    /// Chunked-sequence is a sequence-container which uses a list of large blocks ("chunks") to
     /// ensure very fast append times at the expense of only permitting bi-directional iterators:
     /// random access is not supported, unlike std::deque<> or std::vector<>.
     ///
@@ -46,11 +52,11 @@ namespace pstore {
     /// \tparam ActualSize The storage allocated to an individual element. Normally equal to
     ///   sizeof(T), this can be increased to allow for dynamically-sized types.
     /// \tparam ActualAlign The alignment of an individual element. Normally equal to alignof(T).
-    //-MARK: chunked_vector
+    //-MARK: chunked_sequence
     template <typename T,
               std::size_t ElementsPerChunk = std::max (4096 / sizeof (T), std::size_t{1}),
               std::size_t ActualSize = sizeof (T), std::size_t ActualAlign = alignof (T)>
-    class chunked_vector {
+    class chunked_sequence {
         static_assert (ElementsPerChunk > 0, "Must be at least 1 element per chunk");
         static_assert (ActualSize >= sizeof (T), "ActualSize must be at least sizeof(T)");
         static_assert (ActualAlign >= alignof (T), "ActualAlign must be at least alignof(T)");
@@ -77,14 +83,14 @@ namespace pstore {
         /// The number of elements in an individual chunk.
         static constexpr std::size_t elements_per_chunk = ElementsPerChunk;
 
-        chunked_vector ();
-        chunked_vector (chunked_vector const &) = delete;
-        chunked_vector (chunked_vector && other) noexcept;
+        chunked_sequence ();
+        chunked_sequence (chunked_sequence const &) = delete;
+        chunked_sequence (chunked_sequence && other) noexcept;
 
-        ~chunked_vector () noexcept = default;
+        ~chunked_sequence () noexcept = default;
 
-        chunked_vector & operator= (chunked_vector const & other) noexcept = delete;
-        chunked_vector & operator= (chunked_vector && other) noexcept;
+        chunked_sequence & operator= (chunked_sequence const & other) noexcept = delete;
+        chunked_sequence & operator= (chunked_sequence && other) noexcept;
 
         constexpr bool empty () const noexcept { return size_ == 0; }
         constexpr size_type size () const noexcept { return size_; }
@@ -163,12 +169,12 @@ namespace pstore {
             return chunks_.back ().back ();
         }
 
-        void swap (chunked_vector & other) noexcept {
+        void swap (chunked_sequence & other) noexcept {
             std::swap (chunks_, other.chunks_);
             std::swap (size_, other.size_);
         }
 
-        void splice (chunked_vector && other) {
+        void splice (chunked_sequence && other) {
             // If the other CV is empty then do nothing.
             if (other.empty ()) {
                 return;
@@ -185,9 +191,9 @@ namespace pstore {
         }
 
     private:
-        template <typename ChunkedVector, typename Result = typename inherit_const<
-                                              ChunkedVector, iterator, const_iterator>::type>
-        static Result end_impl (ChunkedVector & cv) noexcept;
+        template <typename ChunkedSequence, typename Result = typename inherit_const<
+                                                ChunkedSequence, iterator, const_iterator>::type>
+        static Result end_impl (ChunkedSequence & cv) noexcept;
 
         /// Add default-initialized members to increase the number of elements held in the container
         /// to \p count.
@@ -218,7 +224,7 @@ namespace pstore {
     // ~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
-    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunked_vector () {
+    chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::chunked_sequence () {
         // Create an initial, empty chunk. This avoids checking whether the chunk list is empty
         // in the (performance sensitive) append function.
         chunks_.emplace_back ();
@@ -226,8 +232,8 @@ namespace pstore {
 
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
-    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunked_vector (
-        chunked_vector && other) noexcept
+    chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::chunked_sequence (
+        chunked_sequence && other) noexcept
             : chunks_{std::move (other.chunks_)}
             , size_{other.size_} {
         other.size_ = 0;
@@ -237,8 +243,8 @@ namespace pstore {
     // ~~~~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
-    auto chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::operator= (
-        chunked_vector && other) noexcept -> chunked_vector & {
+    auto chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::operator= (
+        chunked_sequence && other) noexcept -> chunked_sequence & {
         if (this != &other) {
             chunks_ = std::move (other.chunks_);
             size_ = other.size_;
@@ -253,7 +259,7 @@ namespace pstore {
               std::size_t ActualAlign>
     template <typename... Args>
     auto
-    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::emplace_back (Args &&... args)
+    chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::emplace_back (Args &&... args)
         -> reference {
         PSTORE_ASSERT (chunks_.size () > 0U);
         auto * tail = &chunks_.back ();
@@ -272,9 +278,9 @@ namespace pstore {
     // ~~~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
-    template <typename ChunkedVector, typename Result>
-    Result chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::end_impl (
-        ChunkedVector & cv) noexcept {
+    template <typename ChunkedSequence, typename Result>
+    Result chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::end_impl (
+        ChunkedSequence & cv) noexcept {
         // We always have at least 1 chunk. If the container is empty then return the begin iterator
         // otherwise an iterator referencing end and of the last member of the last chunk.
         PSTORE_ASSERT (cv.chunks_.size () > 0U);
@@ -289,7 +295,7 @@ namespace pstore {
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     void
-    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::resize_grow (size_type count) {
+    chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::resize_grow (size_type count) {
         auto const grow_chunk = [this] (chunk * const c, std::size_t const limit) {
             assert (limit <= c->capacity ());
             for (auto ctr = limit; ctr > 0U; --ctr) {
@@ -329,8 +335,8 @@ namespace pstore {
     // ~~~~~~~~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
-    void
-    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::resize_shrink (size_type count) {
+    void chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::resize_shrink (
+        size_type count) {
         if (count >= size_) {
             return; // Nothing to do.
         }
@@ -361,18 +367,18 @@ namespace pstore {
     //-MARK: chunk
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
-    class chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk {
+    class chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk {
     public:
         chunk () noexcept { // NOLINT
             // Don't use "=default" here. We don't want the zero initializer for membs_ to run.
         }
         chunk (chunk const &) = delete;
-        chunk (chunk && ) noexcept = delete;
+        chunk (chunk &&) noexcept = delete;
 
         ~chunk () noexcept;
 
         chunk & operator= (chunk const &) = delete;
-        chunk & operator= (chunk && ) noexcept = delete;
+        chunk & operator= (chunk &&) noexcept = delete;
 
         T * data () noexcept { return membs_.data (); }
         T const * data () const noexcept { return membs_.data (); }
@@ -411,7 +417,7 @@ namespace pstore {
     // ~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
-    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::~chunk () noexcept {
+    chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::~chunk () noexcept {
         this->shrink (0U);
     }
 
@@ -420,7 +426,7 @@ namespace pstore {
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     template <typename... Args>
-    auto chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::emplace_back (
+    auto chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::emplace_back (
         Args &&... args) -> reference {
         PSTORE_ASSERT (size_ < membs_.size ());
         T & place = (*this)[size_];
@@ -433,7 +439,7 @@ namespace pstore {
     // ~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
-    void chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::shrink (
+    void chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::shrink (
         std::size_t const new_size) noexcept {
         assert (new_size <= size_);
         for (auto ctr = new_size; ctr < size_; ++ctr) {
@@ -451,7 +457,7 @@ namespace pstore {
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     template <bool IsConst>
-    class chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::iterator_base {
+    class chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::iterator_base {
         using list_iterator =
             typename std::conditional<IsConst, typename chunk_list::const_iterator,
                                       typename chunk_list::iterator>::type;
@@ -515,8 +521,8 @@ namespace pstore {
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     template <bool IsConst>
-    auto chunked_vector<T, ElementsPerChunk, ActualSize,
-                        ActualAlign>::iterator_base<IsConst>::operator++ ()
+    auto chunked_sequence<T, ElementsPerChunk, ActualSize,
+                          ActualAlign>::iterator_base<IsConst>::operator++ ()
         -> iterator_base<IsConst> & {
         if (++index_ >= it_->size ()) {
             ++it_;
@@ -529,8 +535,8 @@ namespace pstore {
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     template <bool IsConst>
-    auto chunked_vector<T, ElementsPerChunk, ActualSize,
-                        ActualAlign>::iterator_base<IsConst>::operator++ (int)
+    auto chunked_sequence<T, ElementsPerChunk, ActualSize,
+                          ActualAlign>::iterator_base<IsConst>::operator++ (int)
         -> iterator_base<IsConst> {
         auto const old = *this;
         ++(*this);
@@ -541,8 +547,8 @@ namespace pstore {
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     template <bool IsConst>
-    auto chunked_vector<T, ElementsPerChunk, ActualSize,
-                        ActualAlign>::iterator_base<IsConst>::operator-- ()
+    auto chunked_sequence<T, ElementsPerChunk, ActualSize,
+                          ActualAlign>::iterator_base<IsConst>::operator-- ()
         -> iterator_base<IsConst> & {
         if (index_ > 0U) {
             --index_;
@@ -558,8 +564,8 @@ namespace pstore {
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     template <bool IsConst>
-    auto chunked_vector<T, ElementsPerChunk, ActualSize,
-                        ActualAlign>::iterator_base<IsConst>::operator-- (int)
+    auto chunked_sequence<T, ElementsPerChunk, ActualSize,
+                          ActualAlign>::iterator_base<IsConst>::operator-- (int)
         -> iterator_base<IsConst> {
         auto old = *this;
         --(*this);
@@ -573,11 +579,11 @@ namespace std {
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     void
-    swap (pstore::chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign> & lhs,
-          pstore::chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign> & rhs) noexcept {
+    swap (pstore::chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign> & lhs,
+          pstore::chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign> & rhs) noexcept {
         lhs.swap (rhs);
     }
 
 } // end namespace std
 
-#endif // PSTORE_ADT_CHUNKED_VECTOR_HPP
+#endif // PSTORE_ADT_CHUNKED_SEQUENCE_HPP

@@ -457,21 +457,21 @@ namespace pstore {
             static constexpr auto internal_nodes_per_chunk =
                 std::size_t{256} * 1024 / sizeof (internal_node);
 
-            /// Internal nodes are allocated using a "chunked-vector". This allocates memory in
+            /// Internal nodes are allocated using a "chunked-sequence". This allocates memory in
             /// lumps sufficent for internal_nodes_per_chunk entries. This is then consumed as new
             /// in-heap internal nodes are created.
             ///
             /// The effect of this is to significantly reduce the number of memory allocations
-            /// performed by the index code under heavy insertion pressure as thus give us a little
+            /// performed by the index code under heavy insertion pressure and thus give us a little
             /// extra performance. The cost is that we may waste as much as one chunk's worth of
-            /// memory (minus sizeof (internal_node).
+            /// memory (minus sizeof (internal_node)).
             ///
-            /// TODO: we allocate nodes at their maximum size even though they may only contain two
-            /// members. This is rather wasteful and will prevent us from moving to larger hash
-            /// sizes due to the bloated memory consumption.
+            // TODO: we allocate nodes at their maximum size even though they may only contain two
+            // members. This is rather wasteful and will prevent us from moving to larger hash
+            // sizes due to the bloated memory consumption.
             using internal_nodes_container =
-                chunked_vector<internal_node, internal_nodes_per_chunk,
-                               internal_node::size_bytes (details::hash_size)>;
+                chunked_sequence<internal_node, internal_nodes_per_chunk,
+                                 internal_node::size_bytes (details::hash_size)>;
             std::unique_ptr<internal_nodes_container> internals_container_;
 
             unsigned revision_;
@@ -506,7 +506,7 @@ namespace pstore {
         }
 
 
-        // increment_internal_node
+        // increment internal node
         // ~~~~~~~~~~~~~~~~~~~~~~~
         /// Move the iterator points to the next child.
         /// If the last child of this node is reached, so we need to:
@@ -565,7 +565,7 @@ namespace pstore {
             }
         }
 
-        // move_to_left_most_child
+        // move to left most child
         // ~~~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <bool IsConstIterator>

@@ -18,7 +18,7 @@ set (pstore_adt_lib_src
 )
 set (pstore_adt_include_dir "${PSTORE_ROOT_DIR}/include/pstore/adt")
 set (pstore_adt_lib_includes
-    chunked_vector.hpp
+    chunked_sequence.hpp
     error_or.hpp
     small_vector.hpp
     sparse_array.hpp

@@ -18,7 +18,7 @@
 #ifndef PSTORE_CORE_HAMT_MAP_TYPES_HPP
 #define PSTORE_CORE_HAMT_MAP_TYPES_HPP
 
-#include "pstore/adt/chunked_vector.hpp"
+#include "pstore/adt/chunked_sequence.hpp"
 #include "pstore/core/array_stack.hpp"
 #include "pstore/core/db_archive.hpp"
 

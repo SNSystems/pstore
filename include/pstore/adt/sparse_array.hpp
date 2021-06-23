@@ -186,10 +186,9 @@ namespace pstore {
         sparse_array & operator= (sparse_array &&) = delete;
 
 
-        /// Constructs a sparse_array index instance where the indices are extraced from an
-        /// iterator range [first_index, last_index) and the values at each index are given by
-        /// the range [first_value,last_value). The number of elements in each range must be the
-        /// same.
+        /// Constructs a sparse_array<> instance where the indices are extracted from an iterator
+        /// range [first_index, last_index) and the values at each index are given by the range
+        /// [first_value,last_value). The number of elements in each range must be the same.
         template <typename IteratorIdx, typename IteratorV>
         static auto make_unique (IteratorIdx first_index, IteratorIdx last_index,
                                  IteratorV first_value, IteratorV last_value)
@@ -384,8 +383,23 @@ namespace pstore {
                    (std::max (std::size_t{1}, num_entries) - 1U) * sizeof (ValueType);
         }
 
+        void * operator new (std::size_t const /*count*/, void * const ptr) { return ptr; }
+        void operator delete (void * const /*ptr*/, void * const /*place*/) {}
+        void operator delete (void * const p) { ::operator delete (p); }
+
+    private:
+        /// Computes the number of bytes of storage that are required for a sparse_array.
+        ///
+        /// \tparam InputIterator  An iterator type which, when dereferenced, will produce an array
+        ///   index.
+        /// \param count  The number of bytes to allocate (to which the storage
+        ///   required for the array elements will be added).
+        /// \param first  The beginning of the range of index values.
+        /// \param last  The end of the range of index values.
+        /// \returns The number of bytes of storage that are required for a spare_array with the
+        /// indices described by [first, last).
         template <typename InputIterator>
-        static std::size_t allocate_bytes (std::size_t const count, InputIterator const first,
+        static std::size_t required_bytes (std::size_t const count, InputIterator const first,
                                            InputIterator const last) {
             // There will always be sufficient storage for at least 1 instance of
             // ValueType (this comes from the built-in array).
@@ -395,13 +409,10 @@ namespace pstore {
             return count - sizeof (elements_) + elements * sizeof (ValueType);
         }
 
-        void * operator new (std::size_t const /*count*/, void * const ptr) { return ptr; }
-        void operator delete (void * const /*ptr*/, void * const /*place*/) {}
-        void operator delete (void * const p) { ::operator delete (p); }
-
-    private:
+        /// \tparam InputIterator  An iterator type which, when dereferenced, will produce an array
+        ///   index.
         /// \param count  The number of bytes to allocate (to which the storage
-        /// required for the array elements will be added).
+        ///   required for the array elements will be added).
         /// \param indices_first  The beginning of the range of index values.
         /// \param indices_last  The end of the range of index values.
         /// \returns A pointer to the newly allocated memory block.
@@ -409,7 +420,7 @@ namespace pstore {
         void * operator new (std::size_t count, InputIterator indices_first,
                              InputIterator indices_last) {
             return ::operator new (
-                sparse_array::allocate_bytes (count, indices_first, indices_last));
+                sparse_array::required_bytes (count, indices_first, indices_last));
         }
 
         /// Placement delete member function to match the placement new member

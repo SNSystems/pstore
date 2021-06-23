@@ -1,10 +1,16 @@
-//===- unittests/adt/test_chunked_vector.cpp ------------------------------===//
-//*       _                 _            _                  _              *
-//*   ___| |__  _   _ _ __ | | _____  __| | __   _____  ___| |_ ___  _ __  *
-//*  / __| '_ \| | | | '_ \| |/ / _ \/ _` | \ \ / / _ \/ __| __/ _ \| '__| *
-//* | (__| | | | |_| | | | |   <  __/ (_| |  \ V /  __/ (__| || (_) | |    *
-//*  \___|_| |_|\__,_|_| |_|_|\_\___|\__,_|   \_/ \___|\___|\__\___/|_|    *
-//*                                                                        *
+//===- unittests/adt/test_chunked_sequence.cpp ----------------------------===//
+//*       _                 _            _  *
+//*   ___| |__  _   _ _ __ | | _____  __| | *
+//*  / __| '_ \| | | | '_ \| |/ / _ \/ _` | *
+//* | (__| | | | |_| | | | |   <  __/ (_| | *
+//*  \___|_| |_|\__,_|_| |_|_|\_\___|\__,_| *
+//*                                         *
+//*                                            *
+//*  ___  ___  __ _ _   _  ___ _ __   ___ ___  *
+//* / __|/ _ \/ _` | | | |/ _ \ '_ \ / __/ _ \ *
+//* \__ \  __/ (_| | |_| |  __/ | | | (_|  __/ *
+//* |___/\___|\__, |\__,_|\___|_| |_|\___\___| *
+//*              |_|                           *
 //===----------------------------------------------------------------------===//
 //
 // Part of the pstore project, under the Apache License v2.0 with LLVM Exceptions.
@@ -13,7 +19,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "pstore/adt/chunked_vector.hpp"
+#include "pstore/adt/chunked_sequence.hpp"
 
 // standard library
 #include <utility>
@@ -38,18 +44,18 @@ namespace {
     };
 
     // Limit the chunks to two elements each.
-    using cvector_int = pstore::chunked_vector<int, std::size_t{2}>;
-    using cvector_simple = pstore::chunked_vector<simple, std::size_t{2}>;
+    using cvector_int = pstore::chunked_sequence<int, std::size_t{2}>;
+    using cvector_simple = pstore::chunked_sequence<simple, std::size_t{2}>;
 
 } // end anonymous namespace
 
-TEST (ChunkedVector, Init) {
+TEST (ChunkedSequence, Init) {
     cvector_int cv;
     EXPECT_EQ (cv.size (), 0U);
     EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 0);
 }
 
-TEST (ChunkedVector, OneMember) {
+TEST (ChunkedSequence, OneMember) {
     cvector_simple cv;
     cv.emplace_back (1);
 
@@ -91,7 +97,7 @@ TEST (ChunckedVector, FrontAndBack) {
     EXPECT_EQ (cv.back (), 23);
 }
 
-TEST (ChunkedVector, Swap) {
+TEST (ChunkedSequence, Swap) {
     cvector_int a, b;
     a.emplace_back (7);
     std::swap (a, b);
@@ -100,7 +106,7 @@ TEST (ChunkedVector, Swap) {
     EXPECT_EQ (b.front (), 7);
 }
 
-TEST (ChunkedVector, Splice) {
+TEST (ChunkedSequence, Splice) {
     cvector_int a;
     a.emplace_back (7);
 
@@ -111,7 +117,7 @@ TEST (ChunkedVector, Splice) {
     EXPECT_THAT (a, testing::ElementsAre (7, 11));
 }
 
-TEST (ChunkedVector, SpliceOntoEmpty) {
+TEST (ChunkedSequence, SpliceOntoEmpty) {
     {
         // Start with an empty CV and splice a populated CV onto it.
         cvector_int a;
@@ -134,7 +140,7 @@ TEST (ChunkedVector, SpliceOntoEmpty) {
     }
 }
 
-TEST (ChunkedVector, Clear) {
+TEST (ChunkedSequence, Clear) {
     cvector_int a;
     a.emplace_back (7);
     a.clear ();
@@ -145,17 +151,17 @@ TEST (ChunkedVector, Clear) {
     EXPECT_THAT (a.size (), 1U);
 }
 
-TEST (ChunkedVector, IteratorAssign) {
+TEST (ChunkedSequence, IteratorAssign) {
     cvector_int cv;
     cv.emplace_back (7);
     cvector_int::iterator it = cv.begin ();
-    cvector_int::iterator it2 = it;                         // non-const copy ctor from non-const
-    it2 = it;                                               // non-const assign from non-const.
-    cvector_int::const_iterator cit = it;                   // const copy ctor from non-const.
-    cvector_int::const_iterator cit2 = cit;                 // copy ctor from const.
-    cit2 = cit;                                             // assign from const.
-    cit2 = it;                                              // assign from non-const.
-    cvector_int::const_iterator cit3 = std::move (cit);     // move ctor from const.
+    cvector_int::iterator it2 = it;                     // non-const copy ctor from non-const
+    it2 = it;                                           // non-const assign from non-const.
+    cvector_int::const_iterator cit = it;               // const copy ctor from non-const.
+    cvector_int::const_iterator cit2 = cit;             // copy ctor from const.
+    cit2 = cit;                                         // assign from const.
+    cit2 = it;                                          // assign from non-const.
+    cvector_int::const_iterator cit3 = std::move (cit); // move ctor from const.
     EXPECT_EQ (*cit3, 7);
 }
 
