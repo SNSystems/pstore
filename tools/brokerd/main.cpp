@@ -14,8 +14,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "run_broker.hpp"
 #include "switches.hpp"
-#include "brokerd.hpp"
 
 #include "pstore/broker/globals.hpp"
 #include "pstore/os/logging.hpp"
@@ -37,7 +37,7 @@ int main (int argc, char * argv[]) {
     }
 
     try {
-        broker::exit_code = pstore::broker::run_broker (opt);
+        broker::exit_code = run_broker (opt);
     } catch (std::exception const & ex) {
         log (priority::error, "error: ", ex.what ());
         broker::exit_code = EXIT_FAILURE;

@@ -24,18 +24,18 @@ endif ()
 set (pstore_http_fs_source "${CMAKE_CURRENT_BINARY_DIR}/fs.cpp")
 
 add_pstore_tool (pstore-broker-service
-    main.cpp
+    "${pstore_http_fs_source}"
+    ../../run_broker.cpp
+    ../../run_broker.hpp
+    ../../switches.cpp
+    ../../switches.hpp
     broker_service.cpp
     broker_service.hpp
+    main.cpp
     service_base.cpp
     service_base.hpp
     service_installer.cpp
     service_installer.hpp
-    ../../switches.cpp
-    ../../switches.hpp
-    ../../brokerd.cpp
-    ../../brokerd.hpp
-    "${pstore_http_fs_source}"
 )
 
 if (PSTORE_IS_INSIDE_LLVM)

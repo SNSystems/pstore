@@ -13,7 +13,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-
 #ifndef SWITCHES_HPP
 #define SWITCHES_HPP
 

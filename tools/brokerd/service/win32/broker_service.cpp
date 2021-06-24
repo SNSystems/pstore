@@ -17,12 +17,13 @@
 #include <thread>
 
 #include "broker_service.hpp"
+
+#include "../../run_broker.hpp"
 #include "../../switches.hpp"
-#include "../../brokerd.hpp"
 
 #include "pstore/broker/globals.hpp"
-#include "pstore/command_line/option.hpp"
 #include "pstore/broker/quit.hpp"
+#include "pstore/command_line/option.hpp"
 
 using namespace std::string_literals;
 using namespace pstore;
@@ -68,7 +69,7 @@ void broker_service::start_handler (DWORD argc, TCHAR * argv[]) {
 // ~~~~~~
 void broker_service::worker (switches opt) {
     try {
-        broker::run_broker (opt);
+        run_broker (opt);
         if (broker::exit_code != EXIT_SUCCESS) {
             this->write_event_log_entry ("broker service exited unsuccessfully", event_type::error);
         }
