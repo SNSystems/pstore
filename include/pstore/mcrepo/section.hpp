@@ -45,7 +45,6 @@ namespace pstore {
     X (debug_line)                                                                                 \
     X (debug_string)                                                                               \
     X (debug_ranges)                                                                               \
-    X (interp)                                                                                     \
     X (linked_definitions)
 
 #define X(a) a,

@@ -94,7 +94,7 @@ namespace pstore {
         std::array<std::uint16_t, 2> const & version () const noexcept { return a.version; }
 
         static constexpr std::uint16_t major_version = 1;
-        static constexpr std::uint16_t minor_version = 11;
+        static constexpr std::uint16_t minor_version = 12;
 
         static std::array<std::uint8_t, 4> const file_signature1;
         static std::uint32_t const file_signature2 = 0x0507FFFF;
