@@ -13,6 +13,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file wskey.hpp
+/// \brief Code to generate the value of the Sec-WebSocket-Accept header
+///
 /// This is the header file for code which implements the Secure Hashing Algorithm 1 as defined in
 /// FIPS PUB 180-1 published April 17, 1995.
 ///
