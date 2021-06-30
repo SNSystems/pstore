@@ -288,10 +288,10 @@ namespace pstore {
                 BitmapType bitmap_;
                 std::size_t pos_ = 0;
             };
-            explicit indices (sparse_array const & arr)
+            constexpr explicit indices (sparse_array const & arr) noexcept
                     : bitmap_{arr.bitmap_} {}
-            const_iterator begin () const { return const_iterator{bitmap_}; }
-            const_iterator end () const { return const_iterator{0U}; }
+            const_iterator begin () const noexcept { return const_iterator{bitmap_}; }
+            const_iterator end () const noexcept { return const_iterator{0U}; }
 
             constexpr bool empty () const noexcept { return bitmap_ == 0U; }
             /// Returns the index of the first element in the container. This is the smallest
