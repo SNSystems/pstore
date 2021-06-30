@@ -110,29 +110,19 @@ namespace pstore {
             Accessor acc_;
         };
 
-        // TODO: first_accessor/second_accessor() was originally a lambda defined inside
-        // make_pair_field_iterator() but this is rejected by VS2017. Could this be better done
-        // with std::get<>()?
-        /// Returns a reference to the 'first' field from the value produced by
-        /// dereferencing iterator 'it'.
-        template <typename Iterator>
-        inline auto first_accessor (Iterator it)
-            -> decltype (std::iterator_traits<Iterator>::value_type::first) const & {
-            return it->first;
-        }
-
-        /// Returns a reference to the 'second' field from the value produce by
-        /// dereferencing iterator 'it'.
-        template <typename Iterator>
-        inline auto second_accessor (Iterator it)
-            -> decltype (std::iterator_traits<Iterator>::value_type::second) const & {
-            return it->second;
-        }
-
-        template <typename Iterator, typename Accessor>
-        auto make_pair_field_iterator (Iterator it, Accessor acc)
-            -> pair_field_iterator<Iterator, Accessor> {
-            return {it, acc};
+        /// Returns a function which will return a reference to the Ith element of the tuple-like
+        /// type produced by dereferencing an iterator of type Iterator.
+        ///
+        /// \tparam I  The index of the item to be returned.
+        /// \tparam Iterator  An iterator type which, when dereferenced, will produce a tuple-like
+        ///   type.
+        template <size_t I, typename Iterator>
+        constexpr decltype (auto) get_accessor () noexcept {
+            return [] (Iterator it)
+                       -> std::tuple_element_t<
+                           I, typename std::iterator_traits<Iterator>::value_type> const & {
+                return std::get<I> (*it);
+            };
         }
 
     } // end namespace details
@@ -508,16 +498,20 @@ namespace pstore {
     auto sparse_array<ValueType, BitmapType>::make_unique (Iterator begin, Iterator end)
         -> std::unique_ptr<sparse_array> {
 
-        auto begin_first =
-            details::make_pair_field_iterator (begin, details::first_accessor<Iterator>);
-        auto end_first = details::make_pair_field_iterator (end, details::first_accessor<Iterator>);
-        auto begin_second =
-            details::make_pair_field_iterator (begin, details::second_accessor<Iterator>);
-        auto end_second =
-            details::make_pair_field_iterator (end, details::second_accessor<Iterator>);
+        using details::get_accessor;
+        using details::pair_field_iterator;
+
+        auto const accessor0 = get_accessor<0U, Iterator> ();
+        auto const accessor1 = get_accessor<1U, Iterator> ();
+
+        // [begin0, end0) is the range of indices; [begin1, end1] is the range of values.
+        auto const begin0 = pair_field_iterator<Iterator, decltype (accessor0)>{begin, accessor0};
+        auto const end0 = pair_field_iterator<Iterator, decltype (accessor0)>{end, accessor0};
+        auto const begin1 = pair_field_iterator<Iterator, decltype (accessor1)>{begin, accessor1};
+        auto const end1 = pair_field_iterator<Iterator, decltype (accessor1)>{end, accessor1};
+
         return std::unique_ptr<sparse_array<ValueType, BitmapType>>{
-            new (begin_first, end_first) sparse_array<ValueType, BitmapType> (
-                begin_first, end_first, begin_second, end_second)};
+            new (begin0, end0) sparse_array<ValueType, BitmapType> (begin0, end0, begin1, end1)};
     }
 
     template <typename ValueType, typename BitmapType>
