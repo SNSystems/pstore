@@ -290,8 +290,8 @@ namespace pstore {
             };
             constexpr explicit indices (sparse_array const & arr) noexcept
                     : bitmap_{arr.bitmap_} {}
-            const_iterator begin () const noexcept { return const_iterator{bitmap_}; }
-            const_iterator end () const noexcept { return const_iterator{0U}; }
+            constexpr const_iterator begin () const noexcept { return const_iterator{bitmap_}; }
+            constexpr const_iterator end () const noexcept { return const_iterator{0U}; }
 
             constexpr bool empty () const noexcept { return bitmap_ == 0U; }
             /// Returns the index of the first element in the container. This is the smallest
