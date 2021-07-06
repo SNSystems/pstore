@@ -20,6 +20,7 @@
 #define PSTORE_ADT_SPARSE_ARRAY_HPP
 
 #include <numeric>
+#include <type_traits>
 
 #include "pstore/support/bit_count.hpp"
 #include "pstore/support/error.hpp"
@@ -127,6 +128,32 @@ namespace pstore {
 
     } // end namespace details
 
+    /// Derives the correct type for the bitmap field of a sparse_array<> given the maximum index
+    /// value.
+    template <std::uintmax_t V, typename Enable = void>
+    struct sparray_bitmap;
+    template <std::uintmax_t V>
+    struct sparray_bitmap<V, typename std::enable_if_t<(V <= 8U)>> {
+        using type = std::uint8_t;
+    };
+    template <std::uintmax_t V>
+    struct sparray_bitmap<V, typename std::enable_if_t<(V > 8U && V <= 16U)>> {
+        using type = std::uint16_t;
+    };
+    template <std::uintmax_t V>
+    struct sparray_bitmap<V, typename std::enable_if_t<(V > 16U && V <= 32U)>> {
+        using type = std::uint32_t;
+    };
+    template <std::uintmax_t V>
+    struct sparray_bitmap<V, typename std::enable_if_t<(V > 32U && V <= 64U)>> {
+        using type = std::uint64_t;
+    };
+
+    template <std::uintmax_t V>
+    using sparray_bitmap_t = typename sparray_bitmap<V>::type;
+
+
+
     /// \brief A sparse array type.
     ///
     /// A sparse array implementation which uses a bitmap value (whose type is given by the
@@ -211,7 +238,7 @@ namespace pstore {
         static constexpr size_type max_size () noexcept { return sizeof (BitmapType) * 8; }
 
         /// Returns true if the sparse array has an index 'pos'.
-        bool has_index (size_type pos) const noexcept {
+        constexpr bool has_index (size_type pos) const noexcept {
             return pos < max_size () ? (bitmap_ & (BitmapType{1U} << pos)) != 0U : false;
         }
         ///@}
@@ -297,18 +324,17 @@ namespace pstore {
             /// Returns the index of the first element in the container. This is the smallest
             /// value that can be passed to operator[]. There must be at least one element in
             /// the container.
-            unsigned front () const noexcept {
+            constexpr unsigned front () const noexcept {
                 PSTORE_ASSERT (!empty ());
                 return bit_count::ctz (bitmap_);
             }
             /// Returns the index of the last element in the container. This is the largest
             /// value that can be passed to operator[]. There must be at least one element in
             /// the container.
-            unsigned back () const noexcept {
+            constexpr unsigned back () const noexcept {
                 PSTORE_ASSERT (!empty ());
                 return sizeof (bitmap_) * 8U - bit_count::clz (bitmap_) - 1U;
             }
-
 
         private:
             BitmapType const bitmap_;
@@ -336,25 +362,25 @@ namespace pstore {
 
         /// Returns a reference to the first element in the container. Calling front() on an
         /// empty container is undefined.
-        reference front () {
+        constexpr reference front () {
             PSTORE_ASSERT (!empty ());
             return (*this)[get_indices ().front ()];
         }
         /// Returns a reference to the first element in the container. Calling front() on an
         /// empty container is undefined.
-        const_reference front () const {
+        constexpr const_reference front () const {
             PSTORE_ASSERT (!empty ());
             return (*this)[get_indices ().front ()];
         }
         /// Returns a reference to the last element in the container. Calling back() on an empty
         /// container is undefined.
-        reference back () {
+        constexpr reference back () {
             PSTORE_ASSERT (!empty ());
             return (*this)[get_indices ().back ()];
         }
         /// Returns a reference to the last element in the container. Calling back() on an empty
         /// container is undefined.
-        const_reference back () const {
+        constexpr const_reference back () const {
             PSTORE_ASSERT (!empty ());
             return (*this)[get_indices ().back ()];
         }
@@ -426,7 +452,9 @@ namespace pstore {
 
         /// Computes the bitmap value given a pair of iterators which will produce the
         /// sequence of indices to be present in a sparse array.
-        template <typename InputIterator>
+        template <typename InputIterator,
+                  typename = typename std::enable_if_t<std::is_unsigned<
+                      typename std::iterator_traits<InputIterator>::value_type>::value>>
         static BitmapType bitmap (InputIterator first, InputIterator last);
 
         /// The implementation of operator[].
@@ -551,20 +579,19 @@ namespace pstore {
     // bitmap
     // ~~~~~~
     template <typename ValueType, typename BitmapType>
-    template <typename InputIterator>
+    template <typename InputIterator, typename>
     BitmapType sparse_array<ValueType, BitmapType>::bitmap (InputIterator first,
                                                             InputIterator last) {
-        using iter_value_type = typename std::iterator_traits<InputIterator>::value_type;
-        auto op = [] (BitmapType mm, iter_value_type v) {
-            auto const idx = static_cast<unsigned> (v);
-            PSTORE_ASSERT (idx < max_size ());
-            auto const mask = BitmapType{1U} << idx;
-            PSTORE_ASSERT ((mm & mask) == 0U &&
-                           "The same index must not appear more than once in the "
-                           "collection of sparse indices");
-            return static_cast<BitmapType> (mm | mask);
-        };
-        return std::accumulate (first, last, BitmapType{0U}, op);
+        return std::accumulate (
+            first, last, BitmapType{0U},
+            [] (BitmapType const mm, typename std::iterator_traits<InputIterator>::value_type const idx) {
+                PSTORE_ASSERT (idx < max_size ());
+                auto const mask = BitmapType{1U} << idx;
+                PSTORE_ASSERT ((mm & mask) == 0U &&
+                               "The same index must not appear more than once in the "
+                               "collection of sparse indices");
+                return static_cast<BitmapType> (mm | mask);
+            });
     }
 
     // index impl

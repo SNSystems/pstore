@@ -253,17 +253,18 @@ TYPED_TEST (SparseArray, Indices) {
 }
 
 TYPED_TEST (SparseArray, SizeBytesAgree) {
-    std::vector<std::pair<int, int>> empty;
-    EXPECT_EQ ((sparse_array<int, TypeParam>::make_unique (std::begin (empty), std::end (empty))
-                    ->size_bytes ()),
-               (sparse_array<int, TypeParam>::size_bytes (0)));
+    std::vector<std::pair<unsigned, unsigned>> empty;
+    EXPECT_EQ (
+        (sparse_array<unsigned, TypeParam>::make_unique (std::begin (empty), std::end (empty))
+             ->size_bytes ()),
+        (sparse_array<unsigned, TypeParam>::size_bytes (0)));
 
-    EXPECT_EQ ((sparse_array<int, TypeParam>::make_unique ({0})->size_bytes ()),
-               (sparse_array<int, TypeParam>::size_bytes (1)));
-    EXPECT_EQ ((sparse_array<int, TypeParam>::make_unique ({1, 3})->size_bytes ()),
-               (sparse_array<int, TypeParam>::size_bytes (2)));
-    EXPECT_EQ ((sparse_array<int, TypeParam>::make_unique ({1, 3, 5, 7, 11})->size_bytes ()),
-               (sparse_array<int, TypeParam>::size_bytes (5)));
+    EXPECT_EQ ((sparse_array<unsigned, TypeParam>::make_unique ({0})->size_bytes ()),
+               (sparse_array<unsigned, TypeParam>::size_bytes (1)));
+    EXPECT_EQ ((sparse_array<unsigned, TypeParam>::make_unique ({1, 3})->size_bytes ()),
+               (sparse_array<unsigned, TypeParam>::size_bytes (2)));
+    EXPECT_EQ ((sparse_array<unsigned, TypeParam>::make_unique ({1, 3, 5, 7, 11})->size_bytes ()),
+               (sparse_array<unsigned, TypeParam>::size_bytes (5)));
 }
 
 TYPED_TEST (SparseArray, FrontAndBack) {

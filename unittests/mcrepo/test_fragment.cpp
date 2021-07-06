@@ -108,9 +108,9 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
                reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
-    std::vector<std::size_t> const expected{static_cast<std::size_t> (section_kind::read_only)};
-    auto indices = f->members ().get_indices ();
-    std::vector<std::size_t> const actual (std::begin (indices), std::end (indices));
+    std::vector<section_kind> const expected{section_kind::read_only};
+    auto const indices = f->members ().get_indices ();
+    std::vector<section_kind> const actual{std::begin (indices), std::end (indices)};
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
     generic_section const & s = f->at<section_kind::read_only> ();
@@ -164,9 +164,9 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
 
-    std::vector<std::size_t> const expected{static_cast<std::size_t> (section_kind::text)};
-    auto indices = f->members ().get_indices ();
-    std::vector<std::size_t> actual (std::begin (indices), std::end (indices));
+    std::vector<section_kind> const expected{section_kind::text};
+    auto const indices = f->members ().get_indices ();
+    std::vector<section_kind> actual{std::begin (indices), std::end (indices)};
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
     generic_section const & s = f->at<section_kind::text> ();
@@ -267,10 +267,9 @@ TEST_F (FragmentTest, TwoSections) {
     build_two_sections (transaction_);
 
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
-    std::vector<std::size_t> const expected{static_cast<std::size_t> (section_kind::read_only),
-                                            static_cast<std::size_t> (section_kind::thread_data)};
+    std::vector<section_kind> const expected{section_kind::read_only, section_kind::thread_data};
     auto const indices = f->members ().get_indices ();
-    std::vector<std::size_t> const actual (std::begin (indices), std::end (indices));
+    std::vector<section_kind> const actual{std::begin (indices), std::end (indices)};
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
     generic_section const & rodata = f->at<section_kind::read_only> ();
