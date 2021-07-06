@@ -149,7 +149,7 @@ namespace pstore {
             /// \param kind  The section kind to check.
             /// \returns Returns true if the fragment contains a section of the kind given by
             ///   \p kind, false otherwise.
-            constexpr bool has_section (section_kind const kind) const noexcept {
+            bool has_section (section_kind const kind) const noexcept {
                 return arr_.has_index (kind);
             }
 
