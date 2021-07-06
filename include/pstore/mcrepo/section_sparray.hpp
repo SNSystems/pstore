@@ -130,6 +130,10 @@ namespace pstore {
         public:
             using value_type = typename array_type::value_type;
             using size_type = typename array_type::size_type;
+            using iterator = typename array_type::iterator;
+            using const_iterator = typename array_type::const_iterator;
+            using reference = value_type &;
+            using const_reference = value_type const &;
 
             /// Constructs a sparse array whose available indices are defined by the iterator range
             /// from [first,last) and whose corresponding values are default constructed.
@@ -142,12 +146,14 @@ namespace pstore {
             constexpr value_type & operator[] (section_kind k) noexcept;
             constexpr value_type const & operator[] (section_kind k) const noexcept;
 
-            /// Returns the first section-kind index in the container. This is the smallest value
-            /// that can be passed to operator[].
-            constexpr value_type front () const noexcept;
-            /// Returns the last section-kind index in the container. This is the largest value that
-            /// can be passed to operator[].
-            constexpr value_type back () const noexcept;
+            /// Returns the value associated with the first section-kind index in the container.
+            constexpr reference front () noexcept;
+            /// Returns the value associated with the first section-kind index in the container.
+            constexpr const_reference front () const noexcept;
+            /// Returns the value associated with the last section-kind index in the container.
+            constexpr reference back () noexcept;
+            /// Returns the value associated with the last section-kind index in the container.
+            constexpr const_reference back () const noexcept;
             ///@}
 
 
@@ -159,17 +165,32 @@ namespace pstore {
                 return section_sparray<T>::size_bytes (this->size ());
             }
 
+            /// \name Iterators
+            ///@{
+
+            /// Returns an iterator to the beginning of the container.
+            iterator begin () { return sa_.begin (); }
+            const_iterator begin () const { return sa_.begin (); }
+            const_iterator cbegin () const { return sa_.cbegin (); }
+
+            /// Returns an iterator to the end of the container.
+            iterator end () { return sa_.end (); }
+            const_iterator end () const { return sa_.end (); }
+            const_iterator cend () const { return sa_.cend (); }
+
+            ///@}
+
 
             /// \name Capacity
             ///@{
             constexpr bool empty () const noexcept { return sa_.empty (); }
             constexpr size_type size () const noexcept { return sa_.size (); }
 
-            /// Returns the maximum number of indices that could be contained by an instance of this
-            /// sparse_array type.
-            static constexpr size_type max_size () noexcept { return array_type::max_size (); }
-
-            /// Returns true if the sparse array has an index 'pos'.
+            /// Returns true if the sparse array has an index \p pos.
+            ///
+            /// \param pos  The section kind to be tested.
+            /// \returns True if the sparse array has an index for the \p pos section; false
+            ///   otherwise.
             constexpr bool has_index (section_kind pos) const noexcept {
                 return sa_.has_index (static_cast<index_type> (pos));
             }
@@ -226,14 +247,22 @@ namespace pstore {
         // front
         // ~~~~~
         template <typename T>
-        constexpr auto section_sparray<T>::front () const noexcept -> value_type {
-            return static_cast<value_type> (sa_.front ());
+        constexpr auto section_sparray<T>::front () noexcept -> reference {
+            return sa_.front ();
+        }
+        template <typename T>
+        constexpr auto section_sparray<T>::front () const noexcept -> const_reference {
+            return sa_.front ();
         }
         // back
         // ~~~~
         template <typename T>
-        constexpr auto section_sparray<T>::back () const noexcept -> value_type {
-            return static_cast<value_type> (sa_.back ());
+        constexpr auto section_sparray<T>::back () noexcept -> reference {
+            return sa_.back ();
+        }
+        template <typename T>
+        constexpr auto section_sparray<T>::back () const noexcept -> const_reference {
+            return sa_.back ();
         }
 
         // operator[]

@@ -195,12 +195,12 @@ namespace pstore {
         sparse_array (IteratorIdx first_index, IteratorIdx last_index);
 
         sparse_array (sparse_array const &) = delete;
-        sparse_array (sparse_array &&) = delete;
+        sparse_array (sparse_array &&) noexcept = delete;
 
-        ~sparse_array ();
+        ~sparse_array () noexcept;
 
         sparse_array & operator= (sparse_array const &) = delete;
-        sparse_array & operator= (sparse_array &&) = delete;
+        sparse_array & operator= (sparse_array &&) noexcept = delete;
 
 
         /// Constructs a sparse_array<> instance where the indices are extracted from an iterator
@@ -510,7 +510,7 @@ namespace pstore {
     // (dtor)
     // ~~~~~~
     template <typename ValueType, typename BitmapType>
-    sparse_array<ValueType, BitmapType>::~sparse_array () {
+    sparse_array<ValueType, BitmapType>::~sparse_array () noexcept {
         auto const elements = size ();
         if (elements > 1) {
             for (auto it = &elements_[1], end = &elements_[0] + elements; it != end; ++it) {
