@@ -18,6 +18,7 @@ add_pstore_unit_test (pstore-mcrepo-unit-tests
     test_compilation.cpp
     test_debug_line_section.cpp
     test_fragment.cpp
+    test_section_sparray.cpp
     transaction.cpp
     transaction.hpp
 )

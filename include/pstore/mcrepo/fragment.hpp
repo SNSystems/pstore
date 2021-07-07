@@ -16,10 +16,10 @@
 #ifndef PSTORE_MCREPO_FRAGMENT_HPP
 #define PSTORE_MCREPO_FRAGMENT_HPP
 
-#include "pstore/adt/sparse_array.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
 #include "pstore/mcrepo/linked_definitions_section.hpp"
+#include "pstore/mcrepo/section_sparray.hpp"
 #include "pstore/support/pointee_adaptor.hpp"
 
 namespace pstore {
@@ -106,7 +106,9 @@ namespace pstore {
         //*              |___/                    *
         class fragment {
         public:
-            using member_array = sparse_array<std::uint64_t>;
+            // TODO: 32-bits would be plenty for an intra-fragment offset.
+            using member_array = section_sparray<std::uint64_t>;
+            using const_iterator = member_array::indices::const_iterator;
 
             /// Prepares an instance of a fragment with the collection of sections defined by the
             /// iterator range [first, last).
@@ -148,8 +150,7 @@ namespace pstore {
             /// \returns Returns true if the fragment contains a section of the kind given by
             ///   \p kind, false otherwise.
             bool has_section (section_kind const kind) const noexcept {
-                return arr_.has_index (
-                    static_cast<std::underlying_type<section_kind>::type> (kind));
+                return arr_.has_index (kind);
             }
 
             /// \name Section Access
@@ -188,50 +189,9 @@ namespace pstore {
             /// Returns the array of section offsets.
             member_array const & members () const noexcept { return arr_; }
 
-            /// An iterator which makes the process of iterating over the sections within
-            /// a loaded fragment quite straightforward.
-            class const_iterator {
-                using wrapped_iterator = member_array::indices::const_iterator;
 
-            public:
-                using iterator_category = std::forward_iterator_tag;
-                using value_type = section_kind;
-                using difference_type = wrapped_iterator::difference_type;
-                using pointer = value_type const *;
-                using reference = value_type const &;
-
-                constexpr const_iterator (section_kind const kind,
-                                          wrapped_iterator const & it) noexcept
-                        : section_kind_{kind}
-                        , it_{it} {}
-                constexpr explicit const_iterator (wrapped_iterator const & it) noexcept
-                        : const_iterator (static_cast<section_kind> (*it), it) {
-                    PSTORE_ASSERT (*it < static_cast<std::uint64_t> (section_kind::last));
-                }
-
-                bool operator== (const_iterator const & rhs) const noexcept {
-                    return it_ == rhs.it_;
-                }
-                bool operator!= (const_iterator const & rhs) const noexcept {
-                    return !operator== (rhs);
-                }
-
-                reference operator* () const noexcept { return section_kind_; }
-                pointer operator-> () const noexcept { return &section_kind_; }
-                const_iterator & operator++ () noexcept;
-                const_iterator operator++ (int) noexcept;
-
-            private:
-                section_kind section_kind_;
-                wrapped_iterator it_;
-            };
-
-            const_iterator begin () const noexcept {
-                return const_iterator{arr_.get_indices ().begin ()};
-            }
-            const_iterator end () const noexcept {
-                return const_iterator{section_kind::last, arr_.get_indices ().end ()};
-            }
+            const_iterator begin () const noexcept { return arr_.get_indices ().begin (); }
+            const_iterator end () const noexcept { return arr_.get_indices ().end (); }
 
             /// Returns the number of bytes of storage that are required for a fragment containing
             /// the sections defined by [first, last).
@@ -250,7 +210,7 @@ namespace pstore {
         private:
             template <typename IteratorIdx>
             constexpr fragment (IteratorIdx const first_index, IteratorIdx const last_index)
-                    : arr_ (first_index, last_index) {
+                    : arr_{first_index, last_index} {
 
                 // Verify that the structure layout is the same regardless of the compiler and
                 // target platform.
@@ -260,14 +220,6 @@ namespace pstore {
                 PSTORE_STATIC_ASSERT (offsetof (fragment, padding1_) == 8);
                 PSTORE_STATIC_ASSERT (offsetof (fragment, arr_) == 16);
                 padding1_ = 0; // assignment to silence an "unused" warning from clang.
-
-                static_assert (
-                    std::numeric_limits<member_array::bitmap_type>::radix == 2,
-                    "expect numeric radix to be 2 (so that 'digits' is the number of bits)");
-                using utype = std::underlying_type<section_kind>::type;
-                static_assert (static_cast<utype> (section_kind::last) <=
-                                   std::numeric_limits<member_array::bitmap_type>::digits,
-                               "section_kind does not fit in the member sparse array");
             }
 
             /// Returns pointer to an individual fragment instance given a function which can yield
@@ -323,8 +275,7 @@ namespace pstore {
                           Fragment, typename enum_to_section<Key>::type>::type>
             static ResultType & at_impl (Fragment && f) noexcept {
                 PSTORE_ASSERT (f.has_section (Key));
-                using utype = std::underlying_type<section_kind>::type;
-                return f.template offset_to_instance<ResultType> (f.arr_[static_cast<utype> (Key)]);
+                return f.template offset_to_instance<ResultType> (f.arr_[Key]);
             }
 
             /// The implementation of atp<>() (used by the const and non-const flavors).
@@ -399,10 +350,9 @@ case section_kind::k: name = #k; break;
             // Copy the contents of each of the segments to the fragment.
             std::for_each (
                 first, last, [&out, &fragment_ptr] (section_creation_dispatcher const & c) {
-                    auto const index = static_cast<unsigned> (c.kind ());
                     out = reinterpret_cast<std::uint8_t *> (c.aligned (out));
-                    fragment_ptr->arr_[index] = reinterpret_cast<std::uintptr_t> (out) -
-                                                reinterpret_cast<std::uintptr_t> (fragment_ptr);
+                    fragment_ptr->arr_[c.kind ()] = reinterpret_cast<std::uintptr_t> (out) -
+                                                    reinterpret_cast<std::uintptr_t> (fragment_ptr);
                     out = c.write (out);
                 });
 #ifndef NDEBUG
@@ -435,7 +385,7 @@ case section_kind::k: name = #k; break;
         }
 
 
-        // load_impl
+        // load impl
         // ~~~~~~~~~
         template <typename ReturnType, typename GetOp>
         auto fragment::load_impl (extent<fragment> const & fext, GetOp get) -> ReturnType {
@@ -461,7 +411,7 @@ case section_kind::k: name = #k; break;
         }
 
 
-        // offset_to_instance
+        // offset to instance
         // ~~~~~~~~~~~~~~~~~~
         // This is the implementation used by both const and non-const flavors of
         // offset_to_instance().
@@ -473,7 +423,7 @@ case section_kind::k: name = #k; break;
                 offset);
         }
 
-        // check_range_is_sorted
+        // check range is sorted
         // ~~~~~~~~~~~~~~~~~~~~~
         template <typename Iterator>
         void fragment::check_range_is_sorted (Iterator first, Iterator last) {
@@ -514,19 +464,6 @@ case section_kind::k: name = #k; break;
             return size_bytes;
         }
 
-
-        // fragment::const_iterator
-        // ~~~~~~~~~~~~~~~~~~~~~~~~
-        inline fragment::const_iterator & fragment::const_iterator::operator++ () noexcept {
-            ++it_;
-            section_kind_ = static_cast<section_kind> (*it_);
-            return *this;
-        }
-        inline fragment::const_iterator fragment::const_iterator::operator++ (int) noexcept {
-            auto const prev = *this;
-            ++*this;
-            return prev;
-        }
 
         /// Returns the alignment of the given section type in the given fragment.
         unsigned section_align (fragment const & fragment, section_kind kind);

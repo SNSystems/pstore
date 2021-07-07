@@ -123,15 +123,14 @@ bool fragment::fragment_appears_valid (fragment const & f, pstore::extent<fragme
 #endif // PSTORE_SIGNATURE_CHECKS_ENABLED
 
     auto const indices = f.arr_.get_indices ();
-    using utype = std::underlying_type<section_kind>::type;
-    if (indices.empty () || indices.back () >= static_cast<utype> (section_kind::last)) {
+    if (indices.empty () || indices.back () >= section_kind::last) {
         return false;
     }
 
     std::uint64_t offset = sizeof (fragment);
-    auto const index_end = std::end (indices);
-    for (auto index_it = std::begin (indices); index_it != index_end; ++index_it) {
-        std::size_t const index = *index_it;
+    for (auto index_it = std::begin (indices), index_end = std::end (indices);
+         index_it != index_end; ++index_it) {
+        section_kind const index = *index_it;
 
         auto const this_offset = f.arr_[index];
         auto const next_offset = (index == indices.back ()) ? fext.size : f.arr_[*(index_it + 1)];

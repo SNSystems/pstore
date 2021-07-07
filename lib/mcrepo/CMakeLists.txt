@@ -36,5 +36,6 @@ add_pstore_library (
         generic_section.hpp
         repo_error.hpp
         section.hpp
+        section_sparray.hpp
 )
 target_link_libraries (pstore-mcrepo PUBLIC pstore-adt pstore-core)
