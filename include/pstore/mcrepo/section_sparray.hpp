@@ -44,7 +44,7 @@ namespace pstore {
                 constexpr explicit cast_iterator (BaseIterator it);
                 constexpr bool operator== (cast_iterator const & rhs) const;
                 constexpr bool operator!= (cast_iterator const & rhs) const;
-                constexpr value_type operator* () const;
+                constexpr reference operator* () const;
                 cast_iterator & operator++ ();  // ++prefix
                 cast_iterator operator++ (int); // postfix++
                 cast_iterator & operator-- ();  // --prefix
@@ -54,6 +54,7 @@ namespace pstore {
 
             private:
                 BaseIterator it_;
+                mutable value_type value_;
             };
             template <typename CastToType, typename BaseIterator>
             constexpr cast_iterator<CastToType, BaseIterator>::cast_iterator (BaseIterator it)
@@ -70,8 +71,8 @@ namespace pstore {
             }
             template <typename CastToType, typename BaseIterator>
             constexpr auto cast_iterator<CastToType, BaseIterator>::operator* () const
-                -> value_type {
-                return static_cast<CastToType> (*it_);
+                -> reference {
+                return value_ = static_cast<CastToType> (*it_);
             }
             template <typename CastToType, typename BaseIterator>
             inline auto cast_iterator<CastToType, BaseIterator>::operator++ ()
