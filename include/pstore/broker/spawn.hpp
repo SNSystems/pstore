@@ -14,6 +14,7 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file spawn.hpp
+/// \brief An API for portable spawning of new processes.
 
 #ifndef PSTORE_BROKER_SPAWN_HPP
 #define PSTORE_BROKER_SPAWN_HPP
@@ -54,7 +55,7 @@ namespace pstore {
             ///
             /// \param arg  The argument to encode.
             /// \param force  Supplies an indication of whether we should quote the argument even if
-            /// it does not contain any characters that would ordinarily require quoting.
+            ///   it does not contain any characters that would ordinarily require quoting.
             /// \return  The quoted argument string.
             std::string argv_quote (std::string const & arg, bool force = false);
 

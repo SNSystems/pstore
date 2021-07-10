@@ -14,7 +14,8 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file category.hpp
-/// \brief Defines option_category; a means to group switches in command-line help text.
+/// \brief Defines pstore::command_line::option_category; a means to group switches in command-line
+/// help text.
 
 #ifndef PSTORE_COMMAND_LINE_CATEGORY_HPP
 #define PSTORE_COMMAND_LINE_CATEGORY_HPP

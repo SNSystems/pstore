@@ -14,6 +14,7 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file bimap.hpp
+/// \brief Defines pstore::broker::bitmap: a bi-directional map type.
 
 #ifndef PSTORE_BROKER_BIMAP_HPP
 #define PSTORE_BROKER_BIMAP_HPP

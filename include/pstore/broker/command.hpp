@@ -14,6 +14,7 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file command.hpp
+/// \brief  pstore::broker::command_processor is responsible for managing the command queue.
 
 #ifndef PSTORE_BROKER_COMMAND_HPP
 #define PSTORE_BROKER_COMMAND_HPP
