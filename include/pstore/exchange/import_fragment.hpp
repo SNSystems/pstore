@@ -114,6 +114,12 @@ namespace pstore {
                     return &contents_[static_cast<std::underlying_type<repo::section_kind>::type> (
                         kind)];
                 }
+
+                /// Validates the fragment \p f.
+                ///
+                /// \param f  The fragment to be validated.
+                /// \returns No error is the fragment was valid or an opporiate error code if the fragment was not legal.
+                std::error_code check_fragment (repo::fragment const & f);
             };
 
             //*   __                             _     _         _          *

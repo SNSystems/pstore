@@ -116,6 +116,9 @@ namespace pstore {
                 case error::index_out_of_range: result = "index out of range"; break;
                 case error::unknown_section_name: result = "unknown section name"; break;
 
+                case error::internal_fixup_target_not_found:
+                    result = "the target section of a fragment's internal fixup was not present";
+                    break;
                 case error::debug_line_header_digest_not_found:
                     result = "debug line header digest was not found";
                     break;
