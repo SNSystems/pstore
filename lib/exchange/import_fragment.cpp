@@ -23,6 +23,29 @@
 
 #include <type_traits>
 
+namespace {
+
+    template <typename Section>
+    std::error_code validate_section_ifixups (pstore::repo::fragment const & f, Section const & s) {
+        using pstore::exchange::import_ns::error;
+
+        auto const container = s.ifixups ();
+        return std::any_of (std::begin (container), std::end (container),
+                            [&] (pstore::repo::internal_fixup const & ifx) {
+                                return !f.has_section (ifx.section);
+                            })
+                   ? error::internal_fixup_target_not_found
+                   : error::none;
+    }
+
+    template <>
+    std::error_code validate_section_ifixups<pstore::repo::linked_definitions> (
+        pstore::repo::fragment const &, pstore::repo::linked_definitions const &) {
+        return {};
+    }
+
+} // end anonymous namespace
+
 namespace pstore {
     namespace exchange {
         namespace import_ns {
@@ -114,6 +137,27 @@ namespace pstore {
                 return error::unknown_section_name;
             }
 
+            // check fragment
+            // ~~~~~~~~~~~~~~
+            std::error_code fragment_sections::check_fragment (repo::fragment const & f) {
+                std::error_code error;
+                for (auto it = f.begin (), end = f.end (); it != end && !error; ++it) {
+                    repo::section_kind const kind = *it;
+#define X(k)                                                                                       \
+    case repo::section_kind::k:                                                                    \
+        error = validate_section_ifixups (f, f.at<repo::section_kind::k> ());                      \
+        break;
+                    switch (kind) {
+                        PSTORE_MCREPO_SECTION_KINDS
+                    case repo::section_kind::last:
+                        PSTORE_ASSERT (false); //! OCLINT(PH - don't warn about the assert macro)
+                        break;
+                    }
+#undef X
+                }
+                return error;
+            }
+
             // end object
             // ~~~~~~~~~~
             std::error_code fragment_sections::end_object () {
@@ -122,9 +166,14 @@ namespace pstore {
 
                 auto const dispatchers_begin = make_pointee_adaptor (dispatchers_.begin ());
                 auto const dispatchers_end = make_pointee_adaptor (dispatchers_.end ());
-
                 auto const fext =
                     repo::fragment::alloc (*transaction_, dispatchers_begin, dispatchers_end);
+
+                // Check that the fragment is legal before we go further.
+                if (std::error_code const error =
+                        this->check_fragment (*repo::fragment::load (*ctxt->db, fext))) {
+                    return error;
+                }
                 auto const fragment_index =
                     index::get_index<trailer::indices::fragment> (*ctxt->db, true /* create */);
                 fragment_index->insert (*transaction_, std::make_pair (*digest_, fext));

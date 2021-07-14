@@ -68,6 +68,7 @@ namespace pstore {
                 bad_uuid,
                 bad_visibility,
                 unknown_section_name,
+                internal_fixup_target_not_found,
                 index_out_of_range,
                 debug_line_header_digest_not_found,
                 number_too_large,
