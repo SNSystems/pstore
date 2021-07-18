@@ -58,7 +58,8 @@ namespace pstore {
             };
             template <typename CastToType, typename BaseIterator>
             constexpr cast_iterator<CastToType, BaseIterator>::cast_iterator (BaseIterator it)
-                    : it_{it} {}
+                    : it_{it}
+                    , value_{} {}
             template <typename CastToType, typename BaseIterator>
             constexpr bool
             cast_iterator<CastToType, BaseIterator>::operator== (cast_iterator const & rhs) const {
