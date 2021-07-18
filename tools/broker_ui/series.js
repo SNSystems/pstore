@@ -13,10 +13,10 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-let d3 = require ('d3');
+import * as ds from './node_modules/d3/dist/d3.min.js'
 
-exports.series = function series (pull) {
-    const n = 20; // The number of data points shown.
+export function series (pull) {
+    const n = 20 // The number of data points shown.
     const timeFormat = '%H:%M:%S';
     const margin = {
         top: 20,
@@ -28,9 +28,7 @@ exports.series = function series (pull) {
     const curve = d3.curveBasis; // d3.curveLinear
     const offset = 2; // set to 2 if curve===curveBasis, 1 if curveLinear
 
-    const xDomain = (t) => {
-        return [t - ((n - offset) * duration), t - (offset * duration)];
-    };
+    const xDomain = t => [t - ((n - offset) * duration), t - (offset * duration)];
 
     const data = [];
 
@@ -46,22 +44,19 @@ exports.series = function series (pull) {
         .domain ([0, 1])
         .range ([height, 0]);
 
-    const line = d3.line ()
-        .x ((d) => { return x (d.time); })
-        .y ((d) => { return y (d.value); })
-        .curve (curve);
+    const line = d3.line().x(d => x (d.time)).y(d => y (d.value)).curve(curve);
 
     const xAxisCall = d3.axisBottom (x).tickFormat (d3.timeFormat (timeFormat));
     const yAxisCall = d3.axisLeft (y);
 
     const g = svg.append ('g')
         .attr ('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-    g.append ('defs')
-        .append ('clipPath')
-        .attr ('id', 'clip')
-        .append ('rect')
-        .attr ('width', width)
-        .attr ('height', height);
+    g.append('defs')
+        .append('clipPath')
+        .attr('id', 'clip')
+        .append('rect')
+        .attr('width', width)
+        .attr('height', height);
 
     const xAxis = g.append ('g')
         .attr ('class', 'axis axis-x')
@@ -91,9 +86,7 @@ exports.series = function series (pull) {
         }
 
         x.domain (xDomain (time));
-        y.domain ([0, Math.max (1.0, d3.max (data, (d) => {
-            return d.value;
-        }))]);
+        y.domain([ 0, Math.max(1.0, d3.max(data, d => d.value)) ]);
 
         // Redraw the line.
         path.attr ('d', line).attr ('transform', null);

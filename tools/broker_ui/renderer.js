@@ -13,13 +13,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-const {ipcRenderer} = require ('electron');
-const {dialog} = require ('electron').remote;
-let $ = require ('jquery');
-const {series} = require('./series');
+import {series} from './series.js'
+import * as ds from './node_modules/d3/dist/d3.min.js'
+const bridgeAPI = window.bridgeAPI;
 
-function new_ws (host, channel, on_message) {
-    const socket = new WebSocket ('ws://' + host + '/' + channel);
+function newWS (port, channel, on_message) {
+    const socket = new WebSocket ('ws://localhost:' + port + '/' + channel);
     socket.onerror = event => {
         dialog.showMessageBox({
             type: "error",
@@ -31,7 +30,7 @@ function new_ws (host, channel, on_message) {
         }).then (p => {
             console.log ('button clicked was ', p.response);
             if (p.response === 1) {
-                return new_ws (host, channel, on_message);
+                return newWS (host, channel, on_message);
             }
         }).catch (error => {
             console.error (error);
@@ -43,35 +42,32 @@ function new_ws (host, channel, on_message) {
     return socket;
 }
 
-let prev_commits = 0;
+let prevCommits = 0;
 let commits = 0;
 
-series ((time) => {
-    const arrived = commits - prev_commits;
-    $('#tps').text(arrived);
-    prev_commits = commits;
+series (time => {
+    const arrived = commits - prevCommits;
+    d3.select('#tps').text(arrived);
+    prevCommits = commits;
     return arrived;
 });
 
 // There is a single for processing channel messages because I want to move to a model where there is a single
 // WebSocket for all the channels. A JSON object is sent requesting subscription and unsubscription and each
 // channel gets a member of the received message object.
-function message_received (msg) {
+function messageReceived (msg) {
     const obj = JSON.parse(msg.data);
     if (obj.hasOwnProperty('uptime')) {
-        $('#uptime').text (moment.duration(obj.uptime, 'seconds').humanize());
+        d3.select('#uptime').text(humanizeDuration(obj.uptime * 1000));
     }
     if (obj.hasOwnProperty('commits')) {
-        commits = obj.commits;
-        $('#commits').text (obj.commits);
+        d3.select('#commits').text(obj.commits);
     }
 }
 
-const localhost = 'localhost:8080';
+const port = 8080
 //const localhost = window.location.host;
-new_ws (localhost,'uptime', message_received);
-new_ws (localhost,'commits', message_received);
+newWS (port, 'uptime', messageReceived);
+newWS (port, 'commits', messageReceived);
 
-ipcRenderer.on('dark-mode', (event, message) => {
-    document.documentElement.setAttribute('data-theme', message ? 'dark' : 'light');
-});
+bridgeAPI.ipcRenderer();

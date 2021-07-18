@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
 
     <title>pstore Status</title>
     <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
@@ -24,7 +25,7 @@
         <div class="col">
           <div>
             <div style="display:inline;" class="ui-text">Server uptime:</div>
-            <div style="display:inline;" class="ui-text" id="uptime">0</div>
+            <div style="display:inline;" class="ui-text" id="uptime">unknown</div>
           </div>
 
           <div>
@@ -46,15 +47,13 @@
 
     <!-- Bootstrap Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script>let $ = require('jquery');</script>
+<!--    <script>let $ = require('jquery');</script>
     <script>let moment = require('moment');</script>
 
     <script>require('popper.js');</script>
     <script>require('bootstrap');</script>
-
-    <script>
-      // You can also require other files to run in this process
-      var r = require('./renderer.js');
-    </script>
+-->
+    <script src="./node_modules/humanize-duration/humanize-duration.js"></script>
+    <script type="module" src="./renderer.js"></script>
   </body>
 </html>

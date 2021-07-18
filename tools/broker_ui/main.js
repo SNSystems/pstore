@@ -13,48 +13,50 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-const {app, BrowserWindow, nativeTheme} = require ('electron');
-
+const {app, BrowserWindow, ipcMain, nativeTheme} = require ('electron');
+const path = require ('path')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let main_window;
+let mainWindow;
 
-function dark_side () {
-    main_window.webContents.send('dark-mode', nativeTheme.shouldUseDarkColors);
+function darkSide () {
+    mainWindow.webContents.send('dark-mode', nativeTheme.shouldUseDarkColors);
 }
-nativeTheme.on('updated', dark_side);
 
 function createWindow () {
     // Create the browser window.
-
-    main_window = new BrowserWindow ({
+    mainWindow = new BrowserWindow ({
         width : 800,
         height : 600,
         show : false,
-        webPreferences : {
-            nodeIntegration : true,
-            enableRemoteModule: true
-        },
+        webPreferences : {preload : path.join(__dirname, 'preload.js')},
     });
-    main_window.once('ready-to-show', () => {
-        dark_side ();
-        main_window.show();
+    mainWindow.once('ready-to-show', () => {
+        darkSide ();
+        mainWindow.show();
     });
 
     // and load the index.html of the app.
-    main_window.loadFile('index.html');
+    mainWindow.loadFile('index.html');
 
     // Open the DevTools.
-    //main_window.webContents.openDevTools();
+    main_window.webContents.openDevTools();
 
     // Emitted when the window is closed.
-    main_window.on('closed', function () {
+    mainWindow.on('closed', function () {
         // Dereference the window object, usually you would store windows
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
-        main_window = null;
+        mainWindow = null;
     });
+
+
+
+    //ipcMain.handle('dark-mode:system', () => {nativeTheme.themeSource = 'system'})
+    return mainWindow;
 }
+
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -73,7 +75,7 @@ app.on('window-all-closed', function () {
 app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (main_window === null) {
+    if (BrowserWindow.getAllWindows().length === 0) {
         createWindow ()
     }
 });
