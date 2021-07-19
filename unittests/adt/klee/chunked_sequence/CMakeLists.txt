@@ -13,4 +13,4 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 #===----------------------------------------------------------------------===//
-pstore_add_klee_test (CATEGORY cv NAME resize DEPENDS pstore-adt)
+pstore_add_klee_test (CATEGORY chunked_sequence NAME resize DEPENDS pstore-adt)

@@ -127,6 +127,7 @@ function (pstore_configure_klee_test_target name)
 
     target_include_directories (${name} PRIVATE "${PSTORE_KLEE_SRC_DIR}")
     target_compile_options (${name} PRIVATE
+        -g
         -fno-threadsafe-statics
         -target x86_64-pc-linux-gnu
     )
