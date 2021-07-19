@@ -351,8 +351,9 @@ namespace pstore {
             if (count >= in_chunk && &tail != &head) {
                 chunks_.pop_back ();
             } else {
+                assert (in_chunk >= count);
+                tail.shrink (in_chunk - count);
                 in_chunk = count;
-                tail.shrink (in_chunk);
             }
             count -= in_chunk;
             size_ -= in_chunk;

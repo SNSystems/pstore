@@ -264,6 +264,7 @@ TEST (ChunkedVectorResize, ResizeWholeChunkPlus1) {
     //     [ 0, 0 ] -> [ 0, 0 ] -> [ 0, _ ]
     cv.resize (5U);
     EXPECT_EQ (cv.size (), 5U);
+    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 5U);
     EXPECT_EQ (cv.capacity (), 6U);
 
     cvector_int::const_iterator it = cv.begin ();
@@ -286,6 +287,7 @@ TEST (ChunkedVectorResize, TwoElementsDownToOne) {
     // After: [ 17, _ ]
     cv.resize (1U);
     EXPECT_EQ (cv.size (), 1U);
+    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 1U);
     EXPECT_EQ (cv.capacity (), 2U);
 
     cvector_int::const_iterator it = cv.begin ();
@@ -300,6 +302,7 @@ TEST (ChunkedVectorResize, TwoElementsDownToZero) {
     // After: [ _, _ ]
     cv.resize (0U);
     EXPECT_EQ (cv.size (), 0U);
+    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 0U);
     EXPECT_EQ (cv.capacity (), 2U) << "There is always at least one chunk";
 }
 
@@ -314,6 +317,7 @@ TEST (ChunkedVectorResize, FiveElementsDownToOne) {
     // After: [ 17, _ ]
     cv.resize (1U);
     EXPECT_EQ (cv.size (), 1U);
+    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 1U);
     EXPECT_EQ (cv.capacity (), 2U);
 
     cvector_int::const_iterator it = cv.begin ();
@@ -329,6 +333,25 @@ TEST (ChunkedVectorResize, ThreeElementsDownToZero) {
     // After: [ _, _ ]
     cv.resize (0U);
     EXPECT_EQ (cv.size (), 0U);
+    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 0U);
     EXPECT_EQ (cv.capacity (), 2U);
     EXPECT_TRUE (cv.empty ());
+}
+
+TEST (ChunkedVectorResize, ThreeElementsDownToOne) {
+    pstore::chunked_sequence<int, 3U> cv;
+    {
+        constexpr auto size1 = std::size_t{3};
+        cv.resize (size1);
+        EXPECT_EQ (cv.size (), size1);
+        EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), size1);
+        EXPECT_TRUE (std::all_of (std::begin (cv), std::end (cv), [] (int x) { return x == 0; }));
+    }
+    {
+        constexpr auto size2 = std::size_t{1};
+        cv.resize (size2);
+        EXPECT_EQ (cv.size (), size2);
+        EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), size2);
+        EXPECT_TRUE (std::all_of (std::begin (cv), std::end (cv), [] (int x) { return x == 0; }));
+    }
 }
