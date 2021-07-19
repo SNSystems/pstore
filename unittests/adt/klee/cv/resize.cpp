@@ -14,7 +14,7 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file resize.cpp
-/// \brief KLEE test for chunked_vector<>::resize().
+/// \brief KLEE test for chunked_sequence<>::resize().
 ///
 /// This test makes two calls to resize() both using symbolic arguments. The idea behind this is
 /// that we start with an empty container, resize it and then resize it again. The second of these
@@ -28,14 +28,14 @@
 
 #include <klee/klee.h>
 
-#include "pstore/adt/chunked_vector.hpp"
+#include "pstore/adt/chunked_sequence.hpp"
 
 namespace {
 
     constexpr auto elements_per_chunk = 3U;
     constexpr auto max_size = elements_per_chunk * 3U;
 
-    void check (pstore::chunked_vector<int, elements_per_chunk> const & cv,
+    void check (pstore::chunked_sequence<int, elements_per_chunk> const & cv,
                 std::size_t const size) {
         assert (cv.size () == size);
         assert (std::distance (std::begin (cv), std::end (cv)) == size);
@@ -46,7 +46,7 @@ namespace {
 
 
 int main () {
-    pstore::chunked_vector<int, elements_per_chunk> cv;
+    pstore::chunked_sequence<int, elements_per_chunk> cv;
     std::size_t new_size1;
     std::size_t new_size2;
     klee_make_symbolic (&new_size1, sizeof (new_size1), "new_size1");
