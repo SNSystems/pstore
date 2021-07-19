@@ -48,6 +48,7 @@ check_include_files ("sys/endian.h" PSTORE_HAVE_SYS_ENDIAN_H)
 check_include_files ("sys/syscall.h" PSTORE_HAVE_SYS_SYSCALL_H)
 check_include_files ("sys/time.h;sys/types.h;sys/posix_shm.h" PSTORE_HAVE_SYS_POSIX_SHM_H)
 check_include_files ("syslog.h" PSTORE_HAVE_SYS_LOG_H)
+check_include_files ("pthread_np.h" PSTORE_HAVE_PTHREAD_NP_H)
 
 check_cxx_source_compiles (
     "#include <cstdlib>

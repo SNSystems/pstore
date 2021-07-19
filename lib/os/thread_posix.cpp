@@ -29,6 +29,7 @@
 
 // OS-specific includes
 #    include <pthread.h>
+#    include <unistd.h>
 
 #    ifdef PSTORE_HAVE_LINUX_UNISTD_H
 #        include <linux/unistd.h>
@@ -36,9 +37,7 @@
 #    ifdef PSTORE_HAVE_SYS_SYSCALL_H
 #        include <sys/syscall.h>
 #    endif
-#    include <unistd.h>
-
-#    ifdef __FreeBSD__
+#    ifdef PSTORE_HAVE_PTHREAD_NP_H
 #        include <pthread_np.h>
 #    endif
 
@@ -47,24 +46,32 @@
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/unsigned_cast.hpp"
 
-namespace pstore {
-    namespace threads {
+#    if defined(PSTORE_PTHREAD_GETNAME_NP) || defined(PSTORE_PTHREAD_GET_NAME_NP)
+#        define PTHREAD_GETNAME_NP 1
+#    endif
 #    if defined(PSTORE_PTHREAD_SETNAME_NP_1_ARG) || defined(PSTORE_PTHREAD_SETNAME_NP_2_ARGS) ||   \
         defined(PSTORE_PTHREAD_SETNAME_NP_3_ARGS) || defined(PSTORE_PTHREAD_SET_NAME_NP)
 #        define PTHREAD_SETNAME_NP 1
 #    endif
 
-#    if defined(PSTORE_PTHREAD_GETNAME_NP) || defined(PSTORE_PTHREAD_GET_NAME_NP)
-#        define PTHREAD_GETNAME_NP 1
-#    endif
-
 #    if !defined(PTHREAD_SETNAME_NP) && !defined(PTHREAD_GETNAME_NP)
 #        define USE_FALLBACK 1
+#    elif defined(PTHREAD_SETNAME_NP) && defined(PTHREAD_GETNAME_NP)
+#        define USE_FALLBACK 0
+#    else
+#        error "Need to have both or neither set/get name functions"
 #    endif
 
-#    ifdef USE_FALLBACK
-        static thread_local char thread_name[name_size];
+namespace {
+
+#    if USE_FALLBACK
+    thread_local char thread_name[name_size];
 #    endif
+
+} // end anonymous namespace
+
+namespace pstore {
+    namespace threads {
 
         void set_name (gsl::not_null<gsl::czstring> const name) {
             // pthread support for setting thread names comes in various non-portable forms.
@@ -74,7 +81,7 @@ namespace pstore {
             // - three argument form supported by NetBSD.
             // - the slightly differently named form used in FreeBSD.
             int err = 0;
-#    ifdef USE_FALLBACK
+#    if USE_FALLBACK
             std::strncpy (thread_name, name, name_size);
             thread_name[name_size - 1] = '\0';
 #    elif defined(PSTORE_PTHREAD_SETNAME_NP_1_ARG)
@@ -102,7 +109,7 @@ namespace pstore {
             PSTORE_ASSERT (length == name.size_bytes ());
             auto const length_u = unsigned_cast (length);
             int err = 0;
-#    ifdef USE_FALLBACK
+#    if USE_FALLBACK
             std::strncpy (name.data (), thread_name, length_u);
 #    elif defined(PSTORE_PTHREAD_GETNAME_NP)
             err = pthread_getname_np (pthread_self (), name.data (), length_u);
