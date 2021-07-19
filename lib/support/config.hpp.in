@@ -51,7 +51,8 @@
 
 /// Defined if <byteswap.h> is available.
 #cmakedefine PSTORE_HAVE_BYTESWAP_H 1
-
+/// Defined if <pthread_np.h> is available.
+#cmakedefine PSTORE_HAVE_PTHREAD_NP_H  1
 /// Defined if <sys/endian.h> is available.
 #cmakedefine PSTORE_HAVE_SYS_ENDIAN_H 1
 /// Defined if <sys/syscall.h> is available.
