@@ -85,7 +85,12 @@ function (pstore_enable_warnings)
             list (APPEND options -Werror)
         endif ()
     elseif (MSVC)
-        set (options -W4)
+        # Enable W4 but disable:
+        # 4324: structure was padded due to alignment specifier
+        set (options
+            -W4
+            -wd4324
+        )
         if (PSTORE_WERROR)
             list (APPEND options /WX)
         endif ()
