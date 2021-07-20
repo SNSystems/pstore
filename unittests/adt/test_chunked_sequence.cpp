@@ -340,18 +340,21 @@ TEST (ChunkedVectorResize, ThreeElementsDownToZero) {
 
 TEST (ChunkedVectorResize, ThreeElementsDownToOne) {
     pstore::chunked_sequence<int, 3U> cv;
+    using difference_type = std::iterator_traits<decltype (cv)::iterator>::difference_type;
     {
         constexpr auto size1 = std::size_t{3};
         cv.resize (size1);
         EXPECT_EQ (cv.size (), size1);
-        EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), size1);
+        EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)),
+                   static_cast<difference_type> (size1));
         EXPECT_TRUE (std::all_of (std::begin (cv), std::end (cv), [] (int x) { return x == 0; }));
     }
     {
         constexpr auto size2 = std::size_t{1};
         cv.resize (size2);
         EXPECT_EQ (cv.size (), size2);
-        EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), size2);
+        EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)),
+                   static_cast<difference_type> (size2));
         EXPECT_TRUE (std::all_of (std::begin (cv), std::end (cv), [] (int x) { return x == 0; }));
     }
 }

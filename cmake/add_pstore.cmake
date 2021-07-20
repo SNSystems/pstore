@@ -72,14 +72,28 @@ function (pstore_enable_warnings)
                 -Wno-used-but-marked-unused
             )
         endif ()
+        if (PSTORE_WERROR)
+            list (APPEND options -Werror)
+        endif ()
     elseif (CMAKE_COMPILER_IS_GNUCXX)
         set (options
             -Wall
             -Wextra
             -pedantic
         )
+        if (PSTORE_WERROR)
+            list (APPEND options -Werror)
+        endif ()
     elseif (MSVC)
-        set (options -W4)
+        # Enable W4 but disable:
+        # 4324: structure was padded due to alignment specifier
+        set (options
+            -W4
+            -wd4324
+        )
+        if (PSTORE_WERROR)
+            list (APPEND options /WX)
+        endif ()
     endif ()
 
     target_compile_options (${arg_TARGET} PRIVATE ${options})

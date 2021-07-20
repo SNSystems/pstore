@@ -116,6 +116,7 @@ jobs:
                         -G "${{ matrix.generator }}"                 \
                         -D PSTORE_EXAMPLES=Yes                       \
                         -D PSTORE_NOISY_UNIT_TESTS=Yes               \
+                        -D PSTORE_WERROR=Yes                         \
                         -D CMAKE_BUILD_TYPE=${{ matrix.build_type }} \
                         ${{ matrix.cxx_compiler }}                   \
                         ${{ matrix.options }}
