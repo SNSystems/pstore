@@ -244,8 +244,9 @@ namespace {
     syslog_logger::syslog_logger (std::string const & ident, int const facility)
             : facility_{facility} {
 
-        std::strncpy (ident_.data (), ident.c_str (), sizeof (ident_));
-        ident_[ident_.size () - 1] = '\0';
+        auto const size = ident_.size () - 1U;
+        std::strncpy (ident_.data (), ident.c_str (), size);
+        ident_[size] = '\0';
 
         openlog (ident_.data (), LOG_PID, facility_);
     }
