@@ -72,14 +72,23 @@ function (pstore_enable_warnings)
                 -Wno-used-but-marked-unused
             )
         endif ()
+        if (PSTORE_WERROR)
+            list (APPEND options -Werror)
+        endif ()
     elseif (CMAKE_COMPILER_IS_GNUCXX)
         set (options
             -Wall
             -Wextra
             -pedantic
         )
+        if (PSTORE_WERROR)
+            list (APPEND options -Werror)
+        endif ()
     elseif (MSVC)
         set (options -W4)
+        if (PSTORE_WERROR)
+            list (APPEND options /WX)
+        endif ()
     endif ()
 
     target_compile_options (${arg_TARGET} PRIVATE ${options})
