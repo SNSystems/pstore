@@ -14,6 +14,7 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file hamt_map_types.hpp
+/// \brief Types used by the HAMT index.
 
 #ifndef PSTORE_CORE_HAMT_MAP_TYPES_HPP
 #define PSTORE_CORE_HAMT_MAP_TYPES_HPP
@@ -27,33 +28,36 @@ namespace pstore {
 
     namespace index {
         namespace details {
+
             using hash_type = std::uint64_t;
+
             /// The number of bits in hash_type. This is the maximum number of children that an
             /// internal-node can carry.
             constexpr auto const hash_size = sizeof (hash_type) * 8;
 
-#ifdef _MSC_VER
-            // TODO: VC2015RC won't allow pop_count to be constexpr. Sigh. This forces a (very
-            // crude) population count implementation
-            namespace details_count {
-                constexpr inline unsigned bit_set (std::size_t v, unsigned bit) {
-                    return (v & (std::size_t{1} << bit)) >> bit;
-                }
+            // TODO: Visual Studio won't allow pop_count to be constexpr. This forces us to have a
+            // second implementation that doesn't use the intrinsic.
 
-                constexpr inline unsigned crude_pop_count (std::size_t v) {
-                    return bit_set (v, 0x00) + bit_set (v, 0x01) + bit_set (v, 0x02) +
-                           bit_set (v, 0x03) + bit_set (v, 0x04) + bit_set (v, 0x05) +
-                           bit_set (v, 0x06) + bit_set (v, 0x07) + bit_set (v, 0x08) +
-                           bit_set (v, 0x09) + bit_set (v, 0x0A) + bit_set (v, 0x0B) +
-                           bit_set (v, 0x0C) + bit_set (v, 0x0D) + bit_set (v, 0x0E) +
-                           bit_set (v, 0x0F);
-                }
-            } // namespace details_count
-            constexpr unsigned hash_index_bits = details_count::crude_pop_count (hash_size - 1);
+            /// A function to compute the number of set bits in a value. An alternative to the
+            /// bit_count::pop_count() function that is normally used because some versions of that
+            /// implementation may not be constexpr.
+            ///
+            /// \tparam T An unsigned integer type.
+            /// \param x A value whose population count is to be returned.
+            /// \return The population count of \p x.
+            template <typename T, typename = typename std::enable_if_t<std::is_unsigned<T>::value>>
+            constexpr unsigned cx_pop_count (T const x) noexcept {
+                return x == 0U ? 0U : (x & 1U) + cx_pop_count (x >> 1U);
+            }
+
+#ifdef _MSC_VER
+            constexpr unsigned hash_index_bits = cx_pop_count (hash_size - 1);
 #else
-            /// The number of bits that it takes to represent hash_size.
             constexpr unsigned hash_index_bits = bit_count::pop_count (hash_size - 1);
+            PSTORE_STATIC_ASSERT (bit_count::pop_count (hash_size - 1) ==
+                                  cx_pop_count (hash_size - 1));
 #endif
+
             constexpr unsigned max_hash_bits = (hash_size + 7) / hash_index_bits * hash_index_bits;
             constexpr unsigned hash_index_mask = (1U << hash_index_bits) - 1U;
             constexpr unsigned max_internal_depth = max_hash_bits / hash_index_bits;
@@ -62,11 +66,23 @@ namespace pstore {
             /// (max_internal_depth), one linear node and one leaf node.
             constexpr unsigned max_tree_depth = max_internal_depth + 2U;
 
-            /// Using LSB for marking internal nodes
-            constexpr std::uintptr_t internal_node_bit = 1;
+            enum : std::uintptr_t {
+                internal_node_bit = 1U << 0, /// Using LSB for marking internal nodes
+                heap_node_bit = 1U << 1,     /// Marks newly allocated internal nodes
+            };
 
-            /// Using second LSB for marking newly allocated internal nodes
-            constexpr std::uintptr_t heap_node_bit = 2;
+            /// Provides the member constant `value` which is equal to true, if S the same as
+            /// any of the types (after removing const and/or volatile) in the Types list.
+            /// Otherwise, value is equal to false.
+            template <typename S, typename... Types>
+            struct is_any_of;
+            template <typename S>
+            struct is_any_of<S> : std::integral_constant<bool, false> {};
+            template <typename S, typename Head, typename... Tail>
+            struct is_any_of<S, Head, Tail...>
+                    : std::integral_constant<
+                          bool, std::is_same<std::remove_cv_t<S>, std::remove_cv_t<Head>>::value ||
+                                    is_any_of<S, Tail...>::value> {};
 
         } // end namespace details
 
@@ -90,10 +106,9 @@ namespace pstore {
         PSTORE_STATIC_ASSERT (offsetof (header_block, size) == 8);
         PSTORE_STATIC_ASSERT (offsetof (header_block, root) == 16);
 
-
         namespace details {
 
-            std::size_t const not_found = std::numeric_limits<std::size_t>::max ();
+            constexpr std::size_t not_found = std::numeric_limits<std::size_t>::max ();
 
             class internal_node;
             class linear_node;
@@ -112,61 +127,76 @@ namespace pstore {
             //* |_|_||_\__,_\___/_\_\ | .__/\___/_|_||_\__\___|_|   *
             //*                       |_|                           *
             /// An index pointer is either a database address or a pointer to volatile RAM.
-            /// The type information (which of the two fields applies) is carried externally.
+            /// The type information (whether the record points to either an internal or linear
+            /// node) is carried externally.
             union index_pointer {
-                index_pointer () noexcept
-                        : internal{nullptr} {}
-                explicit index_pointer (address const a) noexcept
-                        : addr (a) {}
-                explicit index_pointer (typed_address<internal_node> const a) noexcept
-                        : addr (a.to_address ()) {}
-                explicit index_pointer (typed_address<linear_node> const a) noexcept
-                        : addr (a.to_address ()) {}
+                constexpr index_pointer () noexcept
+                        : internal_{nullptr} {
+
+                    // A belt-and-braces runtime check for cases where pop_count() can't be
+                    // constexpr.
+                    assert (hash_index_bits == bit_count::pop_count (hash_size - 1));
+
+                    PSTORE_STATIC_ASSERT (sizeof (index_pointer) == 8);
+                    PSTORE_STATIC_ASSERT (alignof (index_pointer) == 8);
+                    PSTORE_STATIC_ASSERT (offsetof (index_pointer, addr_) == 0);
+                    PSTORE_STATIC_ASSERT (sizeof (internal_) == sizeof (addr_));
+                    PSTORE_STATIC_ASSERT (offsetof (index_pointer, internal_) == 0);
+                    PSTORE_STATIC_ASSERT (sizeof (linear_) == sizeof (addr_));
+                    PSTORE_STATIC_ASSERT (offsetof (index_pointer, linear_) == 0);
+                }
+                constexpr explicit index_pointer (address const a) noexcept
+                        : addr_{a} {}
+                constexpr explicit index_pointer (typed_address<internal_node> const a) noexcept
+                        : addr_{a.to_address ()} {}
+                constexpr explicit index_pointer (typed_address<linear_node> const a) noexcept
+                        : addr_{a.to_address ()} {}
                 explicit index_pointer (internal_node * const p) noexcept
-                        : internal{tag_node (p)} {}
+                        : internal_{tag (p)} {}
                 explicit index_pointer (linear_node * const p) noexcept
-                        : linear{tag_node (p)} {}
+                        : linear_{tag (p)} {}
                 index_pointer (index_pointer const &) noexcept = default;
                 index_pointer (index_pointer &&) noexcept = default;
 
                 index_pointer & operator= (index_pointer const &) = default;
                 index_pointer & operator= (index_pointer &&) noexcept = default;
                 index_pointer & operator= (address const & a) noexcept {
-                    addr = a;
+                    addr_ = a;
                     return *this;
                 }
                 index_pointer & operator= (typed_address<internal_node> const & a) noexcept {
-                    addr = a.to_address ();
+                    addr_ = a.to_address ();
                     return *this;
                 }
                 index_pointer & operator= (typed_address<linear_node> const & a) noexcept {
-                    addr = a.to_address ();
+                    addr_ = a.to_address ();
                     return *this;
                 }
                 index_pointer & operator= (internal_node * const p) noexcept {
-                    internal = tag_node (p);
+                    internal_ = tag (p);
                     return *this;
                 }
                 index_pointer & operator= (linear_node * const l) noexcept {
-                    linear = tag_node (l);
+                    linear_ = tag (l);
                     return *this;
                 }
 
-
-                bool operator== (index_pointer const & other) const noexcept {
-                    return addr == other.addr;
+                constexpr bool operator== (index_pointer const & other) const noexcept {
+                    return addr_ == other.addr_;
                 }
-                bool operator!= (index_pointer const & other) const noexcept {
+                constexpr bool operator!= (index_pointer const & other) const noexcept {
                     return !operator== (other);
                 }
 
-                explicit operator bool () const noexcept { return !this->is_empty (); }
+                constexpr explicit operator bool () const noexcept { return !this->is_empty (); }
+
+                void clear () noexcept { internal_ = nullptr; }
 
                 /// Returns true if the index_pointer is pointing to an internal node, false
                 /// otherwise.
                 /// \sa is_leaf
                 bool is_internal () const noexcept {
-                    return (reinterpret_cast<std::uintptr_t> (internal) & internal_node_bit) != 0;
+                    return (reinterpret_cast<std::uintptr_t> (internal_) & internal_node_bit) != 0;
                 }
 
                 /// Returns true if the index_pointer is pointing to a linear node, false otherwise.
@@ -175,72 +205,55 @@ namespace pstore {
                 /// return true for internal nodes  at lower tree levels.
                 bool is_linear () const noexcept { return is_internal (); }
 
-                /// Returns true if the index_pointer is pointing to a value address in the store,
+                /// Returns true if the index_pointer contains the address of a value in the store,
                 /// false otherwise.
                 /// \sa is_internal
                 bool is_leaf () const noexcept { return !is_internal (); }
 
                 /// Returns true if the index_pointer is pointing to a heap node, false otherwise.
-                /// \sa is_addr
+                /// \sa is_address
                 bool is_heap () const noexcept {
-                    return (reinterpret_cast<std::uintptr_t> (internal) & heap_node_bit) != 0;
+                    return (reinterpret_cast<std::uintptr_t> (internal_) & heap_node_bit) != 0U;
                 }
 
                 /// Returns true if the index_pointer is pointing to a store node, false otherwise.
                 /// \sa is_heap
                 bool is_address () const noexcept { return !is_heap (); }
 
-                bool is_empty () const noexcept { return internal == nullptr; }
-                template <typename T>
-                T tag_node () const noexcept {
-                    return reinterpret_cast<T> (tag ());
+                /// Returns true if the pointer is equivalent to "null".
+                constexpr bool is_empty () const noexcept { return internal_ == nullptr; }
+
+                address to_address () const noexcept {
+                    assert (is_address ());
+                    return addr_;
                 }
 
-                template <typename T>
-                T untag_node () const noexcept {
-                    return reinterpret_cast<T> (untag ());
+                template <typename T, typename = typename std::enable_if_t<
+                                          is_any_of<T, internal_node, linear_node>::value>>
+                typed_address<T> untag_address () const noexcept {
+                    return typed_address<T>::make (to_address ().absolute () & ~internal_node_bit);
                 }
 
-                typed_address<internal_node> untag_internal_address () const noexcept {
-                    return typed_address<internal_node>::make (addr.absolute () &
-                                                               ~internal_node_bit);
+                template <typename Ptr, typename = typename std::enable_if_t<is_any_of<
+                                            typename std::pointer_traits<Ptr>::element_type,
+                                            internal_node, linear_node>::value>>
+                Ptr untag () const noexcept {
+                    return reinterpret_cast<Ptr> (reinterpret_cast<std::uintptr_t> (internal_) &
+                                                  ~internal_node_bit & ~heap_node_bit);
                 }
-                typed_address<linear_node> untag_linear_address () const noexcept {
-                    return typed_address<linear_node>::make (addr.absolute () & ~internal_node_bit);
-                }
-
-                address addr;
-                internal_node * internal;
-                linear_node * linear;
 
             private:
-                static std::uintptr_t tag (void * const p) noexcept {
-                    return reinterpret_cast<std::uintptr_t> (p) | internal_node_bit | heap_node_bit;
+                template <typename Ptr, typename = typename std::enable_if_t<is_any_of<
+                                            typename std::pointer_traits<Ptr>::element_type,
+                                            internal_node, linear_node>::value>>
+                static Ptr tag (Ptr t) noexcept {
+                    return reinterpret_cast<Ptr> (reinterpret_cast<std::uintptr_t> (t) |
+                                                  internal_node_bit | heap_node_bit);
                 }
-                std::uintptr_t tag () const noexcept { return tag (internal); }
-
-                static internal_node * tag_node (internal_node * const p) noexcept {
-                    return reinterpret_cast<internal_node *> (tag (p));
-                }
-                static linear_node * tag_node (linear_node * const p) noexcept {
-                    return reinterpret_cast<linear_node *> (tag (p));
-                }
-
-                std::uintptr_t untag () const noexcept {
-                    return reinterpret_cast<std::uintptr_t> (internal) & ~internal_node_bit &
-                           ~heap_node_bit;
-                }
+                address addr_;
+                internal_node * internal_;
+                linear_node * linear_;
             };
-
-
-            PSTORE_STATIC_ASSERT (sizeof (index_pointer) == 8);
-            PSTORE_STATIC_ASSERT (alignof (index_pointer) == 8);
-            PSTORE_STATIC_ASSERT (offsetof (index_pointer, addr) == 0);
-            PSTORE_STATIC_ASSERT (sizeof (index_pointer::internal) == sizeof (index_pointer::addr));
-            PSTORE_STATIC_ASSERT (offsetof (index_pointer, internal) == 0);
-            PSTORE_STATIC_ASSERT (sizeof (index_pointer::linear) == sizeof (index_pointer::addr));
-            PSTORE_STATIC_ASSERT (offsetof (index_pointer, linear) == 0);
-
 
             //*                         _     _                   *
             //*  _ __  __ _ _ _ ___ _ _| |_  | |_ _  _ _ __  ___  *
@@ -250,7 +263,7 @@ namespace pstore {
             /// \brief A class used to keep the pointer to parent node and the child slot.
             class parent_type {
             public:
-                parent_type () = default;
+                constexpr parent_type () noexcept = default;
 
                 /// Constructs a parent type object.
                 /// \param idx  The pointer to either the parent node or a leaf node.
@@ -611,7 +624,7 @@ namespace pstore {
                                                       index_pointer const node,
                                                       internal_node const & internal) {
                     if (node.is_heap ()) {
-                        internal_node * const inode = node.untag_node<internal_node *> ();
+                        internal_node * const inode = node.untag<internal_node *> ();
                         PSTORE_ASSERT (inode->signature_ == node_signature_);
                         return inode;
                     }

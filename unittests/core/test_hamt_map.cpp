@@ -66,8 +66,7 @@ namespace {
 TEST_F (IndexFixture, InitAddress) {
     constexpr auto addr = pstore::address{1};
     index_pointer index{addr};
-    EXPECT_EQ (0U, index.addr.segment ());
-    EXPECT_EQ (1U, index.addr.offset ());
+    EXPECT_EQ (pstore::address{1}, index.to_address ());
     EXPECT_FALSE (index.is_heap ());
 }
 
@@ -96,9 +95,8 @@ namespace {
 TEST_F (DefaultIndexFixture, DefaultConstructor) {
     EXPECT_EQ (0U, index_->size ());
     EXPECT_TRUE (index_->empty ());
-    EXPECT_EQ (0U, index_->root ().addr.absolute ());
-    EXPECT_EQ (nullptr, index_->root ().internal);
-    EXPECT_EQ (nullptr, index_->root ().linear);
+    EXPECT_EQ (index_->root ().to_address (), pstore::address::null ());
+    EXPECT_TRUE (index_->root ().is_empty ());
 }
 
 // test iterator: empty index.
@@ -492,13 +490,13 @@ TEST_F (OneLevel, InsertSecondNode) {
         // Check that the root is in heap as we expected.
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
-        auto root_internal = root.untag_node<internal_node *> ();
+        internal_node const * const root_internal = root.untag<internal_node *> ();
         EXPECT_EQ (root_internal->get_bitmap (), 0b1010U);
         this->check_is_leaf_node ((*root_internal)[0]);
         this->check_is_leaf_node ((*root_internal)[1]);
-        EXPECT_GT ((*root_internal)[0].addr.absolute (), (*root_internal)[1].addr.absolute ());
+        EXPECT_GT ((*root_internal)[0].to_address (), (*root_internal)[1].to_address ());
         index_->flush (t1, db_->get_current_revision ());
-        EXPECT_NE (root.addr, index_->root ().addr);
+        EXPECT_NE (root, index_->root ());
         this->check_is_store_internal_node (index_->root ());
     }
 }
@@ -534,13 +532,13 @@ TEST_F (OneLevel, InsertThirdNode) {
     {
         auto root = index_->root ();
         this->check_is_heap_internal_node (root);
-        auto root_internal = root.untag_node<internal_node *> ();
+        internal_node const * const root_internal = root.untag<internal_node *> ();
         EXPECT_EQ (root_internal->get_bitmap (), 0b10001010U);
         this->check_is_leaf_node ((*root_internal)[2]);
-        EXPECT_GT ((*root_internal)[2].addr.absolute (), (*root_internal)[1].addr.absolute ());
-        EXPECT_GT ((*root_internal)[2].addr.absolute (), (*root_internal)[0].addr.absolute ());
+        EXPECT_GT ((*root_internal)[2].to_address (), (*root_internal)[1].to_address ());
+        EXPECT_GT ((*root_internal)[2].to_address (), (*root_internal)[0].to_address ());
         index_->flush (t1, db_->get_current_revision ());
-        EXPECT_NE (root.addr, index_->root ().addr);
+        EXPECT_NE (root, index_->root ());
         EXPECT_TRUE (this->is_found (*index_, "c")) << "key \"c\" should be present in the index";
     }
 }
@@ -563,11 +561,11 @@ TEST_F (OneLevel, InsertFourthNode) {
         // Check that the trie was laid out as we expected.
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
-        auto root_internal = root.untag_node<internal_node *> ();
+        internal_node const * const root_internal = root.untag<internal_node *> ();
         EXPECT_EQ (root_internal->get_bitmap (), 0b10000000'10001010U);
         EXPECT_EQ (4U, pstore::bit_count::pop_count (root_internal->get_bitmap ()));
         this->check_is_leaf_node ((*root_internal)[3]);
-        EXPECT_GT ((*root_internal)[3].addr.absolute (), (*root_internal)[2].addr.absolute ());
+        EXPECT_GT ((*root_internal)[3].to_address (), (*root_internal)[2].to_address ());
         index_->flush (t1, db_->get_current_revision ());
         this->check_is_store_internal_node (index_->root ());
         EXPECT_TRUE (this->is_found (*index_, "d")) << "key \"d\" should be present in the index";
@@ -766,13 +764,13 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
         // Check that the trie was laid out as we expected in the heap.
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
-        auto root_internal = root.untag_node<internal_node *> ();
+        internal_node const * const root_internal = root.untag<internal_node *> ();
         EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
         auto level1 = (*root_internal)[0];
         this->check_is_heap_internal_node (level1);
 
-        auto level1_internal = level1.untag_node<internal_node *> ();
+        auto level1_internal = level1.untag<internal_node *> ();
         EXPECT_EQ (level1_internal->get_bitmap (), 0b11U);
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
@@ -782,13 +780,14 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
         // Check that the trie was laid out as we expected in the store.
         index_pointer root = index_->root ();
         this->check_is_store_internal_node (root);
-        auto root_address = root.untag_internal_address ();
-        auto root_internal = internal_node::read_node (*db_, root_address);
+        auto root_address = root.untag_address<internal_node> ();
+        std::shared_ptr<internal_node const> const root_internal =
+            internal_node::read_node (*db_, root_address);
         EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
         auto level1 = (*root_internal)[0];
         this->check_is_store_internal_node (level1);
-        auto level1_address = level1.untag_internal_address ();
+        auto level1_address = level1.untag_address<internal_node> ();
         auto level1_internal = internal_node::read_node (*db_, level1_address);
         EXPECT_EQ (level1_internal->get_bitmap (), 0b11U);
         this->check_is_leaf_node ((*level1_internal)[0]);
@@ -827,13 +826,13 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
         // Check that the trie was laid out as we expected in the heap.
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
-        auto root_internal = root.untag_node<internal_node *> ();
+        internal_node const * const root_internal = root.untag<internal_node *> ();
         EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
         auto level1 = (*root_internal)[0];
         this->check_is_heap_internal_node (level1);
 
-        auto level1_internal = level1.untag_node<internal_node *> ();
+        auto level1_internal = level1.untag<internal_node *> ();
         EXPECT_EQ (level1_internal->get_bitmap (), 0b111U);
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
@@ -844,13 +843,14 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
         // Check that the trie was laid out as we expected in the store.
         index_pointer root = index_->root ();
         this->check_is_store_internal_node (root);
-        auto root_address = root.untag_internal_address ();
-        auto root_internal = internal_node::read_node (*db_, root_address);
+        auto root_address = root.untag_address<internal_node> ();
+        std::shared_ptr<internal_node const> const root_internal =
+            internal_node::read_node (*db_, root_address);
         EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
         auto level1 = (*root_internal)[0];
         this->check_is_store_internal_node (level1);
-        auto level1_address = level1.untag_internal_address ();
+        auto level1_address = level1.untag_address<internal_node> ();
         auto level1_internal = internal_node::read_node (*db_, level1_address);
         EXPECT_EQ (level1_internal->get_bitmap (), 0b111U);
         this->check_is_leaf_node ((*level1_internal)[0]);
@@ -991,21 +991,21 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
         // Check that the trie was laid out as we expected in the heap.
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
-        auto root_internal = root.untag_node<internal_node *> ();
+        internal_node const * const root_internal = root.untag<internal_node *> ();
         EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
-        auto const level1_internal = (*root_internal)[0].untag_node<internal_node *> ();
-        auto const level2_internal = (*level1_internal)[0].untag_node<internal_node *> ();
-        auto const level3_internal = (*level2_internal)[0].untag_node<internal_node *> ();
-        auto const level4_internal = (*level3_internal)[0].untag_node<internal_node *> ();
-        auto const level5_internal = (*level4_internal)[0].untag_node<internal_node *> ();
+        auto const level1_internal = (*root_internal)[0].untag<internal_node *> ();
+        auto const level2_internal = (*level1_internal)[0].untag<internal_node *> ();
+        auto const level3_internal = (*level2_internal)[0].untag<internal_node *> ();
+        auto const level4_internal = (*level3_internal)[0].untag<internal_node *> ();
+        auto const level5_internal = (*level4_internal)[0].untag<internal_node *> ();
         EXPECT_EQ (level5_internal->get_bitmap (), 0b100000U);
 
-        auto const level6_internal = (*level5_internal)[0].untag_node<internal_node *> ();
-        auto const level7_internal = (*level6_internal)[0].untag_node<internal_node *> ();
-        auto const level8_internal = (*level7_internal)[0].untag_node<internal_node *> ();
-        auto const level9_internal = (*level8_internal)[0].untag_node<internal_node *> ();
-        auto const level10_internal = (*level9_internal)[0].untag_node<internal_node *> ();
+        auto const level6_internal = (*level5_internal)[0].untag<internal_node *> ();
+        auto const level7_internal = (*level6_internal)[0].untag<internal_node *> ();
+        auto const level8_internal = (*level7_internal)[0].untag<internal_node *> ();
+        auto const level9_internal = (*level8_internal)[0].untag<internal_node *> ();
+        auto const level10_internal = (*level9_internal)[0].untag<internal_node *> ();
         EXPECT_EQ (level10_internal->get_bitmap (), 0b1001000000000000U);
 
         this->check_is_leaf_node ((*level10_internal)[0]);
@@ -1016,39 +1016,39 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
         // Check that the trie was laid out as we expected in the store.
         index_pointer root = index_->root ();
         this->check_is_store_internal_node (root);
-        auto root_internal = internal_node::read_node (*db_, root.untag_internal_address ());
-
+        auto const root_internal =
+            internal_node::read_node (*db_, root.untag_address<internal_node> ());
         auto const level1 = (*root_internal)[0];
         auto const level1_internal =
-            internal_node::read_node (*db_, level1.untag_internal_address ());
+            internal_node::read_node (*db_, level1.untag_address<internal_node> ());
         auto const level2 = (*level1_internal)[0];
         auto const level2_internal =
-            internal_node::read_node (*db_, level2.untag_internal_address ());
+            internal_node::read_node (*db_, level2.untag_address<internal_node> ());
         auto const level3 = (*level2_internal)[0];
         auto const level3_internal =
-            internal_node::read_node (*db_, level3.untag_internal_address ());
+            internal_node::read_node (*db_, level3.untag_address<internal_node> ());
         auto const level4 = (*level3_internal)[0];
         auto const level4_internal =
-            internal_node::read_node (*db_, level4.untag_internal_address ());
+            internal_node::read_node (*db_, level4.untag_address<internal_node> ());
         auto const level5 = (*level4_internal)[0];
         auto const level5_internal =
-            internal_node::read_node (*db_, level5.untag_internal_address ());
+            internal_node::read_node (*db_, level5.untag_address<internal_node> ());
         EXPECT_EQ (level5_internal->get_bitmap (), 0b100000U);
         auto const level6 = (*level5_internal)[0];
         auto const level6_internal =
-            internal_node::read_node (*db_, level6.untag_internal_address ());
+            internal_node::read_node (*db_, level6.untag_address<internal_node> ());
         auto const level7 = (*level6_internal)[0];
         auto const level7_internal =
-            internal_node::read_node (*db_, level7.untag_internal_address ());
+            internal_node::read_node (*db_, level7.untag_address<internal_node> ());
         auto const level8 = (*level7_internal)[0];
         auto const level8_internal =
-            internal_node::read_node (*db_, level8.untag_internal_address ());
+            internal_node::read_node (*db_, level8.untag_address<internal_node> ());
         auto const level9 = (*level8_internal)[0];
         auto const level9_internal =
-            internal_node::read_node (*db_, level9.untag_internal_address ());
+            internal_node::read_node (*db_, level9.untag_address<internal_node> ());
         auto const level10 = (*level9_internal)[0];
         auto const level10_internal =
-            internal_node::read_node (*db_, level10.untag_internal_address ());
+            internal_node::read_node (*db_, level10.untag_address<internal_node> ());
         EXPECT_EQ (level10_internal->get_bitmap (), 0b10010000'00000000U);
         this->check_is_leaf_node ((*level10_internal)[0]);
         this->check_is_leaf_node ((*level10_internal)[1]);
@@ -1178,19 +1178,19 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
 
-        auto const root_internal = root.untag_node<internal_node *> ();
-        auto const level1_internal = (*root_internal)[0].untag_node<internal_node *> ();
-        auto const level2_internal = (*level1_internal)[0].untag_node<internal_node *> ();
-        auto const level3_internal = (*level2_internal)[0].untag_node<internal_node *> ();
-        auto const level4_internal = (*level3_internal)[0].untag_node<internal_node *> ();
-        auto const level5_internal = (*level4_internal)[0].untag_node<internal_node *> ();
-        auto const level6_internal = (*level5_internal)[0].untag_node<internal_node *> ();
-        auto const level7_internal = (*level6_internal)[0].untag_node<internal_node *> ();
-        auto const level8_internal = (*level7_internal)[0].untag_node<internal_node *> ();
-        auto const level9_internal = (*level8_internal)[0].untag_node<internal_node *> ();
-        auto const level10_internal = (*level9_internal)[0].untag_node<internal_node *> ();
+        auto const root_internal = root.untag<internal_node *> ();
+        auto const level1_internal = (*root_internal)[0].untag<internal_node *> ();
+        auto const level2_internal = (*level1_internal)[0].untag<internal_node *> ();
+        auto const level3_internal = (*level2_internal)[0].untag<internal_node *> ();
+        auto const level4_internal = (*level3_internal)[0].untag<internal_node *> ();
+        auto const level5_internal = (*level4_internal)[0].untag<internal_node *> ();
+        auto const level6_internal = (*level5_internal)[0].untag<internal_node *> ();
+        auto const level7_internal = (*level6_internal)[0].untag<internal_node *> ();
+        auto const level8_internal = (*level7_internal)[0].untag<internal_node *> ();
+        auto const level9_internal = (*level8_internal)[0].untag<internal_node *> ();
+        auto const level10_internal = (*level9_internal)[0].untag<internal_node *> ();
         EXPECT_TRUE ((*level10_internal)[0].is_linear ());
-        auto const level11_linear = (*level10_internal)[0].untag_node<linear_node *> ();
+        auto const level11_linear = (*level10_internal)[0].untag<linear_node *> ();
         EXPECT_EQ (level11_linear->size (), 3U);
         EXPECT_EQ (level11_linear->size_bytes (), 40U);
         EXPECT_NE ((*level11_linear)[0], pstore::address::null ());
@@ -1201,43 +1201,44 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
         index_pointer root = index_->root ();
         this->check_is_store_internal_node (root);
 
-        auto const root_internal = internal_node::read_node (*db_, root.untag_internal_address ());
+        auto const root_internal =
+            internal_node::read_node (*db_, root.untag_address<internal_node> ());
         auto const level1 = (*root_internal)[0];
         auto const level1_internal =
-            internal_node::read_node (*db_, level1.untag_internal_address ());
+            internal_node::read_node (*db_, level1.untag_address<internal_node> ());
         auto const level2 = (*level1_internal)[0];
         auto const level2_internal =
-            internal_node::read_node (*db_, level2.untag_internal_address ());
+            internal_node::read_node (*db_, level2.untag_address<internal_node> ());
         auto const level3 = (*level2_internal)[0];
         auto const level3_internal =
-            internal_node::read_node (*db_, level3.untag_internal_address ());
+            internal_node::read_node (*db_, level3.untag_address<internal_node> ());
         auto const level4 = (*level3_internal)[0];
         auto const level4_internal =
-            internal_node::read_node (*db_, level4.untag_internal_address ());
+            internal_node::read_node (*db_, level4.untag_address<internal_node> ());
         auto const level5 = (*level4_internal)[0];
         auto const level5_internal =
-            internal_node::read_node (*db_, level5.untag_internal_address ());
+            internal_node::read_node (*db_, level5.untag_address<internal_node> ());
         auto const level6 = (*level5_internal)[0];
         auto const level6_internal =
-            internal_node::read_node (*db_, level6.untag_internal_address ());
+            internal_node::read_node (*db_, level6.untag_address<internal_node> ());
         auto const level7 = (*level6_internal)[0];
         auto const level7_internal =
-            internal_node::read_node (*db_, level7.untag_internal_address ());
+            internal_node::read_node (*db_, level7.untag_address<internal_node> ());
         auto const level8 = (*level7_internal)[0];
         auto const level8_internal =
-            internal_node::read_node (*db_, level8.untag_internal_address ());
+            internal_node::read_node (*db_, level8.untag_address<internal_node> ());
         auto const level9 = (*level8_internal)[0];
         auto const level9_internal =
-            internal_node::read_node (*db_, level9.untag_internal_address ());
+            internal_node::read_node (*db_, level9.untag_address<internal_node> ());
         auto const level10 = (*level9_internal)[0];
         auto const level10_internal =
-            internal_node::read_node (*db_, level10.untag_internal_address ());
+            internal_node::read_node (*db_, level10.untag_address<internal_node> ());
         auto const level11 = (*level10_internal)[0];
 
         std::shared_ptr<linear_node const> sptr;
         linear_node const * level11_linear = nullptr;
         std::tie (sptr, level11_linear) =
-            linear_node::get_node (*db_, index_pointer{level11.untag_linear_address ()});
+            linear_node::get_node (*db_, index_pointer{level11.untag_address<linear_node> ()});
 
         EXPECT_EQ (level11_linear->size (), 3U);
         EXPECT_TRUE (this->is_found (*index_, "g"))
@@ -1709,7 +1710,7 @@ namespace {
     std::shared_ptr<internal_node> CorruptInternalNodes::load_inode (index_pointer ptr) {
         PSTORE_ASSERT (ptr.is_internal ());
         return std::static_pointer_cast<internal_node> (
-            db_->getrw (ptr.untag_internal_address ().to_address (),
+            db_->getrw (ptr.untag_address<internal_node> ().to_address (),
                         internal_node::size_bytes (internal_node_children)));
     }
 
@@ -1765,9 +1766,10 @@ TEST_F (CorruptInternalNodes, ChildClaimsToBeOnHeap) {
 
         // Corrupt the first child field such it claims to be on the heap.
         {
-            auto inode = this->load_inode (root);
-            auto & first = (*inode)[0];
-            first = first.tag_node<internal_node *> ();
+            std::shared_ptr<internal_node> inode = this->load_inode (root);
+            index_pointer & first = (*inode)[0];
+            first =
+                index_pointer{reinterpret_cast<internal_node *> (first.to_address ().absolute ())};
         }
         t1.commit ();
     }
