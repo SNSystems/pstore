@@ -130,7 +130,7 @@ namespace pstore {
             /// The type information (whether the record points to either an internal or linear
             /// node) is carried externally.
             union index_pointer {
-                constexpr index_pointer () noexcept
+                index_pointer () noexcept
                         : internal_{nullptr} {
 
                     // A belt-and-braces runtime check for cases where pop_count() can't be
@@ -263,7 +263,7 @@ namespace pstore {
             /// \brief A class used to keep the pointer to parent node and the child slot.
             class parent_type {
             public:
-                constexpr parent_type () noexcept = default;
+                parent_type () noexcept = default;
 
                 /// Constructs a parent type object.
                 /// \param idx  The pointer to either the parent node or a leaf node.
