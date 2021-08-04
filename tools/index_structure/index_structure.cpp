@@ -114,7 +114,7 @@ namespace {
                                    std::ostream & os, index_pointer node, unsigned shifts) {
         PSTORE_ASSERT (!node.is_heap ());
         auto const this_id =
-            node_type_name<NodeType>::name + std::to_string (node.addr.absolute ());
+            node_type_name<NodeType>::name + std::to_string (node.to_address ().absolute ());
 
         std::shared_ptr<void const> store_ptr;
         NodeType const * ptr = nullptr;
@@ -134,7 +134,7 @@ namespace {
                       index_pointer node, unsigned shifts) {
         if (node.is_leaf ()) {
             PSTORE_ASSERT (node.is_address ());
-            return dump_leaf (db, index, os, node.addr);
+            return dump_leaf (db, index, os, node.to_address ());
         }
         return depth_is_internal_node (shifts)
                    ? dump_intermediate<internal_node> (db, index, os, node, shifts)

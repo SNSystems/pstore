@@ -13,6 +13,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+/// \file diff.hpp
+/// \brief Comparing the contents of an index between two transactions.
 #ifndef PSTORE_CORE_DIFF_HPP
 #define PSTORE_CORE_DIFF_HPP
 
@@ -25,6 +27,7 @@ namespace pstore {
         template <typename Index>
         class traverser {
             using index_pointer = index::details::index_pointer;
+            using internal_node = index::details::internal_node;
 
         public:
             /// \param db  The owning database instance.
@@ -66,7 +69,7 @@ namespace pstore {
 
             bool is_new (index_pointer const node) const noexcept {
                 return node.is_heap () ||
-                       node.untag_internal_address ().to_address () >= threshold_;
+                       node.untag_address<internal_node> ().to_address () >= threshold_;
             }
 
             database const & db_;
@@ -96,7 +99,7 @@ namespace pstore {
                 // If this leaf is not in the "old" byte range then add it to the output
                 // collection.
                 if (this->is_new (node)) {
-                    *out = node.addr;
+                    *out = node.to_address ();
                     ++out;
                 }
                 return out;

@@ -121,13 +121,13 @@ namespace pstore {
                 -> std::pair<std::shared_ptr<linear_node const>, linear_node const *> {
 
                 if (node.is_heap ()) {
-                    auto const * ptr = node.untag_node<linear_node const *> ();
+                    auto const * ptr = node.untag<linear_node const *> ();
                     PSTORE_ASSERT (ptr->signature_ == node_signature_);
                     return {nullptr, ptr};
                 }
 
                 // Read an existing node. First work out its size.
-                auto const addr = node.untag_linear_address ();
+                auto const addr = node.untag_address<linear_node> ();
                 std::size_t const in_store_size =
                     linear_node::size_bytes (db.getro (addr)->size ());
 
@@ -242,7 +242,7 @@ namespace pstore {
                 return std::all_of (std::begin (internal), std::end (internal),
                                     [addr] (index_pointer const & child) {
                                         if (child.is_heap () ||
-                                            child.untag_internal_address () >= addr) {
+                                            child.untag_address<internal_node> () >= addr) {
                                             return false;
                                         }
                                         return true;
@@ -286,11 +286,11 @@ namespace pstore {
                 -> std::pair<std::shared_ptr<internal_node const>, internal_node const *> {
 
                 if (node.is_heap ()) {
-                    return {nullptr, node.untag_node<internal_node *> ()};
+                    return {nullptr, node.untag<internal_node *> ()};
                 }
 
                 std::shared_ptr<internal_node const> store_internal =
-                    internal_node::read_node (db, node.untag_internal_address ());
+                    internal_node::read_node (db, node.untag_address<internal_node> ());
                 auto const * const p = store_internal.get ();
                 return {std::move (store_internal), p};
             }
@@ -352,14 +352,14 @@ namespace pstore {
                     if (p.is_heap ()) {
                         if (shifts < max_hash_bits) { // internal node
                             PSTORE_ASSERT (p.is_internal ());
-                            auto * const internal = p.untag_node<internal_node *> ();
+                            auto * const internal = p.untag<internal_node *> ();
                             p = internal->flush (transaction, shifts);
                             // This node is owned by a container in the outer HAMT structure. Don't
                             // delete it here. If this ever changes, then add a 'delete internal;'
                             // here.
                         } else { // linear node
                             PSTORE_ASSERT (p.is_linear ());
-                            auto * const linear = p.untag_node<linear_node *> ();
+                            auto * const linear = p.untag<linear_node *> ();
                             p = linear->flush (transaction) | internal_node_bit;
                             delete linear;
                         }

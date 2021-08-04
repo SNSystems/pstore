@@ -14,6 +14,7 @@
 //
 //===----------------------------------------------------------------------===//
 /// \file hamt_map.hpp
+/// \brief A key/value index implementation.
 
 #ifndef PSTORE_CORE_HAMT_MAP_HPP
 #define PSTORE_CORE_HAMT_MAP_HPP
@@ -164,7 +165,7 @@ namespace pstore {
                     PSTORE_ASSERT (visited_parents_.size () >= 1);
                     details::parent_type const & parent = visited_parents_.top ();
                     PSTORE_ASSERT (parent.node.is_leaf () && parent.position == details::not_found);
-                    return parent.node.addr;
+                    return parent.node.to_address ();
                 }
 
             private:
@@ -369,7 +370,7 @@ namespace pstore {
             void clear () {
                 if (root_.is_heap ()) {
                     this->clear (root_, 0 /*shifts*/);
-                    root_.internal = nullptr;
+                    root_.clear ();
                 }
             }
 
@@ -635,14 +636,14 @@ namespace pstore {
             }
         }
 
-        // hamt_map::clear
-        // ~~~~~~~~~~~~~~~
+        // clear
+        // ~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         void hamt_map<KeyType, ValueType, Hash, KeyEqual>::clear (index_pointer node,
                                                                   unsigned shifts) {
             PSTORE_ASSERT (node.is_heap () && !node.is_leaf ());
             if (details::depth_is_internal_node (shifts)) {
-                auto * const internal = node.untag_node<internal_node *> ();
+                auto * const internal = node.untag<internal_node *> ();
                 // Recursively release the children of this internal node.
                 for (auto p : *internal) {
                     if (p.is_heap ()) {
@@ -654,8 +655,8 @@ namespace pstore {
             this->delete_node (node, shifts);
         }
 
-        // hamt_map::load_leaf_node
-        // ~~~~~~~~~~~~~~~~~~~~~~~~
+        // load leaf node
+        // ~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::load_leaf_node (database const & db,
                                                                            address const addr) const
@@ -665,8 +666,8 @@ namespace pstore {
                 serialize::archive::database_reader{db, addr});
         }
 
-        // hamt_map::get_key
-        // ~~~~~~~~~~~~~~~~~
+        // get key
+        // ~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::get_key (database const & db,
                                                                     address const addr) const
@@ -675,8 +676,8 @@ namespace pstore {
             return serialize::read<KeyType> (serialize::archive::database_reader{db, addr});
         }
 
-        // hamt_map::store_leaf_node
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~
+        // store leaf node
+        // ~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherValueType>
         address hamt_map<KeyType, ValueType, Hash, KeyEqual>::store_leaf_node (
@@ -699,8 +700,8 @@ namespace pstore {
             return result;
         }
 
-        // hamt_map::insert_into_leaf
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // insert into leaf
+        // ~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_leaf (
@@ -744,15 +745,15 @@ namespace pstore {
 
             // We ran out of hash bits: create a new linear node.
             auto const linear_ptr = index_pointer{
-                linear_node::allocate (existing_leaf.addr,
+                linear_node::allocate (existing_leaf.to_address (),
                                        this->store_leaf_node (transaction, new_leaf, parents))
                     .release ()};
             parents->push ({linear_ptr, 1U});
             return linear_ptr;
         }
 
-        // hamt_map::delete_node
-        // ~~~~~~~~~~~~~~~~~~~~~
+        // delete node
+        // ~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         void hamt_map<KeyType, ValueType, Hash, KeyEqual>::delete_node (index_pointer const node,
                                                                         unsigned const shifts) {
@@ -761,15 +762,15 @@ namespace pstore {
                 if (details::depth_is_internal_node (shifts)) {
                     // Internal nodes are owned by internals_container_. Don't delete them here. If
                     // this ever changes, then add something like: delete
-                    // node.untag_node<internal_node *> ();
+                    // node.untag<internal_node *> ();
                 } else {
-                    delete node.untag_node<linear_node *> ();
+                    delete node.untag<linear_node *> ();
                 }
             }
         }
 
-        // hamt_map::insert_into_internal
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // insert into internal
+        // ~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_internal (
@@ -828,8 +829,8 @@ namespace pstore {
             return {node, key_exists};
         }
 
-        // hamt_map::insert_into_linear
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // insert into linear
+        // ~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_linear (
@@ -867,7 +868,7 @@ namespace pstore {
 
                     if (node.is_heap ()) {
                         // If the node is already on the heap then there's no need to reallocate it.
-                        lnode = node.untag_node<linear_node *> ();
+                        lnode = node.untag<linear_node *> ();
                         result = node;
                     } else {
                         // Load into memory but no extra space.
@@ -890,8 +891,8 @@ namespace pstore {
             return {result, key_exists};
         }
 
-        // hamt_map::insert_node
-        // ~~~~~~~~~~~~~~~~~~~~~
+        // insert node
+        // ~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_node (
@@ -902,7 +903,8 @@ namespace pstore {
             index_pointer result;
             bool key_exists = false;
             if (node.is_leaf ()) { // This node is a leaf node.
-                key_type const existing_key = get_key (transaction.db (), node.addr); // Read key.
+                key_type const existing_key =
+                    get_key (transaction.db (), node.to_address ()); // Read key.
                 if (equal_ (value.first, existing_key)) {
                     if (is_upsert) {
                         result = this->store_leaf_node (transaction, value, parents);
@@ -931,8 +933,8 @@ namespace pstore {
             return std::make_pair (result, key_exists);
         }
 
-        // hamt_map::insert_or_upsert
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // insert or upsert
+        // ~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_upsert (
@@ -966,8 +968,8 @@ namespace pstore {
             return std::make_pair (iterator (db, std::move (parents), this), !key_exists);
         }
 
-        // hamt_map::insert
-        // ~~~~~~~~~~~~~~~~
+        // insert
+        // ~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherKeyType, typename OtherValueType, typename>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert (
@@ -977,8 +979,8 @@ namespace pstore {
             return this->insert_or_upsert (transaction, value, false /*is_upsert*/);
         }
 
-        // hamp_map::insert_or_assign
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // insert or assign
+        // ~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherKeyType, typename OtherValueType, typename>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_assign (
@@ -988,8 +990,8 @@ namespace pstore {
             return this->insert_or_upsert (transaction, value, true /*is_upsert*/);
         }
 
-        // hamt_map::insert_or_assign
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // insert or assign
+        // ~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherKeyType, typename OtherValueType, typename>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_assign (
@@ -999,8 +1001,8 @@ namespace pstore {
             return this->insert_or_assign (transaction, std::make_pair (key, value));
         }
 
-        // hamt_map::flush
-        // ~~~~~~~~~~~~~~~
+        // flush
+        // ~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         typed_address<header_block>
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction,
@@ -1009,11 +1011,11 @@ namespace pstore {
                 raise (error_code::index_not_latest_revision);
             }
 
-            // If the root is a leaf node, there's nothing to do. If not, we start to recursively
-            // flush the tree.
+            // If the root is a leaf, there's nothing to do. If not, we start to recursively flush
+            // the tree.
             if (!root_.is_address ()) {
                 PSTORE_ASSERT (root_.is_internal ());
-                root_ = root_.untag_node<internal_node *> ()->flush (transaction, 0 /*shifts*/);
+                root_ = root_.untag<internal_node *> ()->flush (transaction, 0 /*shifts*/);
                 PSTORE_ASSERT (root_.is_address ());
                 // Don't delete the internal node here. They are owned by internals_container_. If
                 // this ever changes, then use something like 'delete internal' here.
@@ -1041,12 +1043,12 @@ namespace pstore {
             auto const pos = transaction.alloc_rw<header_block> ();
             pos.first->signature = index_signature;
             pos.first->size = this->size ();
-            pos.first->root = this->root ().addr;
+            pos.first->root = this->root ().to_address ();
             return pos.second;
         }
 
-        // hamt_map::find
-        // ~~~~~~~~~~~~~~
+        // find
+        // ~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename OtherKeyType, typename>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::find (database const & db,
@@ -1091,7 +1093,7 @@ namespace pstore {
             }
             // It's a leaf node.
             PSTORE_ASSERT (node.is_leaf ());
-            key_type const existing_key = get_key (db, node.addr);
+            key_type const existing_key = get_key (db, node.to_address ());
             if (equal_ (existing_key, key)) {
                 parents.push ({node});
                 return const_iterator (db, std::move (parents), this);
@@ -1099,21 +1101,21 @@ namespace pstore {
             return this->cend (db);
         }
 
-        // hamt_map::make_begin_iterator
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // make begin iterator
+        // ~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename Database, typename HamtMap, typename Iterator>
         Iterator hamt_map<KeyType, ValueType, Hash, KeyEqual>::make_begin_iterator (Database && db,
                                                                                     HamtMap && m) {
             Iterator result{db, parent_stack (), &m};
-            if (m.root_.internal) {
+            if (!m.root_.is_empty ()) {
                 result.move_to_left_most_child (m.root_);
             }
             return result;
         }
 
-        // hamt_map::make_end_iterator
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // make end iterator
+        // ~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <typename Database, typename HamtMap, typename Iterator>
         Iterator hamt_map<KeyType, ValueType, Hash, KeyEqual>::make_end_iterator (Database && db,
