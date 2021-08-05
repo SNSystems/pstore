@@ -89,10 +89,10 @@ namespace pstore {
             std::uint16_t padding2 = 0;
             std::uint32_t padding3 = 0;
 
-            auto linkage () const noexcept -> enum linkage {
+            constexpr auto linkage () const noexcept -> enum linkage {
                 return static_cast<enum linkage> (linkage_.value ());
             }
-            auto visibility () const noexcept -> enum visibility {
+            constexpr auto visibility () const noexcept -> enum visibility {
                 return static_cast<enum visibility> (visibility_.value ());
             }
 
