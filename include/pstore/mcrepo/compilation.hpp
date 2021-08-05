@@ -106,7 +106,7 @@ namespace pstore {
 
         private:
             friend class compilation;
-            definition () noexcept {}
+            constexpr definition () noexcept = default;
         };
         // load
         // ~~~~
