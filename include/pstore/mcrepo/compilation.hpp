@@ -106,7 +106,10 @@ namespace pstore {
 
         private:
             friend class compilation;
-            definition () noexcept = default;
+            // TODO: using "=default" here causes clang-8 to issue an error:
+            // "default member initializer for 'padding1' needed within definition of enclosing
+            // class 'definition' outside of member functions"
+            definition () noexcept {}
         };
         // load
         // ~~~~
