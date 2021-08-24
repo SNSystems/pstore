@@ -15,32 +15,40 @@
 //===----------------------------------------------------------------------===//
 /// \file test_database.cpp
 
+// "Self" include
 #include "pstore/core/database.hpp"
 
+// Standard library
 #include <limits>
 #include <memory>
 #include <mutex>
 #include <vector>
 
-#include "gmock/gmock.h"
+// Third party
+#include <gmock/gmock.h>
 
+// pstore library
 #include "pstore/support/portab.hpp"
 
+// Local
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
 
 namespace {
 
-    class Database : public EmptyStore {};
+    class Database : public ::testing::Test {
+    protected:
+        InMemoryStore store_;
+    };
 
 } // end anonymous namespace
 
 TEST_F (Database, CheckInitialState) {
-    pstore::database db{this->file ()};
+    pstore::database db{store_.file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     {
-        auto header = reinterpret_cast<pstore::header const *> (this->buffer ().get ());
+        auto header = reinterpret_cast<pstore::header const *> (store_.buffer ().get ());
         EXPECT_THAT (pstore::header::file_signature1, testing::ContainerEq (header->a.signature1));
         EXPECT_EQ (pstore::header::file_signature2, header->a.signature2);
 
@@ -52,7 +60,7 @@ TEST_F (Database, CheckInitialState) {
         EXPECT_EQ (pstore::leader_size, header->footer_pos.load ().absolute ());
     }
     {
-        auto footer = reinterpret_cast<pstore::trailer const *> (this->buffer ().get () +
+        auto footer = reinterpret_cast<pstore::trailer const *> (store_.buffer ().get () +
                                                                  pstore::leader_size);
 
         EXPECT_THAT (pstore::trailer::default_signature1,
@@ -65,21 +73,115 @@ TEST_F (Database, CheckInitialState) {
     }
 }
 
+TEST_F (Database, SegmentBase) {
+    // Checks that the first segment address is equal to the address of our file backing store
+    // buffer, and that all of the other segment pointers are null.
+
+    pstore::database db{store_.file ()};
+    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+
+    static_assert (pstore::address::segment_size == pstore::storage::min_region_size,
+                   "expected min_region_size == segment_size");
+
+    auto ptr = store_.buffer ().get ();
+
+    ASSERT_LE (std::numeric_limits<pstore::address::segment_type>::max (), pstore::sat_elements);
+
+    EXPECT_EQ (std::shared_ptr<void> (store_.buffer (), ptr), db.storage ().segment_base (0));
+    for (unsigned segment = 1; segment < pstore::sat_elements; ++segment) {
+        auto const si = static_cast<pstore::address::segment_type> (segment);
+        EXPECT_EQ (nullptr, db.storage ().segment_base (si));
+    }
+
+    // Now the same tests, but for the const method.
+    auto const * dbp = &db;
+
+    EXPECT_EQ (std::shared_ptr<void> (store_.buffer (), ptr), dbp->storage ().segment_base (0));
+    for (unsigned segment = 1; segment < pstore::sat_elements; ++segment) {
+        auto const si = static_cast<pstore::address::segment_type> (segment);
+        EXPECT_EQ (nullptr, dbp->storage ().segment_base (si));
+    }
+}
+
+TEST_F (Database, GetEndPastLogicalEOF) {
+    pstore::database db{store_.file ()};
+    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+
+    auto const addr = pstore::address::null ();
+    std::size_t size = db.size () + 1;
+    check_for_error ([&db, addr, size] () { db.getro (addr, size); },
+                     pstore::error_code::bad_address);
+}
+
+TEST_F (Database, GetStartPastLogicalEOF) {
+    pstore::database db{store_.file ()};
+    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+
+    auto const addr = pstore::address{db.size () + 1};
+    constexpr std::size_t size = 1;
+    check_for_error ([&db, addr, size] () { db.getro (addr, size); },
+                     pstore::error_code::bad_address);
+}
+
+TEST_F (Database, GetLocationOverflows) {
+    pstore::database db{store_.file ()};
+    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+
+    auto const addr = std::numeric_limits<pstore::address>::max ();
+    PSTORE_STATIC_ASSERT (std::numeric_limits<std::size_t>::max () >=
+                          std::numeric_limits<std::uint64_t>::max ());
+    std::size_t const size = std::numeric_limits<std::uint64_t>::max () - addr.absolute () + 1U;
+    ASSERT_TRUE (addr + size < addr); // This addition is attended to overflow.
+    check_for_error ([&db, addr, size] () { db.getro (addr, size); },
+                     pstore::error_code::bad_address);
+}
+
+TEST_F (Database, Allocate16Bytes) {
+    pstore::database db{store_.file ()};
+    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+
+    // Initial allocation.
+    constexpr auto size = 16U;
+    constexpr auto align = 1U;
+    pstore::address addr = db.allocate (size, align);
+    EXPECT_EQ (pstore::leader_size + sizeof (pstore::trailer), addr.absolute ());
+
+    // Subsequent allocation.
+    pstore::address addr2 = db.allocate (size, align);
+    EXPECT_EQ (addr.absolute () + 16, addr2.absolute ());
+}
+
+TEST_F (Database, Allocate16BytesAligned1024) {
+    pstore::database db{store_.file ()};
+    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+
+    constexpr unsigned size = 16;
+    constexpr unsigned align = 1024;
+    PSTORE_STATIC_ASSERT (align > pstore::leader_size + sizeof (pstore::trailer));
+
+    pstore::address addr = db.allocate (size, align);
+    EXPECT_EQ (0U, addr.absolute () % align);
+
+    pstore::address addr2 = db.allocate (size, align);
+    EXPECT_EQ (addr.absolute () + align, addr2.absolute ());
+}
 
 namespace {
 
-    class OpenCorruptStore : public EmptyStore {
+    class OpenCorruptStore : public ::testing::Test {
     protected:
+        InMemoryStore store_;
+
         pstore::header * get_header ();
         void check_database_open (pstore::error_code err) const;
     };
 
     pstore::header * OpenCorruptStore::get_header () {
-        return reinterpret_cast<pstore::header *> (this->buffer ().get ());
+        return reinterpret_cast<pstore::header *> (store_.buffer ().get ());
     }
 
     void OpenCorruptStore::check_database_open (pstore::error_code err) const {
-        check_for_error ([this] () { pstore::database{this->file ()}; }, err);
+        check_for_error ([this] () { pstore::database{store_.file ()}; }, err);
     }
 
 } // end anonymous namespace
@@ -159,99 +261,4 @@ TEST_F (OpenCorruptStore, HeaderFooterTooLarge) {
         1U);
     this->get_header ()->footer_pos = too_large;
     this->check_database_open (pstore::error_code::header_corrupt);
-}
-
-
-
-TEST_F (Database, SegmentBase) {
-    // Checks that the first segment address is equal to the address of our file backing store
-    // buffer, and that all of the other segment pointers are null.
-
-    pstore::database db{this->file ()};
-    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-
-    static_assert (pstore::address::segment_size == pstore::storage::min_region_size,
-                   "expected min_region_size == segment_size");
-
-    auto ptr = this->buffer ().get ();
-
-    ASSERT_LE (std::numeric_limits<pstore::address::segment_type>::max (), pstore::sat_elements);
-
-    EXPECT_EQ (std::shared_ptr<void> (this->buffer (), ptr), db.storage ().segment_base (0));
-    for (unsigned segment = 1; segment < pstore::sat_elements; ++segment) {
-        auto const si = static_cast<pstore::address::segment_type> (segment);
-        EXPECT_EQ (nullptr, db.storage ().segment_base (si));
-    }
-
-    // Now the same tests, but for the const method.
-    auto const * dbp = &db;
-
-    EXPECT_EQ (std::shared_ptr<void> (this->buffer (), ptr), dbp->storage ().segment_base (0));
-    for (unsigned segment = 1; segment < pstore::sat_elements; ++segment) {
-        auto const si = static_cast<pstore::address::segment_type> (segment);
-        EXPECT_EQ (nullptr, dbp->storage ().segment_base (si));
-    }
-}
-
-TEST_F (Database, GetEndPastLogicalEOF) {
-    pstore::database db{this->file ()};
-    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-
-    auto const addr = pstore::address::null ();
-    std::size_t size = db.size () + 1;
-    check_for_error ([&db, addr, size] () { db.getro (addr, size); },
-                     pstore::error_code::bad_address);
-}
-
-TEST_F (Database, GetStartPastLogicalEOF) {
-    pstore::database db{this->file ()};
-    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-
-    auto const addr = pstore::address{db.size () + 1};
-    constexpr std::size_t size = 1;
-    check_for_error ([&db, addr, size] () { db.getro (addr, size); },
-                     pstore::error_code::bad_address);
-}
-
-TEST_F (Database, GetLocationOverflows) {
-    pstore::database db{this->file ()};
-    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-
-    auto const addr = std::numeric_limits<pstore::address>::max ();
-    PSTORE_STATIC_ASSERT (std::numeric_limits<std::size_t>::max () >=
-                          std::numeric_limits<std::uint64_t>::max ());
-    std::size_t const size = std::numeric_limits<std::uint64_t>::max () - addr.absolute () + 1U;
-    ASSERT_TRUE (addr + size < addr); // This addition is attended to overflow.
-    check_for_error ([&db, addr, size] () { db.getro (addr, size); },
-                     pstore::error_code::bad_address);
-}
-
-TEST_F (Database, Allocate16Bytes) {
-    pstore::database db{this->file ()};
-    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-
-    // Initial allocation.
-    constexpr auto size = 16U;
-    constexpr auto align = 1U;
-    pstore::address addr = db.allocate (size, align);
-    EXPECT_EQ (pstore::leader_size + sizeof (pstore::trailer), addr.absolute ());
-
-    // Subsequent allocation.
-    pstore::address addr2 = db.allocate (size, align);
-    EXPECT_EQ (addr.absolute () + 16, addr2.absolute ());
-}
-
-TEST_F (Database, Allocate16BytesAligned1024) {
-    pstore::database db{this->file ()};
-    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-
-    constexpr unsigned size = 16;
-    constexpr unsigned align = 1024;
-    PSTORE_STATIC_ASSERT (align > pstore::leader_size + sizeof (pstore::trailer));
-
-    pstore::address addr = db.allocate (size, align);
-    EXPECT_EQ (0U, addr.absolute () % align);
-
-    pstore::address addr2 = db.allocate (size, align);
-    EXPECT_EQ (addr.absolute () + align, addr2.absolute ());
 }
