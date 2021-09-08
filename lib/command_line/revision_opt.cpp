@@ -28,7 +28,7 @@ namespace pstore {
             if (!val.empty ()) {
                 auto rp = pstore::str_to_revision (val);
                 if (!rp) {
-                    error_stream << NATIVE_TEXT (
+                    error_stream << PSTORE_NATIVE_TEXT (
                         "Error: revision must be a revision number or 'HEAD'\n");
                     std::exit (EXIT_FAILURE);
                 }

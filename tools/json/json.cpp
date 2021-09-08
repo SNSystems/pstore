@@ -164,7 +164,7 @@ namespace {
         }
 
         auto obj = p.callbacks ().result ();
-        out_stream << NATIVE_TEXT ("\n----\n") << *obj << NATIVE_TEXT ('\n');
+        out_stream << PSTORE_NATIVE_TEXT ("\n----\n") << *obj << PSTORE_NATIVE_TEXT ('\n');
         return EXIT_SUCCESS;
     }
 
@@ -186,13 +186,13 @@ int main (int argc, char const * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
-        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
-                     << NATIVE_TEXT ('\n');
+        error_stream << PSTORE_NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+                     << PSTORE_NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
-        error_stream << NATIVE_TEXT ("Unknown exception.\n");
+        error_stream << PSTORE_NATIVE_TEXT ("Unknown exception.\n");
         exit_code = EXIT_FAILURE;
     })
     return exit_code;

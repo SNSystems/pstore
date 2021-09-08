@@ -113,7 +113,7 @@ TEST_F (EnumerationParse, ErrorBadValue) {
     bool ok = details::parse_command_line_options (std::begin (argv), std::end (argv), "overview",
                                                    output, errors);
     ASSERT_FALSE (ok);
-    EXPECT_THAT (errors.str (), HasSubstr (NATIVE_TEXT ("'bad'")));
+    EXPECT_THAT (errors.str (), HasSubstr (PSTORE_NATIVE_TEXT ("'bad'")));
 }
 
 TEST_F (EnumerationParse, GoodValueAfterError) {
@@ -128,5 +128,5 @@ TEST_F (EnumerationParse, GoodValueAfterError) {
     bool ok = details::parse_command_line_options (std::begin (argv), std::end (argv), "overview",
                                                    output, errors);
     ASSERT_FALSE (ok);
-    EXPECT_THAT (errors.str (), Not (HasSubstr (NATIVE_TEXT ("'a'"))));
+    EXPECT_THAT (errors.str (), Not (HasSubstr (PSTORE_NATIVE_TEXT ("'a'"))));
 }

@@ -427,17 +427,18 @@ int main (int argc, char * argv[]) {
         }
 
         pstore::dump::value_ptr v = make_value (output);
-        pstore::command_line::out_stream << NATIVE_TEXT ("---\n") << *v << NATIVE_TEXT ("\n...\n");
+        pstore::command_line::out_stream << PSTORE_NATIVE_TEXT ("---\n") << *v
+                                         << PSTORE_NATIVE_TEXT ("\n...\n");
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        pstore::command_line::error_stream << NATIVE_TEXT ("Error: ")
+        pstore::command_line::error_stream << PSTORE_NATIVE_TEXT ("Error: ")
                                        << pstore::utf::to_native_string (ex.what ())
                                        << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        pstore::command_line::error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+        pstore::command_line::error_stream << PSTORE_NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

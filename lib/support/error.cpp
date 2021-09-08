@@ -34,7 +34,7 @@ std::string pstore::error_category::message (int const error) const {
                                 std::remove_cv<decltype (error)>::type>::value,
                    "base type of pstore::error_code must be int to permit safe static cast");
 
-    auto * result = "unknown pstore::category error";
+    auto const * result = "unknown pstore::category error";
     switch (static_cast<error_code> (error)) {
     case error_code::none: result = "no error"; break;
     case error_code::transaction_on_read_only_database:

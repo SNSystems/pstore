@@ -172,13 +172,13 @@ int main (int argc, char * argv[]) {
         write_definition (os, root_var.get (), directory_var (root_id).as_string ());
     }
     PSTORE_CATCH (std::exception const & ex, {
-        pstore::command_line::error_stream << NATIVE_TEXT ("Error: ")
+        pstore::command_line::error_stream << PSTORE_NATIVE_TEXT ("Error: ")
                                            << pstore::utf::to_native_string (ex.what ())
-                                           << NATIVE_TEXT ('\n');
+                                           << PSTORE_NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        pstore::command_line::error_stream << NATIVE_TEXT ("An unknown error occurred\n");
+        pstore::command_line::error_stream << PSTORE_NATIVE_TEXT ("An unknown error occurred\n");
         exit_code = EXIT_FAILURE;
     })
     return exit_code;

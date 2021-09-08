@@ -147,36 +147,6 @@ function (add_clang_tidy_target source_target)
     pstore_find_clang_tidy (tidy_path sys_includes)
 
     if (NOT tidy_path STREQUAL "tidy_path-NOTFOUND")
-        set (clang_tidy_checks "*,\
--cert-dcl21-cpp,\
--cppcoreguidelines-avoid-c-arrays,\
--cppcoreguidelines-avoid-magic-numbers,\
--cppcoreguidelines-init-variables,\
--cppcoreguidelines-macro-usage,\
--cppcoreguidelines-owning-memory,\
--cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
--cppcoreguidelines-pro-bounds-constant-array-index,\
--cppcoreguidelines-pro-bounds-pointer-arithmetic,\
--cppcoreguidelines-pro-type-member-init,\
--cppcoreguidelines-pro-type-reinterpret-cast,\
--cppcoreguidelines-pro-type-union-access,\
--fuchsia-*,\
--google-explicit-constructor,\
--google-readability-todo,\
--google-runtime-int,\
--hicpp-avoid-c-arrays,\
--hicpp-member-init,\
--hicpp-no-array-decay,\
--llvmlibc-*,\
--misc-no-recursion,\
--misc-non-private-member-variables-in-classes,\
--modernize-avoid-c-arrays,\
--modernize-pass-by-value,\
--modernize-use-trailing-return-type,\
--readability-magic-numbers,\
--readability-named-parameter"
-)
-
         # Collect the *.cpp files: clang-tidy will scan these.
         get_target_property (source_files "${source_target}" SOURCES)
 

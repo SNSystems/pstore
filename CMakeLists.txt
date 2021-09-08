@@ -18,6 +18,7 @@ cmake_minimum_required (VERSION 3.4)
 
 include (CheckCSourceCompiles)
 include (CMakeDependentOption)
+include (CPack)
 
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -339,3 +340,10 @@ install (
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pstore"
     NAMESPACE pstore::
 )
+
+# List of four values that specify what project to install. The four values are:
+# - Build directory
+# - Project Name
+# - Project Component
+# - Directory.
+set (CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_PROJECT_NAME};ALL;/")

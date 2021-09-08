@@ -80,19 +80,19 @@ int main (int argc, char * argv[]) {
             pstore::create_log_stream (name);
             pstore::http::server (
                 fs, &status, pstore::http::channel_container{}, [] (in_port_t const port) {
-                    out_stream << NATIVE_TEXT ("Listening on port ") << port << std::endl;
+                    out_stream << PSTORE_NATIVE_TEXT ("Listening on port ") << port << std::endl;
                 });
         }).join ();
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
-        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
-                     << NATIVE_TEXT ('\n');
+        error_stream << PSTORE_NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+                     << PSTORE_NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
-        error_stream << NATIVE_TEXT ("Unknown exception.\n");
+        error_stream << PSTORE_NATIVE_TEXT ("Unknown exception.\n");
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

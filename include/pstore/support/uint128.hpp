@@ -90,7 +90,7 @@ namespace pstore {
         /// Construct from an unsigned integer that's 128-bits wide or fewer.
         template <typename IntType,
                   typename = typename std::enable_if<std::is_unsigned<IntType>::value>::type>
-        constexpr uint128 (IntType const v) noexcept // NOLINT(hicpp-explicit-conversions)
+        constexpr uint128 (IntType v) noexcept // NOLINT(hicpp-explicit-conversions)
                 : v_{v} {}
 
         /// \param bytes Points to an array of 16 bytes whose contents represent a 128 bit
@@ -285,7 +285,7 @@ namespace pstore {
     // ~~~~~~~~~
     constexpr bool uint128::operator! () const noexcept {
 #ifdef PSTORE_HAVE_UINT128_T
-        return !v_;
+        return !v_; // NOLINT(readability-implicit-bool-conversion)
 #else
         return !(high_ != 0 || low_ != 0);
 #endif

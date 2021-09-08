@@ -61,15 +61,15 @@ namespace pstore {
         namespace details {
             template <typename Span, bool IsConst>
             class span_iterator {
-                using element_type_ = typename Span::element_type;
+                using element_type = typename Span::element_type;
 
             public:
                 using iterator_category = std::random_access_iterator_tag;
-                using value_type = typename std::remove_const<element_type_>::type;
+                using value_type = typename std::remove_const<element_type>::type;
                 using difference_type = typename Span::index_type;
 
                 using reference =
-                    typename std::conditional<IsConst, element_type_ const, element_type_>::type &;
+                    typename std::conditional<IsConst, element_type const, element_type>::type &;
                 using pointer = typename std::add_pointer<reference>::type;
 
                 friend class span_iterator<Span, true>;
@@ -82,12 +82,15 @@ namespace pstore {
                     PSTORE_ASSERT (span == nullptr || (index_ >= 0 && index <= span_->length ()));
                 }
                 // Note that we allow non-const iterators to be assigned and constructed from
-                // const iterators, but not the other way round.
+                // const iterators, but not the other way round. We want to allow implicit
+                // conversions between span types.
+                // NOLINTNEXTLINE(hicpp-explicit-conversions)
                 constexpr span_iterator (span_iterator<Span, false> const & other) noexcept
                         : span_iterator (other.span_, other.index_) {}
 
                 template <bool OtherIsConst = IsConst,
                           typename = typename std::enable_if<OtherIsConst>::type>
+                // NOLINTNEXTLINE(hicpp-explicit-conversions)
                 constexpr span_iterator (span_iterator<Span, true> const & other) noexcept
                         : span_iterator (other.span_, other.index_) {}
 
@@ -289,8 +292,8 @@ namespace pstore {
             constexpr span (pointer ptr, index_type count)
                     : storage_ (ptr, count) {}
 
-            constexpr span (pointer firstElem, pointer lastElem)
-                    : storage_ (firstElem, std::distance (firstElem, lastElem)) {}
+            constexpr span (pointer first, pointer last)
+                    : storage_ (first, std::distance (first, last)) {}
 
 
             template <size_t N>
@@ -324,8 +327,8 @@ namespace pstore {
                     : storage_ (ptr.get (), ptr.get () ? 1 : 0) {}
 
 
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <typename OtherElementType, std::ptrdiff_t OtherExtent>
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             constexpr span (span<OtherElementType, OtherExtent> const & other)
                     : storage_ (other.data (), details::extent_type<OtherExtent> (other.size ())) {}
 
@@ -525,8 +528,8 @@ namespace pstore {
         }
 
         template <typename ElementType>
-        span<ElementType> make_span (ElementType * firstElem, ElementType * lastElem) {
-            return span<ElementType> (firstElem, lastElem);
+        span<ElementType> make_span (ElementType * first, ElementType * last) {
+            return span<ElementType> (first, last);
         }
 
         template <typename ElementType, std::size_t N>

@@ -26,11 +26,11 @@ namespace pstore {
     namespace command_line {
 
 #ifdef _WIN32
-#    define NATIVE_TEXT(str) _TEXT (str)
+#    define PSTORE_NATIVE_TEXT(str) _TEXT (str)
         using tchar = TCHAR;
 #else
         using tchar = char;
-#    define NATIVE_TEXT(str) str
+#    define PSTORE_NATIVE_TEXT(str) str
 #endif
 
 #if defined(_WIN32) && defined(_UNICODE)

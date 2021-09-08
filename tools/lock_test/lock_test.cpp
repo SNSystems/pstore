@@ -102,7 +102,7 @@ namespace {
 
         std::unique_lock<std::mutex> lock{mut_};
         if (is_blocked_) {
-            say (out_stream, NATIVE_TEXT ("blocked"));
+            say (out_stream, PSTORE_NATIVE_TEXT ("blocked"));
             cv_.wait (lock, [this] () { return !is_blocked_; });
         }
     }
@@ -127,32 +127,33 @@ int main (int argc, char * argv[]) {
         pstore::command_line::parse_command_line_options (
             argc, argv, "pstore lock test: A simple test for the transaction lock.\n");
 
-        say (out_stream, NATIVE_TEXT ("start"));
+        say (out_stream, PSTORE_NATIVE_TEXT ("start"));
 
         std::string input;
         pstore::database db{path.get (), pstore::database::access_mode::writable};
 
-        say (out_stream, NATIVE_TEXT ("pre-lock"));
+        say (out_stream, PSTORE_NATIVE_TEXT ("pre-lock"));
         std::cin >> input;
 
         blocked_notifier notifier;
         auto transaction = pstore::begin (db);
         notifier.not_blocked ();
 
-        say (out_stream, NATIVE_TEXT ("holding-lock"));
+        say (out_stream, PSTORE_NATIVE_TEXT ("holding-lock"));
         std::cin >> input;
 
         transaction.commit ();
-        say (out_stream, NATIVE_TEXT ("done"));
+        say (out_stream, PSTORE_NATIVE_TEXT ("done"));
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
-        say (error_stream, NATIVE_TEXT ("Error: "), pstore::utf::to_native_string (ex.what ()));
+        say (error_stream, PSTORE_NATIVE_TEXT ("Error: "),
+             pstore::utf::to_native_string (ex.what ()));
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
-        say (error_stream, NATIVE_TEXT ("Unknown exception.\n"));
+        say (error_stream, PSTORE_NATIVE_TEXT ("Unknown exception.\n"));
         exit_code = EXIT_FAILURE;
     })
     return exit_code;

@@ -111,6 +111,8 @@ namespace pstore {
 
 #else //_WIN32
 
+// The type follows the Microsoft convention for its naming.
+// NOLINTNEXTLINE(readability-identifier-naming)
 using TCHAR = char;
 
 #endif // !defined(_WIN32)

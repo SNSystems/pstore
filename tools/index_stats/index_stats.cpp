@@ -147,8 +147,8 @@ namespace {
             stats s{db};
             s.traverse (*index);
 
-            static constexpr auto newline = NATIVE_TEXT ("\n");
-            static constexpr auto comma = NATIVE_TEXT (",");
+            static constexpr auto newline = PSTORE_NATIVE_TEXT ("\n");
+            static constexpr auto comma = PSTORE_NATIVE_TEXT (",");
             command_line::out_stream << utf::to_native_string (index_name<Index>::name) << comma
                                      << s.branching_factor () << comma << s.mean_leaf_depth ()
                                      << comma << s.max_depth () << comma << index->size ()
@@ -172,7 +172,7 @@ int main (int argc, char * argv[]) {
         database db{db_path.get (), database::access_mode::read_only};
         db.sync (static_cast<unsigned> (revision.get ()));
 
-        command_line::out_stream << NATIVE_TEXT (
+        command_line::out_stream << PSTORE_NATIVE_TEXT (
             "name,branching-factor,mean-leaf-depth,max-depth,size\n");
 #define X(a) dump_index_stats<trailer::indices::a> (db);
         PSTORE_INDICES
@@ -180,13 +180,13 @@ int main (int argc, char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
-        command_line::error_stream << NATIVE_TEXT ("Error: ") << utf::to_native_string (ex.what ())
-                                   << std::endl;
+        command_line::error_stream << PSTORE_NATIVE_TEXT ("Error: ")
+                                   << utf::to_native_string (ex.what ()) << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
-        command_line::error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+        command_line::error_stream << PSTORE_NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     return exit_code;

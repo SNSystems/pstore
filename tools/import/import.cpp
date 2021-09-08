@@ -51,7 +51,8 @@ int main (int argc, char * argv[]) {
         parse_command_line_options (argc, argv, "pstore import utility\n");
 
         if (pstore::file::exists (db_path.get ())) {
-            error_stream << NATIVE_TEXT ("error: the import database must not be an existing file.")
+            error_stream << PSTORE_NATIVE_TEXT (
+                                "error: the import database must not be an existing file.")
                          << std::endl;
             return EXIT_FAILURE;
         }
@@ -66,7 +67,7 @@ int main (int argc, char * argv[]) {
         std::unique_ptr<FILE, decltype (close)> infile{open_input (), close};
         if (infile.get () == nullptr) {
             auto const err = errno;
-            error_stream << NATIVE_TEXT (R"(error: could not open ")")
+            error_stream << PSTORE_NATIVE_TEXT (R"(error: could not open ")")
                          << pstore::utf::to_native_string (input_name ()) << R"(": )"
                          << std::strerror (err) << std::endl;
             return EXIT_FAILURE;
@@ -83,7 +84,7 @@ int main (int argc, char * argv[]) {
                 std::fread (ptr, sizeof (std::uint8_t), buffer.size (), infile.get ());
             if (nread < buffer.size ()) {
                 if (std::ferror (infile.get ())) {
-                    error_stream << NATIVE_TEXT ("error: there was an error reading input")
+                    error_stream << PSTORE_NATIVE_TEXT ("error: there was an error reading input")
                                  << std::endl;
                     exit_code = EXIT_FAILURE;
                     break;
@@ -93,9 +94,9 @@ int main (int argc, char * argv[]) {
             parser.input (ptr, ptr + nread);
             if (parser.has_error ()) {
                 auto const coord = parser.coordinate ();
-                error_stream << pstore::utf::to_native_string (input_name ()) << NATIVE_TEXT (":")
-                             << coord.row << NATIVE_TEXT (":") << coord.column
-                             << NATIVE_TEXT (": error: ")
+                error_stream << pstore::utf::to_native_string (input_name ())
+                             << PSTORE_NATIVE_TEXT (":") << coord.row << PSTORE_NATIVE_TEXT (":")
+                             << coord.column << PSTORE_NATIVE_TEXT (": error: ")
                              << pstore::utf::to_native_string (parser.last_error ().message ())
                              << std::endl;
                 exit_code = EXIT_FAILURE;
@@ -111,13 +112,13 @@ int main (int argc, char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
-        error_stream << NATIVE_TEXT ("error: ") << pstore::utf::to_native_string (ex.what ())
+        error_stream << PSTORE_NATIVE_TEXT ("error: ") << pstore::utf::to_native_string (ex.what ())
                      << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
-        error_stream << NATIVE_TEXT ("error: an unknown error occurred") << std::endl;
+        error_stream << PSTORE_NATIVE_TEXT ("error: an unknown error occurred") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     return exit_code;

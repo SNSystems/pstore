@@ -60,15 +60,15 @@ namespace {
         std::shared_ptr<pstore::index::name_index const> const strings =
             pstore::index::get_index<pstore::trailer::indices::name> (db);
         if (strings == nullptr) {
-            error_stream << NATIVE_TEXT ("Error: Strings index was not found") << std::endl;
+            error_stream << PSTORE_NATIVE_TEXT ("Error: Strings index was not found") << std::endl;
             return false;
         }
 
         auto str = pstore::make_sstring_view (key);
         auto const it = strings->find (db, pstore::indirect_string{db, &str});
         if (it == strings->cend (db)) {
-            error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
-                         << std::endl;
+            error_stream << pstore::utf::to_native_string (key)
+                         << PSTORE_NATIVE_TEXT (": not found") << std::endl;
             // note that the program does not signal failure if the key is missing.
         } else {
             pstore::shared_sstring_view owner;
@@ -83,14 +83,14 @@ namespace {
         std::shared_ptr<pstore::index::write_index const> const names =
             pstore::index::get_index<pstore::trailer::indices::write> (db);
         if (names == nullptr) {
-            error_stream << NATIVE_TEXT ("Error: Names index was not found") << std::endl;
+            error_stream << PSTORE_NATIVE_TEXT ("Error: Names index was not found") << std::endl;
             return false;
         }
 
         auto const it = names->find (db, key);
         if (it == names->cend (db)) {
-            error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
-                         << std::endl;
+            error_stream << pstore::utf::to_native_string (key)
+                         << PSTORE_NATIVE_TEXT (": not found") << std::endl;
             // note that the program does not signal failure if the key is missing.
         } else {
             pstore::extent<char> const & r = it->second;
@@ -143,13 +143,13 @@ int main (int argc, char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
-        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+        error_stream << PSTORE_NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
                      << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
-        error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+        error_stream << PSTORE_NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
 

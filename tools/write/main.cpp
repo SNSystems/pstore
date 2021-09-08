@@ -69,7 +69,7 @@ namespace {
                 static_cast<
                     std::make_unsigned<std::remove_const<decltype (expected_size)>::type>::type> (
                     expected_size)) {
-                error_stream << NATIVE_TEXT ("Did not read the number of bytes requested");
+                error_stream << PSTORE_NATIVE_TEXT ("Did not read the number of bytes requested");
                 std::exit (EXIT_FAILURE);
             }
 
@@ -142,7 +142,7 @@ int main (int argc, char * argv[]) {
             for (std::pair<std::string, std::string> const & v : opt.files) {
                 if (!add_file (transaction, *write, v.first, v.second)) {
                     error_stream << to_native_string (v.second)
-                                 << NATIVE_TEXT (": No such file or directory\n");
+                                 << PSTORE_NATIVE_TEXT (": No such file or directory\n");
                     exit_code = EXIT_FAILURE;
                 }
             }
@@ -166,12 +166,12 @@ int main (int argc, char * argv[]) {
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
         auto what = ex.what ();
-        error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what)
+        error_stream << PSTORE_NATIVE_TEXT ("An error occurred: ") << to_native_string (what)
                     << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
+        error_stream << PSTORE_NATIVE_TEXT ("An unknown error occurred.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

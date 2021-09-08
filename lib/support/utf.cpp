@@ -65,11 +65,11 @@ namespace pstore {
                 return std::make_pair (-1, -1);
             }
 
-            auto const first = str;
-            auto const last = str + strlen (str);
-            auto const p1 =
+            auto const * const first = str;
+            auto const * const last = str + strlen (str);
+            gsl::czstring p1 =
                 index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, start)));
-            auto const p2 =
+            gsl::czstring p2 =
                 index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, end)));
             return std::make_pair ((p1 != last) ? p1 - str : -1, (p2 != last) ? p2 - str : -1);
         }

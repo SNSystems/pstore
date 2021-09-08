@@ -164,8 +164,9 @@ TEST_F (ClCommandLine, DoubleDashStringOptionWithSingleDash) {
     string_stream errors;
     bool const res = this->parse_command_line_options (output, errors);
     EXPECT_FALSE (res);
-    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Unknown command line argument")));
-    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("'--arg'")));
+    EXPECT_THAT (errors.str (),
+                 testing::HasSubstr (PSTORE_NATIVE_TEXT ("Unknown command line argument")));
+    EXPECT_THAT (errors.str (), testing::HasSubstr (PSTORE_NATIVE_TEXT ("'--arg'")));
     EXPECT_EQ (output.str ().length (), 0U);
 }
 
@@ -190,7 +191,8 @@ TEST_F (ClCommandLine, UnknownArgument) {
     string_stream output;
     string_stream errors;
     EXPECT_FALSE (this->parse_command_line_options (output, errors));
-    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Unknown command line argument")));
+    EXPECT_THAT (errors.str (),
+                 testing::HasSubstr (PSTORE_NATIVE_TEXT ("Unknown command line argument")));
     EXPECT_EQ (output.str ().length (), 0U);
 }
 
@@ -203,7 +205,8 @@ TEST_F (ClCommandLine, NearestName) {
     string_stream output;
     string_stream errors;
     EXPECT_FALSE (this->parse_command_line_options (output, errors));
-    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Did you mean '--xx=value'")));
+    EXPECT_THAT (errors.str (),
+                 testing::HasSubstr (PSTORE_NATIVE_TEXT ("Did you mean '--xx=value'")));
     EXPECT_EQ (output.str ().length (), 0U);
 }
 
@@ -213,7 +216,8 @@ TEST_F (ClCommandLine, MissingOptionName) {
     string_stream output;
     string_stream errors;
     EXPECT_FALSE (this->parse_command_line_options (output, errors));
-    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Unknown command line argument")));
+    EXPECT_THAT (errors.str (),
+                 testing::HasSubstr (PSTORE_NATIVE_TEXT ("Unknown command line argument")));
     EXPECT_EQ (output.str ().length (), 0U);
 }
 
@@ -245,7 +249,7 @@ TEST_F (ClCommandLine, RequiredStringPositional) {
     EXPECT_FALSE (res);
 
     EXPECT_THAT (errors.str (),
-                 testing::HasSubstr (NATIVE_TEXT ("a positional argument was missing")));
+                 testing::HasSubstr (PSTORE_NATIVE_TEXT ("a positional argument was missing")));
     EXPECT_EQ (output.str ().length (), 0U);
 
     EXPECT_EQ (option.get (), "");
@@ -395,7 +399,7 @@ TEST_F (ClCommandLine, MissingRequired) {
     EXPECT_FALSE (res);
 
     EXPECT_THAT (errors.str (),
-                 testing::HasSubstr (NATIVE_TEXT ("must be specified at least once")));
+                 testing::HasSubstr (PSTORE_NATIVE_TEXT ("must be specified at least once")));
     EXPECT_EQ (output.str ().length (), 0U);
 
     EXPECT_EQ (opt.get_num_occurrences (), 0U);
@@ -412,7 +416,7 @@ TEST_F (ClCommandLine, MissingValue) {
     bool const res = this->parse_command_line_options (output, errors);
     EXPECT_FALSE (res);
 
-    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("requires a value")));
+    EXPECT_THAT (errors.str (), testing::HasSubstr (PSTORE_NATIVE_TEXT ("requires a value")));
     EXPECT_EQ (output.str ().length (), 0U);
 
     EXPECT_EQ (opt.get (), "");
@@ -426,7 +430,8 @@ TEST_F (ClCommandLine, UnwantedValue) {
     string_stream output;
     string_stream errors;
     EXPECT_FALSE (this->parse_command_line_options (output, errors));
-    EXPECT_THAT (errors.str (), ::testing::HasSubstr (NATIVE_TEXT ("does not take a value")));
+    EXPECT_THAT (errors.str (),
+                 ::testing::HasSubstr (PSTORE_NATIVE_TEXT ("does not take a value")));
     EXPECT_EQ (output.str ().length (), 0U);
     EXPECT_FALSE (opt.get ());
 }

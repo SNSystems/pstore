@@ -55,16 +55,16 @@ int main (int argc, char * argv[]) {
                                                                        *opt.second_revision));
 
         auto output = pstore::dump::make_value (file);
-        out_stream << NATIVE_TEXT ("---\n") << *output << NATIVE_TEXT ("\n...\n");
+        out_stream << PSTORE_NATIVE_TEXT ("---\n") << *output << PSTORE_NATIVE_TEXT ("\n...\n");
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+        error_stream << PSTORE_NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
                      << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+        error_stream << PSTORE_NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

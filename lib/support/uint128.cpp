@@ -42,7 +42,8 @@ namespace {
             if (!digit) {
                 return nothing<std::uint64_t> ();
             }
-            result |= (static_cast<std::uint64_t> (digit.value ()) << shift);
+            result |=
+                (static_cast<std::uint64_t> (digit.value ()) << static_cast<unsigned> (shift));
         }
         return just (result);
     }

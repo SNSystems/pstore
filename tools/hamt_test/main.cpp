@@ -236,12 +236,12 @@ int main (int argc, char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        error_stream << NATIVE_TEXT ("An error occurred: ") << pstore::utf::to_native_string (ex.what ())
+        error_stream << PSTORE_NATIVE_TEXT ("An error occurred: ") << pstore::utf::to_native_string (ex.what ())
                      << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
+        error_stream << PSTORE_NATIVE_TEXT ("An unknown error occurred.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on
