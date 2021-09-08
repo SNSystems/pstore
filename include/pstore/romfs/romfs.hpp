@@ -35,7 +35,7 @@ namespace pstore {
             // The need for this constructor was removed by CWG defect 253 but Clang (prior
             // to 3.9.0) and GCC (before 4.6.4) require its presence.
             error_category () noexcept {} // NOLINT
-            char const * PSTORE_NONNULL name () const noexcept override;
+            char const * name () const noexcept override;
             std::string message (int error) const override;
         };
 
@@ -73,7 +73,7 @@ namespace pstore {
             descriptor & operator= (descriptor const & other) = default;
             descriptor & operator= (descriptor && other) = default;
 
-            std::size_t read (void * PSTORE_NONNULL buffer, std::size_t size, std::size_t count);
+            std::size_t read (gsl::not_null<void *> buffer, std::size_t size, std::size_t count);
             error_or<std::size_t> seek (off_t offset, int whence);
             struct stat stat () const;
 
@@ -95,7 +95,7 @@ namespace pstore {
             friend class romfs;
 
         public:
-            dirent const * PSTORE_NULLABLE read ();
+            dirent const * read ();
             void rewind ();
 
         private:
@@ -112,7 +112,7 @@ namespace pstore {
         //*                        *
         class romfs {
         public:
-            explicit romfs (directory const * PSTORE_NONNULL root);
+            explicit romfs (gsl::not_null<directory const *> root);
             romfs (romfs const &) noexcept = default;
             romfs (romfs &&) noexcept = default;
             ~romfs () noexcept = default;
@@ -120,12 +120,12 @@ namespace pstore {
             romfs & operator= (romfs const &) = delete;
             romfs & operator= (romfs &&) = delete;
 
-            error_or<descriptor> open (gsl::czstring PSTORE_NONNULL path) const;
-            error_or<dirent_descriptor> opendir (gsl::czstring PSTORE_NONNULL path);
-            error_or<struct stat> stat (gsl::czstring PSTORE_NONNULL path) const;
+            error_or<descriptor> open (gsl::not_null<gsl::czstring> path) const;
+            error_or<dirent_descriptor> opendir (gsl::not_null<gsl::czstring> path);
+            error_or<struct stat> stat (gsl::not_null<gsl::czstring> path) const;
 
             error_or<std::string> getcwd () const;
-            std::error_code chdir (gsl::czstring PSTORE_NONNULL path);
+            std::error_code chdir (gsl::not_null<gsl::czstring> path);
 
             /// \brief Check that the file system's structures are intact.
             ///
@@ -134,17 +134,14 @@ namespace pstore {
             bool fsck () const;
 
         private:
-            using dirent_ptr = dirent const * PSTORE_NONNULL;
+            using dirent_ptr = gsl::not_null<dirent const *>;
 
-            error_or<std::string> dir_to_string (directory const * const PSTORE_NONNULL dir) const;
+            error_or<std::string> dir_to_string (gsl::not_null<directory const *> dir) const;
 
-            static dirent const * PSTORE_NONNULL
-            directory_to_dirent (directory const * PSTORE_NONNULL d);
+            static gsl::not_null<dirent const *>
+            directory_to_dirent (gsl::not_null<directory const *> d);
 
-            static directory const * PSTORE_NONNULL
-            dirent_to_directory (dirent const * PSTORE_NONNULL de);
-
-            error_or<dirent_ptr> parse_path (gsl::czstring const PSTORE_NONNULL path) const {
+            error_or<dirent_ptr> parse_path (gsl::not_null<gsl::czstring> const path) const {
                 return parse_path (path, cwd_);
             }
 
@@ -155,15 +152,14 @@ namespace pstore {
             ///
             /// \param path The path string to be parsed.
             /// \param start_dir  The directory to which the path is relative. Ignored if the
-            /// initial character of the \p path argument is a slash.
+            ///   initial character of the \p path argument is a slash.
             /// \returns  The directory entry described by the \p path argument or an error if the
-            /// string was not valid.
-            error_or<dirent_ptr> parse_path (gsl::czstring PSTORE_NONNULL path,
-                                             directory const * PSTORE_NONNULL start_dir) const;
+            ///   string was not valid.
+            error_or<dirent_ptr> parse_path (gsl::not_null<gsl::czstring> path,
+                                             gsl::not_null<directory const *> start_dir) const;
 
-
-            directory const * const PSTORE_NONNULL root_;
-            directory const * PSTORE_NONNULL cwd_;
+            gsl::not_null<directory const *> const root_;
+            gsl::not_null<directory const *> cwd_;
         };
 
     } // end namespace romfs

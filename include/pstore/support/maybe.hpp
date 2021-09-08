@@ -67,16 +67,17 @@ namespace pstore {
                       !std::is_same<typename details::remove_cvref_t<U>, maybe<T>>::value>::type>
         explicit maybe (U && value) noexcept (std::is_nothrow_move_constructible<T>::value &&
                                                   std::is_nothrow_copy_constructible<T>::value &&
-                                              !std::is_convertible<U &&, T>::value) {
+                                              !std::is_convertible<U &&, T>::value)
+                : valid_{true} {
 
             new (&storage_) T (std::forward<U> (value));
-            valid_ = true;
         }
 
         template <typename... Args>
-        explicit maybe (in_place_t const, Args &&... args) {
+        explicit maybe (in_place_t const in_place, Args &&... args)
+                : valid_{true} {
+            (void) in_place;
             new (&storage_) T (std::forward<Args> (args)...);
-            valid_ = true;
         }
 
         /// Copy constructor: If other contains a value, initializes the contained value with the
@@ -229,7 +230,8 @@ namespace pstore {
     }
 
     template <typename T, typename... Args>
-    constexpr decltype (auto) just (in_place_t const, Args &&... args) {
+    constexpr decltype (auto) just (in_place_t const in_place, Args &&... args) {
+        (void) in_place;
         return maybe<typename details::remove_cvref_t<T>>{in_place, std::forward<Args> (args)...};
     }
 

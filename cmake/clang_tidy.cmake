@@ -178,7 +178,6 @@ function (add_clang_tidy_target source_target)
 
         add_custom_target ("${tidy_target}"
             COMMAND "${tidy_path}"
-                    -checks=${clang_tidy_checks}
                     -header-filter="${PROJECT_SOURCE_DIR}/include/.*"
                     ${cpp_files}
                     --

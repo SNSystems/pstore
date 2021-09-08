@@ -68,23 +68,56 @@ namespace pstore {
     constexpr std::uint64_t fnv1_64_init = UINT64_C (0xcbf29ce484222325);
     constexpr std::uint64_t fnv1a_64_init = fnv1_64_init;
 
+    namespace fnv_details {
+
+#ifdef NO_FNV_GCC_OPTIMIZATION
+        /// 64 bit magic FNV-1a prime
+        constexpr auto fnv_64_prime = UINT64_C (0x100000001b3);
+#endif
+
+        inline std::uint64_t append (std::uint8_t const v, std::uint64_t hval) noexcept {
+            // xor the bottom with the current octet
+            hval ^= static_cast<std::uint64_t> (v);
+
+// multiply by the 64 bit FNV magic prime mod 2^64
+#ifdef NO_FNV_GCC_OPTIMIZATION
+            hval *= fnv_64_prime;
+#else
+            hval += (hval << 1U) + (hval << 4U) + (hval << 5U) + (hval << 7U) + (hval << 8U) +
+                    (hval << 40U);
+#endif
+            return hval;
+        }
+
+    } // end namespace fnv_details
+
 
     /// \brief Perform a 64 bit Fowler/Noll/Vo FNV-1a hash on a buffer.
-    /// \param buf  Start of buffer to hash
-    /// \param len Length of buffer in octets
+    /// \param buf  Buffer to hash
     /// \param hval  Previous hash value
     /// \returns 64 bit hash.
     /// \note  To use the recommended 64 bit FNV-1a hash, use fnv1a_64_init as the hval arg on the
-    /// first call to either fnv_64a_buf() or fnv_64a_str().
-    std::uint64_t fnv_64a_buf (void const * buf, std::size_t len,
-                               std::uint64_t hval = fnv1a_64_init) noexcept;
+    ///   first call to either fnv_64a_buf() or fnv_64a_str().
+    template <typename ElementType, std::ptrdiff_t Extent>
+    std::uint64_t fnv_64a_buf (gsl::span<ElementType, Extent> const buf,
+                               std::uint64_t const hval = fnv1a_64_init) noexcept {
+        // FNV-1a hash each octet of the buffer
+        auto result = hval;
+        for (auto const *it = reinterpret_cast<std::uint8_t const *> (buf.data ()),
+                        *const end = it + buf.size_bytes ();
+             it != end; ++it) {
+            result = fnv_details::append (*it, result);
+        }
+        return result;
+    }
+
 
     /// \brief perform a 64 bit Fowler/Noll/Vo FNV-1a hash on a buffer
     /// \param str  Start of the NUL-terminated string to hash
     /// \param hval  Previous hash value
     /// \returns 64 bit hash.
     /// \note  To use the recommended 64 bit FNV-1a hash, use fnv1a_64_init as the hval arg on the
-    /// first call to either fnv_64a_buf() or fnv_64a_str().
+    ///   first call to either fnv_64a_buf() or fnv_64a_str().
     std::uint64_t fnv_64a_str (gsl::czstring str, std::uint64_t hval = fnv1a_64_init) noexcept;
 
 
@@ -94,7 +127,7 @@ namespace pstore {
     struct fnv_64a_hash {
         template <typename Container>
         std::uint64_t operator() (Container const & c) const {
-            return fnv_64a_buf (c.data (), c.size ());
+            return fnv_64a_buf (gsl::make_span (c));
         }
     };
 

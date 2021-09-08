@@ -18,7 +18,7 @@
 
 #include <cstdlib>
 
-#include "pstore/support/portab.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace romfs {
@@ -28,7 +28,7 @@ namespace pstore {
         class directory {
         public:
             constexpr directory (std::size_t const size,
-                                 dirent const * const PSTORE_NONNULL members) noexcept
+                                 gsl::not_null<dirent const *> const members) noexcept
                     : size_{size}
                     , members_{members} {}
             template <std::size_t N>
@@ -47,8 +47,10 @@ namespace pstore {
             directory & operator= (directory const &) = delete;
             directory & operator= (directory &&) = delete;
 
-            dirent const * PSTORE_NONNULL begin () const { return members_; }
-            dirent const * PSTORE_NONNULL end () const;
+            using iterator = dirent const *;
+            iterator begin () const noexcept { return members_; }
+            iterator end () const noexcept;
+
             std::size_t size () const noexcept { return size_; }
             dirent const & operator[] (std::size_t pos) const noexcept;
 
@@ -61,11 +63,10 @@ namespace pstore {
             /// \param length  The number of code units in \p name.
             /// \returns A pointer to the relevant directory entry, if the name was found or nullptr
             ///          if it was not.
-            dirent const * PSTORE_NULLABLE find (char const * PSTORE_NONNULL name,
-                                                 std::size_t length) const;
+            dirent const * find (gsl::not_null<char const *> name, std::size_t length) const;
 
             template <std::size_t Size>
-            dirent const * PSTORE_NULLABLE find (char const (&name)[Size]) const {
+            dirent const * find (char const (&name)[Size]) const {
                 return this->find (&name[0], Size - 1U);
             }
 
@@ -73,23 +74,23 @@ namespace pstore {
             ///
             /// \param d  The directory to be found.
             /// \returns  A pointer to the directory entry if found, or nullptr if not.
-            dirent const * PSTORE_NULLABLE find (directory const * PSTORE_NONNULL d) const;
+            dirent const * find (gsl::not_null<directory const *> d) const;
 
             /// Performs basic validity checks on a directory hierarchy.
             bool check () const;
 
         private:
             struct check_stack_entry {
-                directory const * PSTORE_NONNULL d;
-                check_stack_entry const * PSTORE_NULLABLE prev;
+                gsl::not_null<directory const *> d;
+                check_stack_entry const * prev;
             };
-            bool check (directory const * const PSTORE_NONNULL parent,
-                        check_stack_entry const * PSTORE_NULLABLE visited) const;
+            bool check (gsl::not_null<directory const *> const parent,
+                        check_stack_entry const * const visited) const;
 
             /// The number of entries in the members_ array.
             std::size_t const size_;
             /// An array of directory members.
-            dirent const * PSTORE_NONNULL members_;
+            gsl::not_null<dirent const *> const members_;
         };
 
     } // end namespace romfs

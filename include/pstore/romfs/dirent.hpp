@@ -52,21 +52,21 @@ namespace pstore {
 
         class dirent {
         public:
-            constexpr dirent (gsl::czstring const PSTORE_NONNULL name,
-                              void const * const PSTORE_NONNULL contents, stat const s) noexcept
+            constexpr dirent (gsl::not_null<gsl::czstring> const name,
+                              gsl::not_null<void const *> const contents, stat const s) noexcept
                     : name_{name}
                     , contents_{contents}
                     , stat_{s} {}
-            constexpr dirent (gsl::czstring const PSTORE_NONNULL name,
-                              directory const * const PSTORE_NONNULL dir) noexcept
+            constexpr dirent (gsl::not_null<gsl::czstring> const name,
+                              gsl::not_null<directory const *> const dir) noexcept
                     : name_{name}
                     , contents_{dir}
                     , stat_{sizeof (dir), 0 /*time*/, mode_t::directory} {}
 
-            constexpr gsl::czstring PSTORE_NONNULL name () const noexcept { return name_; }
-            constexpr void const * PSTORE_NONNULL contents () const noexcept { return contents_; }
+            constexpr gsl::not_null<gsl::czstring> name () const noexcept { return name_; }
+            constexpr gsl::not_null<void const *> contents () const noexcept { return contents_; }
 
-            error_or<class directory const * PSTORE_NONNULL> opendir () const;
+            error_or<gsl::not_null<class directory const *>> opendir () const;
 
             constexpr struct stat const & stat () const noexcept { return stat_; }
             constexpr bool is_directory () const noexcept {
@@ -74,8 +74,8 @@ namespace pstore {
             }
 
         private:
-            gsl::czstring PSTORE_NONNULL name_;
-            void const * PSTORE_NONNULL contents_;
+            gsl::not_null<gsl::czstring> const name_;
+            gsl::not_null<void const *> const contents_;
             struct stat stat_;
         };
 

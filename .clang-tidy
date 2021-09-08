@@ -1,5 +1,6 @@
 Checks: >
-  *
+  *,
+  -altera-*,
   -cert-dcl21-cpp,
   -cppcoreguidelines-avoid-c-arrays,
   -cppcoreguidelines-avoid-magic-numbers,
@@ -25,8 +26,8 @@ Checks: >
   -modernize-avoid-c-arrays,
   -modernize-pass-by-value,
   -modernize-use-trailing-return-type,
-  -readability-magic-numbers,
-  -readability-named-parameter
+  -readability-identifier-length,
+  -readability-magic-numbers
 
 CheckOptions:
   - { key: readability-identifier-naming.AbstractClassCase, value: lower_case }
@@ -83,4 +84,4 @@ CheckOptions:
   - { key: readability-identifier-naming.ValueTemplateParameterCase, value: CamelCase }
   - { key: readability-identifier-naming.VariableCase, value: lower_case }
   - { key: readability-identifier-naming.VirtualMethodCase, value: lower_case }
-  
+

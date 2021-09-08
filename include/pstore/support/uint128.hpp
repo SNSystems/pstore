@@ -61,7 +61,10 @@ namespace pstore {
         template <typename T, typename Enable = void>
         class high {
         public:
-            constexpr std::uint64_t operator() (T) const noexcept { return 0; }
+            constexpr std::uint64_t operator() (T const t) const noexcept {
+                (void) t;
+                return 0;
+            }
         };
 
         /// A function object which can extract the high 64-bits from an integer type. This partial

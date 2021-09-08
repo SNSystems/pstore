@@ -431,7 +431,8 @@ namespace std {
     template <typename StringType>
     struct hash<::pstore::sstring_view<StringType>> {
         size_t operator() (::pstore::sstring_view<StringType> const & str) const {
-            return static_cast<size_t> (::pstore::fnv_64a_buf (str.data (), str.length ()));
+            return static_cast<size_t> (
+                ::pstore::fnv_64a_buf (::pstore::gsl::make_span (str.begin (), str.end ())));
         }
     };
 

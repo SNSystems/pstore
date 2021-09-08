@@ -85,10 +85,10 @@ namespace pstore {
 
     std::error_category const & get_error_category ();
 
-    inline std::error_code make_error_code (error_code const e) {
-        static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
+    inline std::error_code make_error_code (error_code const erc) {
+        static_assert (std::is_same<std::underlying_type<decltype (erc)>::type, int>::value,
                        "base type of pstore::error_code must be int to permit safe static cast");
-        return {static_cast<int> (e), get_error_category ()};
+        return {static_cast<int> (erc), get_error_category ()};
     }
 
     // *************
@@ -106,8 +106,8 @@ namespace pstore {
         int err_;
     };
 
-    inline std::error_code make_error_code (errno_erc const e) noexcept {
-        return {e.get (), std::generic_category ()};
+    inline std::error_code make_error_code (errno_erc const erc) noexcept {
+        return {erc.get (), std::generic_category ()};
     }
 
 #ifdef _WIN32
@@ -146,35 +146,35 @@ namespace pstore {
 
     template <typename Exception, typename = typename std::enable_if<
                                       std::is_base_of<std::exception, Exception>::value>::type>
-    PSTORE_NO_RETURN void raise_exception (Exception const & ex) {
+    PSTORE_NO_RETURN void raise_exception (Exception const & exc) {
 #ifdef PSTORE_EXCEPTIONS
-        throw ex;
+        throw exc;
 #else
 #    ifdef _WIN32
-        std::wcerr << L"Error: " << utf::win32::to16 (ex.what ()) << L'\n';
+        std::wcerr << L"Error: " << utf::win32::to16 (exc.what ()) << L'\n';
 #    else
-        std::cerr << "Error: " << ex.what () << '\n';
+        std::cerr << "Error: " << exc.what () << '\n';
 #    endif // _WIN32
         std::exit (EXIT_FAILURE);
 #endif     // PSTORE_EXCEPTIONS
     }
 
     template <typename ErrorCode>
-    PSTORE_NO_RETURN void raise_error_code (ErrorCode e) {
-        raise_exception (std::system_error{e});
+    PSTORE_NO_RETURN void raise_error_code (ErrorCode erc) {
+        raise_exception (std::system_error{erc});
     }
     template <typename ErrorCode, typename StrType>
-    PSTORE_NO_RETURN void raise_error_code (ErrorCode e, StrType const & what) {
-        raise_exception (std::system_error{e, what});
+    PSTORE_NO_RETURN void raise_error_code (ErrorCode erc, StrType const & what) {
+        raise_exception (std::system_error{erc, what});
     }
 
     template <typename ErrorType>
-    PSTORE_NO_RETURN void raise (ErrorType e) {
-        raise_error_code (make_error_code (e));
+    PSTORE_NO_RETURN void raise (ErrorType erc) {
+        raise_error_code (make_error_code (erc));
     }
     template <typename ErrorType, typename StrType>
-    PSTORE_NO_RETURN void raise (ErrorType e, StrType const & what) {
-        raise_error_code (make_error_code (e), what);
+    PSTORE_NO_RETURN void raise (ErrorType erc, StrType const & what) {
+        raise_error_code (make_error_code (erc), what);
     }
 
 } // end namespace pstore

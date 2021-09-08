@@ -57,49 +57,14 @@
 
 #include "pstore/support/fnv.hpp"
 
-namespace {
-
-#ifdef NO_FNV_GCC_OPTIMIZATION
-    /// 64 bit magic FNV-1a prime
-    constexpr auto fnv_64_prime = UINT64_C (0x100000001b3);
-#endif
-
-    inline std::uint64_t append (std::uint8_t const v, std::uint64_t hval) noexcept {
-        // xor the bottom with the current octet
-        hval ^= static_cast<std::uint64_t> (v);
-
-// multiply by the 64 bit FNV magic prime mod 2^64
-#ifdef NO_FNV_GCC_OPTIMIZATION
-        hval *= fnv_64_prime;
-#else
-        hval += (hval << 1U) + (hval << 4U) + (hval << 5U) + (hval << 7U) + (hval << 8U) +
-                (hval << 40U);
-#endif
-        return hval;
-    }
-
-} // end anonymous namespace
 
 namespace pstore {
-
-    std::uint64_t fnv_64a_buf (void const * const buf, std::size_t const len,
-                               std::uint64_t const hval) noexcept {
-        // FNV-1a hash each octet of the buffer
-        auto const * it = static_cast<uint8_t const *> (buf);
-        auto const * const end = it + len;
-        auto result = hval;
-        for (; it < end; ++it) {
-            result = append (*it, result);
-        }
-        return result;
-    }
-
 
     std::uint64_t fnv_64a_str (gsl::czstring const str, std::uint64_t const hval) noexcept {
         // FNV-1a hash each octet of the string
         auto result = hval;
         for (auto const * s = reinterpret_cast<uint8_t const *> (str); *s != '\0'; ++s) {
-            result = append (*s, result);
+            result = fnv_details::append (*s, result);
         }
         return result;
     }
