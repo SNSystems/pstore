@@ -62,7 +62,7 @@ TYPED_TEST (SparseArray, InitializerListIndicesHasIndex) {
 
 TYPED_TEST (SparseArray, TwoArgCtor) {
     using array_type = sparse_array<with_default_ctor, TypeParam>;
-    std::array<unsigned const, 3> const indices{{0U, 2U, 4U}};
+    constexpr std::array<unsigned const, 3> indices{{0U, 2U, 4U}};
     typename std::aligned_storage_t<array_type::size_bytes (indices.size ()), alignof (array_type)>
         storage;
     array_type * arrp = new (&storage) array_type{indices.begin (), indices.end ()};
