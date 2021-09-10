@@ -17,7 +17,9 @@
 #include "pstore/adt/sparse_array.hpp"
 
 #include <array>
+#include <bitset>
 #include <set>
+#include <type_traits>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -32,6 +34,10 @@ namespace {
     using bitmap_test_types =
         ::testing::Types<std::uint16_t, std::uint32_t, std::uint64_t, pstore::uint128>;
 
+    struct with_default_ctor {
+        int a = 37;
+    };
+
 } // end anonymous namespace
 
 #ifdef PSTORE_IS_INSIDE_LLVM
@@ -41,12 +47,39 @@ TYPED_TEST_SUITE (SparseArray, bitmap_test_types, );
 #endif
 
 TYPED_TEST (SparseArray, InitializerListIndicesHasIndex) {
-    auto arrp = sparse_array<int, TypeParam>::make_unique ({0, 2, 4});
+    auto arrp = sparse_array<with_default_ctor, TypeParam>::make_unique ({0, 2, 4});
+    auto & arr = *arrp;
+
     std::array<bool, 256> indices{{true, false, true, false, true}};
 
     for (auto ctr = 0U; ctr < indices.size (); ++ctr) {
-        EXPECT_EQ (arrp->has_index (ctr), indices[ctr]);
+        EXPECT_EQ (arr.has_index (ctr), indices[ctr]);
     }
+    EXPECT_EQ (arr[0].a, 37);
+    EXPECT_EQ (arr[2].a, 37);
+    EXPECT_EQ (arr[4].a, 37);
+}
+
+TYPED_TEST (SparseArray, TwoArgCtor) {
+    using array_type = sparse_array<with_default_ctor, TypeParam>;
+    std::array<unsigned const, 3> const indices{{0U, 2U, 4U}};
+    typename std::aligned_storage_t<array_type::size_bytes (indices.size ()), alignof (array_type)>
+        storage;
+    array_type * arrp = new (&storage) array_type{indices.begin (), indices.end ()};
+    array_type & arr = *arrp;
+
+    std::bitset<256> valid_indices;
+    valid_indices.reset ();
+    for (unsigned const ind : indices) {
+        valid_indices.set (ind);
+    }
+
+    for (auto ctr = 0U; ctr < valid_indices.size (); ++ctr) {
+        EXPECT_EQ (arr.has_index (ctr), valid_indices.test (ctr));
+    }
+    EXPECT_EQ (arr[0].a, 37);
+    EXPECT_EQ (arr[2].a, 37);
+    EXPECT_EQ (arr[4].a, 37);
 }
 
 TYPED_TEST (SparseArray, InitializeWithIndexAndValue) {

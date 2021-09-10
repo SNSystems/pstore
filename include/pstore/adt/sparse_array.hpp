@@ -505,7 +505,17 @@ namespace pstore {
     template <typename IteratorIdx>
     sparse_array<ValueType, BitmapType>::sparse_array (IteratorIdx first_index,
                                                        IteratorIdx last_index)
-            : bitmap_{bitmap (first_index, last_index)} {}
+            : bitmap_{sparse_array<ValueType, BitmapType>::bitmap (first_index, last_index)} {
+        // The first element will have been default-constructed by the compiler.
+        if (first_index != last_index) {
+            ++first_index;
+        }
+        auto out = &elements_[1];
+        // Default-construct the remaining objects.
+        for (; first_index != last_index; ++first_index, ++out) {
+            new (out) ValueType ();
+        }
+    }
 
     // (dtor)
     // ~~~~~~
