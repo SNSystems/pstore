@@ -74,9 +74,9 @@ namespace pstore {
         }
 
         template <typename... Args>
-        explicit maybe (in_place_t const in_place, Args &&... args)
+        explicit maybe (in_place_t const inp, Args &&... args)
                 : valid_{true} {
-            (void) in_place;
+            (void) inp;
             new (&storage_) T (std::forward<Args> (args)...);
         }
 
@@ -230,8 +230,8 @@ namespace pstore {
     }
 
     template <typename T, typename... Args>
-    constexpr decltype (auto) just (in_place_t const in_place, Args &&... args) {
-        (void) in_place;
+    constexpr decltype (auto) just (in_place_t const inp, Args &&... args) {
+        (void) inp;
         return maybe<typename details::remove_cvref_t<T>>{in_place, std::forward<Args> (args)...};
     }
 

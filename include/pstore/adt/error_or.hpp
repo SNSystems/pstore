@@ -73,8 +73,9 @@ namespace pstore {
         }
 
         template <typename... Args>
-        explicit error_or (in_place_t const, Args &&... args)
+        explicit error_or (in_place_t const inp, Args &&... args)
                 : has_error_{false} {
+            (void) inp;
             new (get_storage ()) storage_type (std::forward<Args> (args)...);
         }
 
@@ -82,6 +83,7 @@ namespace pstore {
 
         template <typename Other,
                   typename = typename std::enable_if<std::is_convertible<Other, T>::value>::type>
+        // NOLINTNEXTLINE(hicpp-explicit-conversions)
         error_or (error_or<Other> const & rhs) {
             copy_construct (rhs);
         }
@@ -90,6 +92,7 @@ namespace pstore {
 
         template <typename Other,
                   typename = typename std::enable_if<std::is_convertible<Other, T>::value>::type>
+        // NOLINTNEXTLINE(hicpp-explicit-conversions)
         error_or (error_or<Other> && rhs) noexcept {
             move_construct (std::move (rhs));
         }
@@ -168,7 +171,9 @@ namespace pstore {
         }
 
         template <typename T1, typename T2>
-        static constexpr bool same_object (T1 const &, T2 const &) noexcept {
+        static constexpr bool same_object (T1 const & lhs, T2 const & rhs) noexcept {
+            (void) lhs;
+            (void) rhs;
             return false;
         }
 
