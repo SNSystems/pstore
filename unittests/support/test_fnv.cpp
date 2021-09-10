@@ -538,8 +538,9 @@ namespace {
 TEST (Fnv, StandardVectors) {
     auto test_num = 1; // test vector that failed, starting at 1.
     for (test_vector const * t = fnv_test_str; t->buf != nullptr; ++t, ++test_num) {
-        std::uint64_t hval = pstore::fnv_64a_buf (
-            pstore::gsl::make_span (reinterpret_cast<std::uint8_t const *> (t->buf), t->len));
+        auto const * const first = reinterpret_cast<std::uint8_t const *> (t->buf);
+        std::uint64_t const hval = pstore::fnv_64a_buf (
+            pstore::gsl::make_span (first, first + t->len));
         EXPECT_EQ (hval, fnv1a_64_vector[test_num - 1].fnv1a_64) << "failed test # " << test_num;
     }
 }
