@@ -81,12 +81,12 @@ namespace pstore {
             // ~~~~~~~~~~
             template <typename OutputIterator>
             std::error_code debug_line_section<OutputIterator>::end_object () {
+                if (!seen_.all ()) {
+                    return error::incomplete_debug_line_section;
+                }
                 maybe<index::digest> const digest = uint128::from_hex_string (header_digest_);
                 if (!digest) {
                     return error::bad_digest;
-                }
-                if (!seen_.all ()) {
-                    return error::incomplete_debug_line_section;
                 }
 
                 database * const db = this->get_context ()->db;
