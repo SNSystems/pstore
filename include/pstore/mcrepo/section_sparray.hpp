@@ -113,12 +113,6 @@ namespace pstore {
             static_assert (std::is_unsigned<index_type>::value,
                            "section-kind underlying type should be unsigned");
 
-            /// Returns the maximum section-kind value.
-            static constexpr auto max_section_kind () noexcept
-                -> std::underlying_type_t<section_kind> {
-                return static_cast<std::underlying_type_t<section_kind>> (section_kind::last);
-            }
-
             /// Returns true if the value_type of Iterator is section_kind.
             template <typename Iterator>
             static constexpr bool is_section_kind_iterator () {
@@ -127,7 +121,8 @@ namespace pstore {
                                     section_kind>::value;
             }
 
-            using array_type = sparse_array<T, sparray_bitmap_t<max_section_kind ()>>;
+            using array_type =
+                sparse_array<T, sparray_bitmap_t<static_cast<index_type> (section_kind::last)>>;
 
         public:
             using value_type = typename array_type::value_type;

@@ -18,23 +18,26 @@
 #include <algorithm>
 #include <cstring>
 
-using namespace pstore;
+#include "pstore/support/unsigned_cast.hpp"
+
+using pstore::gsl::czstring;
+using pstore::gsl::not_null;
 
 namespace {
 
-    std::pair<gsl::czstring, gsl::czstring> path_component (gsl::czstring const path) {
+    std::pair<czstring, czstring> path_component (czstring const path) {
         if (path == nullptr) {
             return {nullptr, nullptr};
         }
-        gsl::czstring p = path;
+        czstring p = path;
         while (*p != '\0' && *p != '/') {
             ++p;
         }
         return {path, p};
     }
 
-    gsl::not_null<gsl::czstring> next_component (gsl::not_null<gsl::czstring> const path) {
-        gsl::czstring p = path.get ();
+    not_null<czstring> next_component (not_null<czstring> const path) {
+        czstring p = path;
         while (*p == '/') {
             ++p;
         }
@@ -54,7 +57,7 @@ namespace pstore {
         char const * error_category::name () const noexcept { return "pstore-romfs category"; }
 
         std::string error_category::message (int const error) const {
-            auto * result = "unknown error";
+            gsl::czstring result = "unknown error";
             switch (static_cast<error_code> (error)) {
             case error_code::einval: result = "There was an invalid operation"; break;
             case error_code::enoent: result = "The path was not found"; break;
@@ -92,8 +95,8 @@ namespace pstore {
             open_file & operator= (open_file const &) = delete;
             open_file & operator= (open_file &&) = delete;
 
-            error_or<std::size_t> seek (off_t offset, int whence);
-            std::size_t read (gsl::not_null<void *> buffer, std::size_t size, std::size_t count);
+            error_or<std::size_t> seek (off_t offset, seek_mode whence);
+            std::size_t read (not_null<void *> buffer, std::size_t size, std::size_t count);
             struct stat stat () {
                 return dir_.stat ();
             }
@@ -105,7 +108,7 @@ namespace pstore {
 
         // read
         // ~~~~
-        std::size_t open_file::read (gsl::not_null<void *> const b, std::size_t const size,
+        std::size_t open_file::read (not_null<void *> const b, std::size_t const size,
                                      std::size_t const count) {
             if (size == 0 || count == 0) {
                 return 0;
@@ -113,7 +116,8 @@ namespace pstore {
             auto const file_size =
                 std::make_unsigned<off_t>::type (std::max (dir_.stat ().size, std::size_t{0}));
             auto num_read = std::size_t{0};
-            auto start = reinterpret_cast<std::uint8_t const *> (dir_.contents ().get ()) + pos_;
+            auto const * start =
+                reinterpret_cast<std::uint8_t const *> (dir_.contents ().get ()) + pos_;
             void * buffer = b;
             for (; num_read < count; ++num_read) {
                 if (pos_ + size > file_size) {
@@ -129,21 +133,21 @@ namespace pstore {
 
         // seek
         // ~~~~
-        error_or<std::size_t> open_file::seek (off_t const offset, int const whence) {
+        error_or<std::size_t> open_file::seek (off_t const offset, seek_mode const whence) {
             auto make_error = [] (error_code const erc) {
                 return error_or<std::size_t> (make_error_code (erc));
             };
             using uoff_type = std::make_unsigned<off_t>::type;
-            std::size_t new_pos;
+            std::size_t new_pos = 0;
             std::size_t const file_size = dir_.stat ().size;
             switch (whence) {
-            case SEEK_SET:
+            case seek_mode::set:
                 if (offset < 0) {
                     return make_error (error_code::einval);
                 }
                 new_pos = static_cast<uoff_type> (offset);
                 break;
-            case SEEK_CUR:
+            case seek_mode::cur:
                 if (offset < 0) {
                     auto const positive_offset = static_cast<uoff_type> (-offset);
                     if (positive_offset > pos_) {
@@ -154,16 +158,13 @@ namespace pstore {
                     new_pos = pos_ + static_cast<uoff_type> (offset);
                 }
                 break;
-            case SEEK_END:
+            case seek_mode::end:
                 if (offset < 0 && static_cast<std::size_t> (-offset) > file_size) {
                     return make_error (error_code::einval);
                 }
                 new_pos = (offset >= 0) ? (file_size + static_cast<uoff_type> (offset))
                                         : (file_size - static_cast<uoff_type> (-offset));
                 break;
-            default:
-                // Whence is not a proper value.
-                return make_error (error_code::einval);
             }
 
             pos_ = new_pos;
@@ -208,11 +209,11 @@ namespace pstore {
         //* / _` / -_|_-</ _| '_| | '_ \  _/ _ \ '_| *
         //* \__,_\___/__/\__|_| |_| .__/\__\___/_|   *
         //*                       |_|                *
-        std::size_t descriptor::read (gsl::not_null<void *> const buffer, std::size_t const size,
+        std::size_t descriptor::read (not_null<void *> const buffer, std::size_t const size,
                                       std::size_t const count) {
             return f_->read (buffer, size, count);
         }
-        error_or<std::size_t> descriptor::seek (off_t const offset, int const whence) {
+        error_or<std::size_t> descriptor::seek (off_t const offset, seek_mode const whence) {
             return f_->seek (offset, whence);
         }
         auto descriptor::stat () const -> struct stat {
@@ -237,9 +238,9 @@ namespace pstore {
         //* | '_/ _ \ '  \|  _(_-< *
         //* |_| \___/_|_|_|_| /__/ *
         //*                        *
-        // ctor
-        // ~~~~
-        romfs::romfs (gsl::not_null<directory const *> const root)
+        // (ctor)
+        // ~~~~~~
+        romfs::romfs (not_null<directory const *> const root)
                 : root_{root}
                 , cwd_{root} {
             PSTORE_ASSERT (this->fsck ());
@@ -247,7 +248,7 @@ namespace pstore {
 
         // open
         // ~~~~
-        auto romfs::open (gsl::not_null<gsl::czstring> const path) const -> error_or<descriptor> {
+        auto romfs::open (not_null<czstring> const path) const -> error_or<descriptor> {
             return this->parse_path (path) >>= [] (dirent_ptr const de) {
                 auto const file = std::make_shared<open_file> (*de);
                 return error_or<descriptor>{descriptor{file}};
@@ -256,7 +257,7 @@ namespace pstore {
 
         // opendir
         // ~~~~~~~
-        error_or<dirent_descriptor> romfs::opendir (gsl::not_null<gsl::czstring> const path) {
+        error_or<dirent_descriptor> romfs::opendir (not_null<czstring> const path) {
             auto get_directory = [] (dirent const * const de) {
                 using rett = error_or<directory const *>;
                 return de->is_directory () ? rett{de->opendir ()}
@@ -273,7 +274,7 @@ namespace pstore {
 
         // stat
         // ~~~~
-        error_or<struct stat> romfs::stat (gsl::not_null<gsl::czstring> const path) const {
+        error_or<struct stat> romfs::stat (not_null<czstring> const path) const {
             return this->parse_path (path) >>=
                    [] (dirent_ptr const de) { return error_or<struct stat>{de->stat ()}; };
         }
@@ -284,7 +285,7 @@ namespace pstore {
 
         // chdir
         // ~~~~~
-        std::error_code romfs::chdir (gsl::not_null<gsl::czstring> const path) {
+        std::error_code romfs::chdir (not_null<czstring> const path) {
             auto const dirent_to_directory = [] (dirent_ptr const de) { return de->opendir (); };
 
             auto const set_cwd = [this] (directory const * const d) {
@@ -298,18 +299,17 @@ namespace pstore {
 
         // directory to dirent [static]
         // ~~~~~~~~~~~~~~~~~~~
-        gsl::not_null<dirent const *>
-        romfs::directory_to_dirent (gsl::not_null<directory const *> const d) {
-            auto * const r = d->find ("..");
-            PSTORE_ASSERT (r != nullptr && r->is_directory ());
-            return static_cast<dirent const *> (r);
+        not_null<dirent const *> romfs::directory_to_dirent (not_null<directory const *> const d) {
+            directory::iterator const dotdot_pos = d->find ("..");
+            PSTORE_ASSERT (dotdot_pos != d->end () && dotdot_pos->is_directory ());
+            return static_cast<dirent const *> (&*dotdot_pos);
         }
 
         // parse path
         // ~~~~~~~~~~
-        auto  romfs::parse_path (gsl::not_null<gsl::czstring> const path,
-                                                gsl::not_null<directory const *> dir) const -> error_or<dirent_ptr> {
-            if (!path || !dir) {
+        auto romfs::parse_path (not_null<czstring> const path,
+                                not_null<directory const *> dir) const -> error_or<dirent_ptr> {
+            if (path.get () == nullptr || dir.get () == nullptr) {
                 return error_or<dirent_ptr> (make_error_code (error_code::enoent));
             }
 
@@ -329,14 +329,13 @@ namespace pstore {
                 p = next_component (tail);
 
                 PSTORE_ASSERT (tail > component);
-                current_de = dir->find (
-                    component,
-                    static_cast<std::make_unsigned<std::ptrdiff_t>::type> (tail - component));
-                if (current_de == nullptr) {
+                auto const component_pos = dir->find (component, unsigned_cast (tail - component));
+                if (component_pos == dir->end ()) {
                     // name not found
                     return error_or<dirent_ptr>{make_error_code (error_code::enoent)};
                 }
 
+                current_de = &*component_pos;
                 if (current_de->is_directory ()) {
                     auto eo_directory = current_de->opendir ();
                     if (!eo_directory) {
@@ -351,25 +350,24 @@ namespace pstore {
             return error_or<dirent_ptr>{current_de};
         }
 
-        // dir_to_string
+        // dir to string
         // ~~~~~~~~~~~~~
-        error_or<std::string>
-        romfs::dir_to_string (gsl::not_null<directory const *> const dir) const {
+        error_or<std::string> romfs::dir_to_string (not_null<directory const *> const dir) const {
             if (dir == root_) {
                 return error_or<std::string>{"/"};
             }
-            dirent const * const parent_de = dir->find ("..");
-            PSTORE_ASSERT (parent_de != nullptr && "All directories must contain a '..' entry");
+            auto const parent_de = dir->find ("..");
+            PSTORE_ASSERT (parent_de != dir->end () && "All directories must contain a '..' entry");
             return parent_de->opendir () >>=
-                   [this, dir] (gsl::not_null<directory const *> const parent) {
+                   [this, dir] (not_null<directory const *> const parent) {
                        return this->dir_to_string (parent) >>= [dir, parent] (std::string s) {
                            PSTORE_ASSERT (s.length () > 0);
                            if (s.back () != '/') {
                                s += '/';
                            }
 
-                           dirent const * const p = parent->find (dir);
-                           PSTORE_ASSERT (p != nullptr);
+                           auto const p = parent->find (dir);
+                           PSTORE_ASSERT (p != dir->end ());
                            return error_or<std::string> (s.append (p->name ().get ()));
                        };
                    };

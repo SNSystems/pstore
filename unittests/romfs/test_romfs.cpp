@@ -37,7 +37,7 @@ namespace {
     std::array<dirent, 3> const dir0_membs = {{
         {".", &dir0},
         {"..", &dir3},
-        {"foo", file1, pstore::romfs::stat{sizeof (file1), foo_mtime, pstore::romfs::mode_t::file}},
+        {"foo", file1, pstore::romfs::stat{sizeof (file1), pstore::romfs::mode_t::file, foo_mtime}},
     }};
     directory const dir0{dir0_membs};
     std::array<dirent, 4> const dir3_membs = {{
@@ -45,7 +45,7 @@ namespace {
         {"..", &dir3},
         {"dir", &dir0},
         {"hello", file2,
-         pstore::romfs::stat{sizeof (file2), hello_mtime, pstore::romfs::mode_t::file}},
+         pstore::romfs::stat{sizeof (file2), pstore::romfs::mode_t::file, hello_mtime}},
     }};
     directory const dir3{dir3_membs};
     directory const * const root = &dir3;
@@ -107,16 +107,16 @@ TEST_F (RomFs, OpenAndReadFile) {
 
     constexpr std::size_t file2_size = pstore::array_elements (file2);
     pstore::romfs::stat const & s = d.stat ();
-    EXPECT_EQ (s, (pstore::romfs::stat{file2_size, hello_mtime, pstore::romfs::mode_t::file}));
+    EXPECT_EQ (s, (pstore::romfs::stat{file2_size, pstore::romfs::mode_t::file, hello_mtime}));
 
     std::array<std::uint8_t, file2_size> buffer;
     EXPECT_EQ (d.read (buffer.data (), sizeof (std::uint8_t), buffer.size ()), buffer.size ());
     EXPECT_THAT (buffer, ::testing::ElementsAreArray (file2, file2_size));
     EXPECT_EQ (d.read (buffer.data (), sizeof (std::uint8_t), 1), 0U);
 
-    EXPECT_EQ (d.seek (0, SEEK_CUR), file2_size);
-    EXPECT_EQ (d.seek (0, SEEK_SET), std::size_t{0U});
-    EXPECT_EQ (d.seek (0, SEEK_CUR), 0);
+    EXPECT_EQ (d.seek (0, seek_mode::cur), file2_size);
+    EXPECT_EQ (d.seek (0, seek_mode::set), std::size_t{0U});
+    EXPECT_EQ (d.seek (0, seek_mode::cur), 0);
 }
 
 TEST_F (RomFs, OpenDir) {
@@ -144,23 +144,23 @@ TEST_F (RomFs, Seek) {
     std::uint8_t v;
     EXPECT_EQ (d.read (&v, sizeof (v), 1U), 1U);
     EXPECT_EQ (v, 104U);
-    pstore::error_or<std::size_t> eos = d.seek (0, SEEK_SET);
+    pstore::error_or<std::size_t> eos = d.seek (0, seek_mode::set);
     EXPECT_TRUE (static_cast<bool> (eos));
     EXPECT_EQ (*eos, 0U);
 
-    eos = d.seek (1, SEEK_SET);
+    eos = d.seek (1, seek_mode::set);
     EXPECT_TRUE (static_cast<bool> (eos));
     EXPECT_EQ (*eos, 1U);
 
-    eos = d.seek (0, SEEK_CUR);
+    eos = d.seek (0, seek_mode::cur);
     EXPECT_TRUE (static_cast<bool> (eos));
     EXPECT_EQ (*eos, 1U);
 
-    eos = d.seek (-2, SEEK_CUR);
+    eos = d.seek (-2, seek_mode::cur);
     EXPECT_FALSE (static_cast<bool> (eos)) << "Seek past start of file is disallowed";
     EXPECT_EQ (eos.get_error (), make_error_code (pstore::romfs::error_code::einval));
 
-    eos = d.seek (-1, SEEK_CUR);
+    eos = d.seek (-1, seek_mode::cur);
     EXPECT_TRUE (static_cast<bool> (eos)) << "Seek backwards inside the file should be allowed";
     EXPECT_EQ (*eos, 0U);
 }
@@ -170,11 +170,11 @@ TEST_F (RomFs, SeekPastEnd) {
     ASSERT_TRUE (static_cast<bool> (eod));
     descriptor & d = *eod;
 
-    pstore::error_or<std::size_t> eos = d.seek (3, SEEK_END);
+    pstore::error_or<std::size_t> eos = d.seek (3, seek_mode::end);
     EXPECT_TRUE (static_cast<bool> (eos)) << "Seek past EOF should be allowed";
     EXPECT_EQ (*eos, sizeof (file2) + 3U);
 
-    eos = d.seek (0, SEEK_CUR);
+    eos = d.seek (0, seek_mode::cur);
     EXPECT_TRUE (static_cast<bool> (eos)) << "Should get current position";
     EXPECT_EQ (*eos, sizeof (file2) + 3U);
 

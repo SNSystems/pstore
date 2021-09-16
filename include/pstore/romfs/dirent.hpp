@@ -30,11 +30,14 @@ namespace pstore {
         enum class mode_t { file, directory };
 
         struct stat {
-            constexpr stat (std::size_t const size_, std::time_t const mtime_,
-                            mode_t const m) noexcept
+            /// \param size_ File size in bytes.
+            /// \param mtime_ Time when file data was last modified.
+            /// \param mode_ File mode.
+            constexpr stat (std::size_t const size_, mode_t const mode_,
+                            std::time_t const mtime_) noexcept
                     : size{size_}
-                    , mtime{mtime_}
-                    , mode{m} {}
+                    , mode{mode_}
+                    , mtime{mtime_} {}
 
             constexpr bool operator== (stat const & rhs) const noexcept {
                 return size == rhs.size && mtime == rhs.mtime && mode == rhs.mode;
@@ -43,9 +46,9 @@ namespace pstore {
                 return !operator== (rhs);
             }
 
-            std::size_t size;  ///< File size in bytes.
-            std::time_t mtime; ///< Time when file data was last modified.
-            mode_t mode;
+            std::size_t const size;  ///< File size in bytes.
+            mode_t const mode;       ///< File mode.
+            std::time_t const mtime; ///< Time when file data was last modified.
         };
 
         class directory;
@@ -61,7 +64,7 @@ namespace pstore {
                               gsl::not_null<directory const *> const dir) noexcept
                     : name_{name}
                     , contents_{dir}
-                    , stat_{sizeof (dir), 0 /*time*/, mode_t::directory} {}
+                    , stat_{sizeof (dir), mode_t::directory, 0 /*time*/} {}
 
             constexpr gsl::not_null<gsl::czstring> name () const noexcept { return name_; }
             constexpr gsl::not_null<void const *> contents () const noexcept { return contents_; }

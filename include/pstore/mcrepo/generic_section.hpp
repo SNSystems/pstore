@@ -20,6 +20,7 @@
 #define PSTORE_MCREPO_GENERIC_SECTION_HPP
 
 #include <algorithm>
+#include <memory>
 #include <cstring>
 
 #include "pstore/adt/small_vector.hpp"
@@ -342,26 +343,17 @@ namespace pstore {
 
             if (d.first != d.second) {
                 data_size_ = generic_section::set_size<decltype (data_size_)> (d.first, d.second);
-                std::memcpy (p, d.first, data_size_);
-                p += data_size_;
+                p = std::uninitialized_copy (d.first, d.second, p);
             }
             if (i.first != i.second) {
-                auto * iout = aligned_ptr<internal_fixup> (p);
-                std::for_each (i.first, i.second, [&iout] (internal_fixup const & ifx) {
-                    new (iout) internal_fixup (ifx);
-                    ++iout;
-                });
-                p = reinterpret_cast<std::uint8_t *> (iout);
+                p = reinterpret_cast<std::uint8_t *> (
+                    std::uninitialized_copy (i.first, i.second, aligned_ptr<internal_fixup> (p)));
                 num_ifixups_ = generic_section::set_size<decltype (num_ifixups_)::value_type> (
                     i.first, i.second);
             }
             if (x.first != x.second) {
-                auto * xout = aligned_ptr<external_fixup> (p);
-                std::for_each (x.first, x.second, [&xout] (external_fixup const & xfx) {
-                    new (xout) external_fixup (xfx);
-                    ++xout;
-                });
-                p = reinterpret_cast<std::uint8_t *> (xout);
+                p = reinterpret_cast<std::uint8_t *> (
+                    std::uninitialized_copy (x.first, x.second, aligned_ptr<external_fixup> (p)));
                 num_xfixups_ =
                     generic_section::set_size<decltype (num_xfixups_)> (x.first, x.second);
             }

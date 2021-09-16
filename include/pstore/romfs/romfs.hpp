@@ -57,6 +57,17 @@ namespace pstore {
         class open_file;
         class open_directory;
 
+        /// Use to determine the interpretation of the offset parameter to descriptor::seek().
+        enum class seek_mode {
+            /// The seek offset is relative to the start of the file (equivalent to SEEK_SET).
+            set,
+            /// The seek offset is relative to the current position indicator (equivalent to
+            /// SEEK_CUR).
+            cur,
+            /// The seek offset is relative to the end of the file (equivalent to SEEK_END).
+            end
+        };
+
         //*     _                _      _            *
         //*  __| |___ ___ __ _ _(_)_ __| |_ ___ _ _  *
         //* / _` / -_|_-</ _| '_| | '_ \  _/ _ \ '_| *
@@ -74,7 +85,7 @@ namespace pstore {
             descriptor & operator= (descriptor && other) = default;
 
             std::size_t read (gsl::not_null<void *> buffer, std::size_t size, std::size_t count);
-            error_or<std::size_t> seek (off_t offset, int whence);
+            error_or<std::size_t> seek (off_t offset, seek_mode whence);
             struct stat stat () const;
 
         private:

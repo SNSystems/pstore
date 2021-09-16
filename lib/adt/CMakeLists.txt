@@ -20,6 +20,7 @@ set (pstore_adt_include_dir "${PSTORE_ROOT_DIR}/include/pstore/adt")
 set (pstore_adt_lib_includes
     chunked_sequence.hpp
     error_or.hpp
+    pointer_based_iterator.hpp
     small_vector.hpp
     sparse_array.hpp
     sstring_view.hpp

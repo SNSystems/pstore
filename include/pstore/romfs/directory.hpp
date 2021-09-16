@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 
+#include "pstore/adt/pointer_based_iterator.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
@@ -27,6 +28,8 @@ namespace pstore {
 
         class directory {
         public:
+            using iterator = pointer_based_iterator<dirent const>;
+
             constexpr directory (std::size_t const size,
                                  gsl::not_null<dirent const *> const members) noexcept
                     : size_{size}
@@ -47,8 +50,7 @@ namespace pstore {
             directory & operator= (directory const &) = delete;
             directory & operator= (directory &&) = delete;
 
-            using iterator = dirent const *;
-            iterator begin () const noexcept { return members_; }
+            iterator begin () const noexcept { return iterator{members_.get ()}; }
             iterator end () const noexcept;
 
             std::size_t size () const noexcept { return size_; }
@@ -61,20 +63,19 @@ namespace pstore {
             ///
             /// \param name  The name of the entry to be found.
             /// \param length  The number of code units in \p name.
-            /// \returns A pointer to the relevant directory entry, if the name was found or nullptr
-            ///          if it was not.
-            dirent const * find (gsl::not_null<char const *> name, std::size_t length) const;
+            /// \returns  An iterator to the directory entry if found, or end if not.
+            iterator find (gsl::not_null<char const *> name, std::size_t length) const;
 
             template <std::size_t Size>
-            dirent const * find (char const (&name)[Size]) const {
+            iterator find (char const (&name)[Size]) const {
                 return this->find (&name[0], Size - 1U);
             }
 
             /// Searchs the directory for a member which references the directory structure \p d.
             ///
             /// \param d  The directory to be found.
-            /// \returns  A pointer to the directory entry if found, or nullptr if not.
-            dirent const * find (gsl::not_null<directory const *> d) const;
+            /// \returns  An iterator to the directory entry if found, or end if not.
+            iterator find (gsl::not_null<directory const *> d) const;
 
             /// Performs basic validity checks on a directory hierarchy.
             bool check () const;
@@ -84,14 +85,15 @@ namespace pstore {
                 gsl::not_null<directory const *> d;
                 check_stack_entry const * prev;
             };
-            bool check (gsl::not_null<directory const *> const parent,
-                        check_stack_entry const * const visited) const;
+            bool check (gsl::not_null<directory const *> parent,
+                        check_stack_entry const * visited) const;
 
             /// The number of entries in the members_ array.
             std::size_t const size_;
             /// An array of directory members.
             gsl::not_null<dirent const *> const members_;
         };
+
 
     } // end namespace romfs
 } // end namespace pstore

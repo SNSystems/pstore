@@ -211,7 +211,7 @@ namespace pstore {
             // mkstemp() modifies its input parameter so that on return it contains
             // the actual name of the temporary file that was created.
             small_vector<char> buffer (path.length () + 1);
-            char * const out = std::copy (std::begin (path), std::end (path), std::begin (buffer));
+            auto out = std::copy (std::begin (path), std::end (path), std::begin (buffer));
             *out = '\0';
 
             file_ = ::mkstemp (buffer.data ());

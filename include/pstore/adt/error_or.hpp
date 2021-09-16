@@ -377,10 +377,7 @@ namespace std {
         return std::get<I> (*eon);
     }
 
-
 } // end namespace std
-
-
 
 namespace pstore {
     namespace details {
@@ -403,9 +400,9 @@ namespace pstore {
         template <>
         struct applier<std::size_t{0}> {
             template <typename Function, typename Tuple, typename... Args>
-            static auto apply (Function && f, Tuple &&, Args &&... a)
+            static auto apply (Function && f, Tuple && t, Args &&... a)
                 -> decltype (std::forward<Function> (f) (std::forward<Args> (a)...)) {
-
+                (void) t;
                 return std::forward<Function> (f) (std::forward<Args> (a)...);
             }
         };

@@ -25,6 +25,7 @@
 #include <initializer_list>
 #include <vector>
 
+#include "pstore/adt/pointer_based_iterator.hpp"
 #include "pstore/support/assert.hpp"
 #include "pstore/support/inherit_const.hpp"
 
@@ -47,8 +48,8 @@ namespace pstore {
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
 
-        using iterator = value_type *;
-        using const_iterator = value_type const *;
+        using iterator = pointer_based_iterator<value_type>;
+        using const_iterator = pointer_based_iterator<value_type const>;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -117,9 +118,9 @@ namespace pstore {
         /// \name Iterators
         ///@{
         /// Returns an iterator to the beginning of the container.
-        const_iterator begin () const noexcept { return buffer_; }
-        iterator begin () noexcept { return buffer_; }
-        const_iterator cbegin () noexcept { return buffer_; }
+        const_iterator begin () const noexcept { return const_iterator{buffer_}; }
+        iterator begin () noexcept { return iterator{buffer_}; }
+        const_iterator cbegin () noexcept { return const_iterator{buffer_}; }
         /// Returns a reverse iterator to the first element of the reversed
         /// container. It corresponds to the last element of the non-reversed
         /// container.
@@ -127,17 +128,17 @@ namespace pstore {
         const_reverse_iterator rbegin () const noexcept {
             return const_reverse_iterator{this->end ()};
         }
-        const_reverse_iterator rcbegin () noexcept { return const_reverse_iterator{this->end ()}; }
+        const_reverse_iterator rcbegin () noexcept { return const_reverse_iterator{this->cend ()}; }
 
         /// Returns an iterator to the end of the container.
-        const_iterator end () const noexcept { return buffer_ + elements_; }
-        iterator end () noexcept { return buffer_ + elements_; }
-        const_iterator cend () noexcept { return buffer_ + elements_; }
+        const_iterator end () const noexcept { return const_iterator{buffer_ + elements_}; }
+        iterator end () noexcept { return iterator{buffer_ + elements_}; }
+        const_iterator cend () noexcept { return const_iterator{buffer_ + elements_}; }
         reverse_iterator rend () noexcept { return reverse_iterator{this->begin ()}; }
         const_reverse_iterator rend () const noexcept {
             return const_reverse_iterator{this->begin ()};
         }
-        const_reverse_iterator rcend () noexcept { return const_reverse_iterator{this->begin ()}; }
+        const_reverse_iterator rcend () noexcept { return const_reverse_iterator{this->cbegin ()}; }
         ///@}
 
         /// \name Modifiers

@@ -1,4 +1,4 @@
-//===- unittests/adt/klee/cv/resize.cpp -----------------------------------===//
+//===- unittests/adt/klee/chunked_sequence/resize.cpp ---------------------===//
 //*                _          *
 //*  _ __ ___  ___(_)_______  *
 //* | '__/ _ \/ __| |_  / _ \ *

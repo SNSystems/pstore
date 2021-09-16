@@ -44,7 +44,7 @@ namespace {
         {".", &root_dir},
         {"..", &root_dir},
         {"index.html", reinterpret_cast<std::uint8_t const *> (index_html),
-         pstore::romfs::stat{index_size, index_mtime, pstore::romfs::mode_t::file}},
+         pstore::romfs::stat{index_size, pstore::romfs::mode_t::file, index_mtime}},
     }};
     pstore::romfs::directory const root_dir{root_dir_membs};
     pstore::romfs::directory const * const root = &root_dir;

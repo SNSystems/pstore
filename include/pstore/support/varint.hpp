@@ -92,6 +92,7 @@ namespace pstore {
             PSTORE_ASSERT (bytes < 9);
             // clang-format off
             switch (bytes) {
+            // NOLINTNEXTLINE(bugprone-branch-clone)
             case 8: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
             case 7: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
             case 6: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
@@ -139,6 +140,7 @@ namespace pstore {
             auto shift = 0U;
             // clang-format off
             switch (size) {
+            // NOLINTNEXTLINE(bugprone-branch-clone)
             case 8: result |= std::uint64_t{*(in++)} << shift; shift += 8; PSTORE_FALLTHROUGH;
             case 7: result |= std::uint64_t{*(in++)} << shift; shift += 8; PSTORE_FALLTHROUGH;
             case 6: result |= std::uint64_t{*(in++)} << shift; shift += 8; PSTORE_FALLTHROUGH;
