@@ -270,6 +270,7 @@ function (add_pstore_library)
         set_target_properties (${arg_TARGET} PROPERTIES
             CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
+            CXX_EXTENSIONS Off
             # Full path of all of the public include files.
             PUBLIC_HEADER "${include_files}"
             # Produce PIC so that pstore static libraries can be used in a shared library.
@@ -321,6 +322,7 @@ function (add_pstore_executable target)
         set_target_properties (${target} PROPERTIES
             CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
+            CXX_EXTENSIONS Off
         )
         pstore_enable_warnings (TARGET ${target})
         add_pstore_additional_compiler_flags (${target})
@@ -385,6 +387,7 @@ function (add_pstore_test_library target_name)
         set_target_properties (${target_name} PROPERTIES
             CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
+            CXX_EXTENSIONS Off
         )
         pstore_enable_warnings (TARGET ${target_name})
         add_pstore_additional_compiler_flags (${target_name})
@@ -410,6 +413,7 @@ function (add_pstore_unit_test target_name)
             FOLDER "pstore tests"
             CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
+            CXX_EXTENSIONS Off
         )
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
         pstore_enable_warnings (TARGET ${target_name} IS_UNIT_TEST)
