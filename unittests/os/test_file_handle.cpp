@@ -69,24 +69,26 @@ TYPED_TEST (SplitFixture, Small) {
 }
 
 TYPED_TEST (SplitFixture, Uint8Max) {
-    TypeParam * ptr = nullptr;
     constexpr std::size_t size = std::numeric_limits<std::uint8_t>::max ();
+    std::array<TypeParam, size> buffer{size, TypeParam{}};
+
     using ::testing::Return;
-    EXPECT_CALL (this->callback, call (ptr, size)).Times (1).WillOnce (Return (size));
+    EXPECT_CALL (this->callback, call (buffer.data (), size)).Times (1).WillOnce (Return (size));
 
     using pstore::file::details::split;
-    std::size_t const total = split<std::uint8_t> (ptr, size, this->callback);
+    std::size_t const total = split<std::uint8_t> (buffer.data (), size, this->callback);
     EXPECT_EQ (size, total);
 }
 
 TYPED_TEST (SplitFixture, Uint16Max) {
-    TypeParam * ptr = nullptr;
     constexpr std::size_t size = std::numeric_limits<std::uint16_t>::max ();
+    auto buffer = std::make_unique<TypeParam[]> (size);
+
     using ::testing::Return;
-    EXPECT_CALL (this->callback, call (ptr, size)).Times (1).WillOnce (Return (size));
+    EXPECT_CALL (this->callback, call (buffer.get (), size)).Times (1).WillOnce (Return (size));
 
     using pstore::file::details::split;
-    std::size_t const total = split<std::uint16_t> (ptr, size, this->callback);
+    std::size_t const total = split<std::uint16_t> (buffer.get (), size, this->callback);
     EXPECT_EQ (size, total);
 }
 
@@ -95,7 +97,9 @@ TYPED_TEST (SplitFixture, SplitUint16MaxPlus1) {
         TypeParam * ptr;
         std::size_t size;
     };
-    params const call1{nullptr, std::numeric_limits<std::uint16_t>::max ()};
+    auto buffer = std::make_unique<TypeParam[]> (std::numeric_limits<std::uint16_t>::max () + 1U);
+
+    params const call1{buffer.get (), std::numeric_limits<std::uint16_t>::max ()};
     params const call2{call1.ptr + call1.size, 1U};
     auto const total_size = call1.size + call2.size;
 
@@ -117,7 +121,10 @@ TYPED_TEST (SplitFixture, SplitUint8TwiceMaxPlus1) {
         TypeParam * ptr;
         std::size_t size;
     };
-    params const call1{nullptr, std::numeric_limits<std::uint8_t>::max ()};
+    auto buffer =
+        std::make_unique<TypeParam[]> (std::numeric_limits<std::uint8_t>::max () * 2U + 1U);
+
+    params const call1{buffer.get (), std::numeric_limits<std::uint8_t>::max ()};
     params const call2{call1.ptr + call1.size, std::numeric_limits<std::uint8_t>::max ()};
     params const call3{call2.ptr + call2.size, 1U};
     auto const total_size = call1.size + call2.size + call3.size;

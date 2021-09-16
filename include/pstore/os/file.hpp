@@ -110,13 +110,14 @@ namespace pstore {
             /// of contiguous elements to be processed.
             ///
             /// \param buffer The base address of the buffer to be processed by the provided
-            /// callback.
+            ///   callback.
             /// \param size  The total number of bytes to be processed.
             /// \param function  This function is called repeatedly to operate on each portion of
-            /// the with the buffer parameter.
+            ///   the buffer.
             /// \return The sum of the values returned by \p function.
             template <typename WidthType, typename PointeeType, typename Function>
             std::size_t split (PointeeType * buffer, std::size_t size, Function const & function) {
+                PSTORE_ASSERT (buffer != nullptr);
 
                 static_assert (sizeof (PointeeType) == sizeof (std::uint8_t),
                                "PointeeType must be a byte wide type");
