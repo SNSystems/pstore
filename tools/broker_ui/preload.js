@@ -13,7 +13,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-const {contextBridge, ipcRenderer, nativeTheme} = require ('electron')
+const {contextBridge, ipcRenderer} = require ('electron')
 
 contextBridge.exposeInMainWorld('bridgeAPI', {
     ipcRenderer : () => {
