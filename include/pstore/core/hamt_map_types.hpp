@@ -67,8 +67,8 @@ namespace pstore {
             constexpr unsigned max_tree_depth = max_internal_depth + 2U;
 
             enum : std::uintptr_t {
-                internal_node_bit = 1U << 0, /// Using LSB for marking internal nodes
-                heap_node_bit = 1U << 1,     /// Marks newly allocated internal nodes
+                internal_node_bit = 1U << 0U, /// Using LSB for marking internal nodes
+                heap_node_bit = 1U << 1U,     /// Marks newly allocated internal nodes
             };
 
             /// Provides the member constant `value` which is equal to true, if S the same as
