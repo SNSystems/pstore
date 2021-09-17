@@ -97,7 +97,7 @@ namespace pstore {
             all = ~none,
         };
 
-        inline constexpr extensions operator| (extensions a, extensions b) noexcept {
+        constexpr extensions operator| (extensions a, extensions b) noexcept {
             return static_cast<extensions> (static_cast<unsigned> (a) | static_cast<unsigned> (b));
         }
 
