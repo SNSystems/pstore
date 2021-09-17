@@ -32,14 +32,12 @@ namespace pstore {
 
 #define X(a)                                                                                       \
     case repo::linkage::a: return os << #a;
-        ostream_base & operator<< (ostream_base & os, linkage const l);
         ostream_base & operator<< (ostream_base & os, linkage const l) {
             switch (l) { PSTORE_REPO_LINKAGES }
             return os << "unknown";
         }
 #undef X
 
-        ostream_base & operator<< (ostream_base & os, visibility const v);
         ostream_base & operator<< (ostream_base & os, visibility const v) {
             switch (v) {
             case repo::visibility::default_vis: return os << "default";

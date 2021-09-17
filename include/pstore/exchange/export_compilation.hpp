@@ -33,16 +33,26 @@ namespace pstore {
 
             class ostream_base;
 
-            void emit_compilation (ostream_base & os, indent const ind, database const & db,
+            void emit_compilation (ostream_base & os, indent ind, database const & db,
                                    repo::compilation const & compilation,
                                    string_mapping const & strings, bool comments);
 
-            void emit_compilation_index (ostream_base & os, indent const ind, database const & db,
+            void emit_compilation_index (ostream_base & os, indent ind, database const & db,
                                          unsigned const generation, string_mapping const & strings,
                                          bool comments);
 
         } // end namespace export_ns
     }     // end namespace exchange
+
+    namespace repo {
+
+        exchange::export_ns::ostream_base & operator<< (exchange::export_ns::ostream_base & os,
+                                                        linkage l);
+
+        exchange::export_ns::ostream_base & operator<< (exchange::export_ns::ostream_base & os,
+                                                        visibility v);
+
+    } // end namespace repo
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_EXPORT_COMPILATION_HPP
