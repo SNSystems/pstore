@@ -40,7 +40,7 @@ function createWindow () {
     mainWindow.loadFile('index.html');
 
     // Open the DevTools.
-    main_window.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
@@ -49,8 +49,6 @@ function createWindow () {
         // when you should delete the corresponding element.
         mainWindow = null;
     });
-
-
 
     //ipcMain.handle('dark-mode:system', () => {nativeTheme.themeSource = 'system'})
     return mainWindow;

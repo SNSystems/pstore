@@ -61,7 +61,8 @@ function messageReceived (msg) {
         d3.select('#uptime').text(humanizeDuration(obj.uptime * 1000));
     }
     if (obj.hasOwnProperty('commits')) {
-        d3.select('#commits').text(obj.commits);
+        commits = obj.commits;
+        d3.select('#commits').text(commits);
     }
 }
 
