@@ -214,8 +214,7 @@ namespace pstore {
     // ~~~~~~
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (std::size_t const required_elements)
-            : elements_{required_elements}
-            , small_buffer_{} {
+            : elements_{required_elements} {
 
         if (!is_small (elements_)) {
             big_buffer_.resize (elements_);
@@ -224,8 +223,7 @@ namespace pstore {
     }
 
     template <typename ElementType, std::size_t BodyElements>
-    small_vector<ElementType, BodyElements>::small_vector () noexcept
-            : small_buffer_{} {
+    small_vector<ElementType, BodyElements>::small_vector () noexcept {
         this->set_buffer_ptr (elements_);
     }
 
@@ -266,12 +264,12 @@ namespace pstore {
     }
 
     template <typename ElementType, std::size_t BodyElements>
-    auto small_vector<ElementType, BodyElements>::operator= (small_vector const & rhs)
+    auto small_vector<ElementType, BodyElements>::operator= (small_vector const & other)
         -> small_vector & {
-        if (this != &rhs) {
+        if (this != &other) {
             this->clear ();
-            this->resize (rhs.size ());
-            std::copy (std::begin (rhs), std::end (rhs), std::begin (*this));
+            this->resize (other.size ());
+            std::copy (std::begin (other), std::end (other), std::begin (*this));
         }
         return *this;
     }
@@ -297,8 +295,8 @@ namespace pstore {
 
             // Update the buffer pointer and preserve the contents if we've switched from small to
             // larger buffer or vice-versa.
-            auto old_buffer = buffer_;
-            auto new_buffer = this->set_buffer_ptr (new_elements);
+            auto * const old_buffer = buffer_;
+            auto * const new_buffer = this->set_buffer_ptr (new_elements);
 
             if (is_small_before != is_small_after) {
                 std::copy (old_buffer, old_buffer + elements_, new_buffer);
