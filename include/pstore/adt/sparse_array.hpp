@@ -288,7 +288,7 @@ namespace pstore {
                 constexpr pointer operator-> () const noexcept { return pos_; }
 
                 const_iterator & operator++ () noexcept {
-                    bitmap_ >>= 1;
+                    bitmap_ >>= 1U;
                     ++pos_;
                     next ();
                     return *this;
@@ -308,7 +308,7 @@ namespace pstore {
 
             private:
                 void next () noexcept {
-                    for (; bitmap_ != 0U && (bitmap_ & 1U) == 0U; bitmap_ >>= 1) {
+                    for (; bitmap_ != 0U && (bitmap_ & 1U) == 0U; bitmap_ >>= 1U) {
                         ++pos_;
                     }
                 }
