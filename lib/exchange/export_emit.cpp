@@ -28,7 +28,7 @@ namespace pstore {
 
             void emit_digest (ostream_base & os, uint128 const d) {
                 std::array<char, uint128::hex_string_length> hex;
-                auto const out = d.to_hex (hex.begin ());
+                auto const * const out = d.to_hex (hex.begin ());
                 (void) out;
                 PSTORE_ASSERT (out == hex.end ());
                 os << '"';

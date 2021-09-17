@@ -510,7 +510,7 @@ namespace pstore {
         if (first_index != last_index) {
             ++first_index;
         }
-        auto out = &elements_[1];
+        auto * out = &elements_[1];
         // Default-construct the remaining objects.
         for (; first_index != last_index; ++first_index, ++out) {
             new (out) ValueType ();
