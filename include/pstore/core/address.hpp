@@ -440,9 +440,11 @@ namespace pstore {
     template <typename T>
     struct extent {
         constexpr extent () noexcept;
-        constexpr extent (typed_address<T> const addr_, std::uint64_t const size_) noexcept
-                : addr (addr_)
-                , size (size_) {}
+        /// \param a  The address of the start of the data.
+        /// \param s  The number of bytes of data.
+        constexpr extent (typed_address<T> const a, std::uint64_t const s) noexcept
+                : addr{a}
+                , size{s} {}
         extent (extent const & rhs) noexcept = default;
         extent (extent && rhs) noexcept = default;
         ~extent () noexcept = default;
