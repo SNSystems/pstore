@@ -24,8 +24,10 @@
 
 namespace pstore {
 
+#ifndef NDEBUG
     PSTORE_NO_RETURN
     void assert_failed (char const * str, char const * file, int line);
+#endif // NDEBUG
 
 } // end namespace pstore
 

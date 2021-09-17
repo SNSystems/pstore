@@ -18,53 +18,57 @@
 
 #include "pstore/support/assert.hpp"
 
-#include <array>
-#include <cstdlib>
-#include <iostream>
+#ifndef NDEBUG
 
-#ifdef _WIN32
-#    include <tchar.h>
-#endif // _WIN32
-
-#include "pstore/support/gsl.hpp"
-
-#include "backtrace.hpp"
+#    include <array>
+#    include <cstdlib>
+#    include <iostream>
 
 #    ifdef _WIN32
-#    define PSTORE_NATIVE_TEXT(str) _TEXT (str)
+#        include <tchar.h>
+#        define PSTORE_NATIVE_TEXT(str) _TEXT (str)
 #    else
-#    define PSTORE_NATIVE_TEXT(str) str
+#        define PSTORE_NATIVE_TEXT(str) str
 #    endif
+
+#    include "pstore/support/gsl.hpp"
+
+#    include "backtrace.hpp"
 
 namespace pstore {
 
     void assert_failed (gsl::czstring const str, gsl::czstring const file, int const line) {
-#ifdef _WIN32
+#    ifdef _WIN32
         auto & out_stream = std::wcerr;
-#else
+#    else
         auto & out_stream = std::cerr;
-#endif
+#    endif
         out_stream << PSTORE_NATIVE_TEXT ("Assert failed: (") << str
                    << PSTORE_NATIVE_TEXT ("), file ") << file << PSTORE_NATIVE_TEXT (", line ")
                    << line << std::endl;
 #    if PSTORE_HAVE_BACKTRACE
-        std::array<void *, 64U> callstack;
-        void ** const out = callstack.data ();
-        int const frames = ::backtrace (out, static_cast<int> (callstack.size ()));
+        {
+            std::array<void *, 64U> callstack;
+            void ** const out = callstack.data ();
+            int const frames = ::backtrace (out, static_cast<int> (callstack.size ()));
 
-        auto const deleter = [] (void * const p) {
-            if (p != nullptr) {
-                // NOLINTNEXTLINE(cppcoreguidelines-no-malloc, hicpp-no-malloc)
-                std::free (p);
-            }
-        };
-        std::unique_ptr<gsl::zstring, decltype (deleter)> const strs{
-            ::backtrace_symbols (out, frames), deleter};
-        auto * const begin = strs.get ();
-        std::copy (begin, begin + frames,
-                   std::ostream_iterator<gsl::czstring> (out_stream, PSTORE_NATIVE_TEXT ("\n")));
+            auto const deleter = [] (void * const p) {
+                if (p != nullptr) {
+                    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc, hicpp-no-malloc)
+                    std::free (p);
+                }
+            };
+            std::unique_ptr<gsl::zstring, decltype (deleter)> const strs{
+                ::backtrace_symbols (out, frames), deleter};
+            auto * const begin = strs.get ();
+            std::copy (
+                begin, begin + frames,
+                std::ostream_iterator<gsl::czstring> (out_stream, PSTORE_NATIVE_TEXT ("\n")));
+        }
 #    endif // PSTORE_HAVE_BACKTRACE
         std::abort ();
     }
 
 } // end namespace pstore
+
+#endif // NDEBUG
