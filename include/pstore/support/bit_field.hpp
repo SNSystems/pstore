@@ -176,14 +176,14 @@ namespace pstore {
         }
 
         bit_field & operator++ () noexcept { return operator+=(value_type{1}); }
-        bit_field const operator++ (int) noexcept {
+        bit_field operator++ (int) noexcept {
             bit_field const prev = *this;
             ++*this;
             return prev;
         }
 
         bit_field & operator-- () noexcept { return operator-=(value_type{1}); }
-        bit_field const operator-- (int) noexcept {
+        bit_field operator-- (int) noexcept {
             bit_field const prev = *this;
             --*this;
             return prev;
