@@ -30,22 +30,20 @@
 
 #include "backtrace.hpp"
 
-namespace {
-
 #    ifdef _WIN32
-    auto & out_stream = std::wcerr;
 #    define PSTORE_NATIVE_TEXT(str) _TEXT (str)
 #    else
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    auto & out_stream = std::cerr;
 #    define PSTORE_NATIVE_TEXT(str) str
 #    endif
 
-} // end anonymous namespace
-
 namespace pstore {
 
-    void assert_failed (gsl::czstring str, gsl::czstring file, int line) {
+    void assert_failed (gsl::czstring const str, gsl::czstring const file, int const line) {
+#ifdef _WIN32
+        auto & out_stream = std::wcerr;
+#else
+        auto & out_stream = std::cerr;
+#endif
         out_stream << PSTORE_NATIVE_TEXT ("Assert failed: (") << str
                    << PSTORE_NATIVE_TEXT ("), file ") << file << PSTORE_NATIVE_TEXT (", line ")
                    << line << std::endl;
@@ -54,14 +52,14 @@ namespace pstore {
         void ** const out = callstack.data ();
         int const frames = ::backtrace (out, static_cast<int> (callstack.size ()));
 
-        auto const deleter = [] (void * p) {
+        auto const deleter = [] (void * const p) {
             if (p != nullptr) {
                 // NOLINTNEXTLINE(cppcoreguidelines-no-malloc, hicpp-no-malloc)
                 std::free (p);
             }
         };
-        std::unique_ptr<gsl::zstring, decltype (deleter)> strs{::backtrace_symbols (out, frames),
-                                                               deleter};
+        std::unique_ptr<gsl::zstring, decltype (deleter)> const strs{
+            ::backtrace_symbols (out, frames), deleter};
         auto * const begin = strs.get ();
         std::copy (begin, begin + frames,
                    std::ostream_iterator<gsl::czstring> (out_stream, PSTORE_NATIVE_TEXT ("\n")));
