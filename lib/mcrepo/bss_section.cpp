@@ -36,9 +36,9 @@ namespace pstore {
                                std::numeric_limits<bss_section::size_type>::max () &&
                            "The BSS section is too large");
 
-            auto * const scn = new (out) bss_section (
-                section_->align, static_cast<bss_section::size_type> (section_->data.size ()));
-            return out + scn->size_bytes ();
+            new (out) bss_section (section_->align,
+                                   static_cast<bss_section::size_type> (section_->data.size ()));
+            return out + bss_section::size_bytes ();
         }
 
         std::uintptr_t
