@@ -106,7 +106,7 @@ namespace pstore {
             // ctor
             // ~~~~
             ostream::ostream (FILE * const os)
-                    : ostream_base (std::size_t{256 * 1024})
+                    : ostream_base (std::size_t{256} * 1024U)
                     , os_ (os) {}
 
             // dtor
@@ -122,10 +122,10 @@ namespace pstore {
             // flush buffer
             // ~~~~~~~~~~~~
             void ostream::flush_buffer (std::vector<char> const & buffer, std::size_t const size) {
-                auto * const begin = buffer.data ();
+                auto const * const begin = buffer.data ();
                 if (size > 0U) {
                     std::fwrite (begin, sizeof (char), size, os_);
-                    if (ferror (os_)) {
+                    if (std::ferror (os_) != 0) {
                         raise (error_code::write_failed);
                     }
                 }
