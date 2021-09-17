@@ -28,7 +28,7 @@ namespace pstore {
 
     namespace index {
 
-        inline index_base::~index_base () {}
+        inline index_base::~index_base () = default;
 
 #ifdef _WIN32
 #    pragma warning(push)
@@ -200,8 +200,13 @@ namespace pstore {
             hamt_map (database const & db,
                       typed_address<header_block> ip = typed_address<header_block>::null (),
                       Hash const & hash = Hash (), KeyEqual const & equal = KeyEqual ());
+            hamt_map (hamt_map const &) = delete;
+            hamt_map (hamt_map &&) noexcept = delete;
 
             ~hamt_map () override { this->clear (); }
+
+            hamt_map & operator= (hamt_map const &) = delete;
+            hamt_map & operator= (hamt_map &&) noexcept = delete;
 
             /// \name Iterators
             ///@{
@@ -348,7 +353,7 @@ namespace pstore {
             ///@{
 
             /// Read a leaf node from a store.
-            value_type load_leaf_node (database const & db, address const addr) const;
+            value_type load_leaf_node (database const & db, address addr) const;
 
             /// Returns the index root pointer.
             index_pointer root () const noexcept { return root_; }
@@ -375,7 +380,7 @@ namespace pstore {
             }
 
             /// Read a key from a store.
-            key_type get_key (database const & db, address const addr) const;
+            key_type get_key (database const & db, address addr) const;
 
             /// Called when the trie's top-level loop has descended as far as a leaf node. We need
             /// to convert that to an internal node.
@@ -410,7 +415,7 @@ namespace pstore {
                                        bool is_upsert) -> std::pair<index_pointer, bool>;
 
             template <typename OtherValueType>
-            auto insert_into_linear (transaction_base & transaction, index_pointer const node,
+            auto insert_into_linear (transaction_base & transaction, index_pointer node,
                                      OtherValueType const & value,
                                      gsl::not_null<parent_stack *> parents, bool is_upsert)
                 -> std::pair<index_pointer, bool>;
@@ -418,7 +423,7 @@ namespace pstore {
             /// Insert a new key/value pair into a existing node, which could be a leaf node, an
             /// internal store node or an internal heap node.
             template <typename OtherValueType>
-            auto insert_node (transaction_base & transaction, index_pointer const node,
+            auto insert_node (transaction_base & transaction, index_pointer node,
                               OtherValueType const & value, hash_type hash, unsigned shifts,
                               gsl::not_null<parent_stack *> parents, bool is_upsert)
                 -> std::pair<index_pointer, bool>;
