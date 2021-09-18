@@ -284,7 +284,7 @@ namespace pstore {
                     template <typename Ty>
                     auto put (Ty const & t) -> result_type {
                         auto const old_size = bytes_.size ();
-                        auto const first = reinterpret_cast<std::uint8_t const *> (&t);
+                        auto const * const first = reinterpret_cast<std::uint8_t const *> (&t);
                         std::copy (first, first + sizeof (Ty), std::back_inserter (bytes_));
                         return old_size;
                     }
@@ -292,7 +292,7 @@ namespace pstore {
                     template <typename SpanType>
                     auto putn (SpanType sp) -> result_type {
                         auto const old_size = bytes_.size ();
-                        auto const first = reinterpret_cast<std::uint8_t const *> (sp.data ());
+                        auto const * const first = reinterpret_cast<std::uint8_t const *> (sp.data ());
                         std::copy (first, first + sp.size_bytes (), std::back_inserter (bytes_));
                         return old_size;
                     }
