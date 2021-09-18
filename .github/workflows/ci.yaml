@@ -19,7 +19,7 @@ jobs:
 
 
                     - name: Ubuntu-latest/gcc-7.5/Debug
-                      apt_name: g++-7
+                      apt_install: g++-7
                       build_type: Debug
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
                       generator: Unix Makefiles
@@ -27,7 +27,7 @@ jobs:
                       os: ubuntu-latest
 
                     - name: Ubuntu-latest/gcc-7.5/Release
-                      apt_name: g++-7
+                      apt_install: g++-7
                       build_type: Release
                       cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
                       generator: Unix Makefiles
@@ -49,7 +49,7 @@ jobs:
 
 
                     - name: Ubuntu-latest/clang-8/Debug
-                      apt_name: clang-8
+                      apt_install: clang-8
                       build_type: Debug
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_C_COMPILER=clang-8
                       generator: Unix Makefiles
@@ -57,7 +57,7 @@ jobs:
                       os: ubuntu-latest
 
                     - name: Ubuntu-latest/clang-8/Release
-                      apt_name: clang-8
+                      apt_install: clang-8
                       build_type: Release
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_C_COMPILER=clang-8
                       generator: Unix Makefiles
@@ -65,10 +65,11 @@ jobs:
 
 
                     - name: Ubuntu-latest/clang-12/Debug
+                      apt_install: valgrind
                       build_type: Debug
                       cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-12 -DCMAKE_C_COMPILER=clang-12
                       generator: Unix Makefiles
-                      options: '-DPSTORE_ALWAYS_SPANNING=Yes -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold'
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes -DPSTORE_VALGRIND=Yes -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold'
                       os: ubuntu-latest
 
                     - name: Ubuntu-latest/clang-12/Release
@@ -100,8 +101,8 @@ jobs:
                   node-version: 12
 
             - name: Install Dependencies (Linux)
-              if: matrix.os == 'ubuntu-latest' && matrix.apt_name != ''
-              run: sudo apt-get install -y ${{ matrix.apt_name }}
+              if: matrix.os == 'ubuntu-latest' && matrix.apt_install != ''
+              run: sudo apt-get install -y ${{ matrix.apt_install }}
 
 
 
