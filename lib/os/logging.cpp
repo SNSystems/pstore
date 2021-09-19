@@ -385,7 +385,7 @@ namespace pstore {
         // get_current_thread_name
         // ~~~~~~~~~~~~~~~~~~~~~~~
         std::string basic_logger::get_current_thread_name () {
-            std::string name = threads::get_name ();
+            std::string const name = threads::get_name ();
             if (!name.empty ()) {
                 return name;
             }
