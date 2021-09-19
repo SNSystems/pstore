@@ -575,6 +575,8 @@ namespace pstore {
 
 } // end namespace pstore
 
+// std::swap may be specialized in namespace std for program-defined types
+// NOLINTNEXTLINE(cert-dcl58-cpp)
 namespace std {
 
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
