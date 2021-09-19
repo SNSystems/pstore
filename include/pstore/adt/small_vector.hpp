@@ -55,9 +55,10 @@ namespace pstore {
 
         /// Constructs the buffer with an initial size of 0.
         small_vector () noexcept;
-        /// Constructs the buffer with the given initial numbe of elements.
+        /// Constructs the buffer with the given initial number of elements.
         explicit small_vector (std::size_t required_elements);
-        explicit small_vector (std::initializer_list<ElementType> init);
+        /// Constructs the buffer with a given initial collection of values.
+        small_vector (std::initializer_list<ElementType> init);
         small_vector (small_vector && other) noexcept;
         small_vector (small_vector const & rhs);
 
