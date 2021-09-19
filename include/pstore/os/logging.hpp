@@ -56,7 +56,13 @@ namespace pstore {
             };
 
             logger () = default;
+            logger (logger const &) = delete;
+            logger (logger &&) noexcept = delete;
+
             virtual ~logger () noexcept = default;
+
+            logger & operator= (logger const &) = delete;
+            logger & operator= (logger &&) noexcept = delete;
 
             void set_priority (priority const p) noexcept { priority_ = p; }
             priority get_priority () const noexcept { return priority_; }
@@ -135,8 +141,14 @@ namespace pstore {
         class stdout_logger final : public file_logger {
         public:
             stdout_logger ()
-                    : file_logger (stdout) {}
+                    : file_logger{stdout} {}
+            stdout_logger (stdout_logger const &) = delete;
+            stdout_logger (stdout_logger &&) noexcept = delete;
+
             ~stdout_logger () noexcept override;
+
+            stdout_logger & operator= (stdout_logger const &) = delete;
+            stdout_logger & operator= (stdout_logger &&) noexcept = delete;
         };
 
         //*                                  *
@@ -146,19 +158,25 @@ namespace pstore {
         class stderr_logger final : public file_logger {
         public:
             stderr_logger ()
-                    : file_logger (stderr) {}
+                    : file_logger{stderr} {}
+            stderr_logger (stderr_logger const &) = delete;
+            stderr_logger (stderr_logger &&) noexcept = delete;
+
             ~stderr_logger () noexcept override;
+
+            stderr_logger & operator= (stderr_logger const &) = delete;
+            stderr_logger & operator= (stderr_logger &&) noexcept = delete;
         };
 
 
 
         struct file_system_traits {
-            bool exists (std::string const & path) { return pstore::file::exists (path); }
-            void rename (std::string const & from, std::string const & to) {
+            static bool exists (std::string const & path) { return pstore::file::exists (path); }
+            static void rename (std::string const & from, std::string const & to) {
                 pstore::file::file_handle f{from};
                 f.rename (to);
             }
-            static void unlink (std::string const & path) { pstore::file::unlink (path.c_str ()); }
+            static void unlink (std::string const & path) { pstore::file::unlink (path); }
         };
         struct fstream_traits {
             using stream_type = std::ofstream;
