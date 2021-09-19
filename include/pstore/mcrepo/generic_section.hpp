@@ -230,15 +230,15 @@ namespace pstore {
             std::uint64_t size () const noexcept { return data_size_; }
 
             container<std::uint8_t> payload () const noexcept {
-                auto * const begin = aligned_ptr<std::uint8_t> (this + 1);
+                auto const * const begin = aligned_ptr<std::uint8_t> (this + 1);
                 return {begin, begin + data_size_};
             }
             container<internal_fixup> ifixups () const {
-                auto * const begin = aligned_ptr<internal_fixup> (payload ().end ());
+                auto const * const begin = aligned_ptr<internal_fixup> (payload ().end ());
                 return {begin, begin + this->num_ifixups ()};
             }
             container<external_fixup> xfixups () const {
-                auto * const begin = aligned_ptr<external_fixup> (ifixups ().end ());
+                auto const * const begin = aligned_ptr<external_fixup> (ifixups ().end ());
                 return {begin, begin + num_xfixups_};
             }
 
