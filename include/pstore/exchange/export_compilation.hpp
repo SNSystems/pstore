@@ -38,7 +38,7 @@ namespace pstore {
                                    string_mapping const & strings, bool comments);
 
             void emit_compilation_index (ostream_base & os, indent ind, database const & db,
-                                         unsigned const generation, string_mapping const & strings,
+                                         unsigned generation, string_mapping const & strings,
                                          bool comments);
 
         } // end namespace export_ns

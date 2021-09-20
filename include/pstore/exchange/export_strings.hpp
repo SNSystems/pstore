@@ -71,7 +71,7 @@ namespace pstore {
                 ///
                 /// \param addr  The address of a string previously passed to the add() method.
                 /// \result The index of the string at \p addr in the exported names array.
-                std::uint64_t index (typed_address<indirect_string> const addr) const;
+                std::uint64_t index (typed_address<indirect_string> addr) const;
 
             private:
                 std::unordered_map<address, std::uint64_t> strings_;

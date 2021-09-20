@@ -51,22 +51,34 @@ namespace pstore {
 
             rule::~rule () = default;
 
-            std::error_code rule::int64_value (std::int64_t const) {
+            std::error_code rule::int64_value (std::int64_t const value) {
+                (void) value;
                 return error::unexpected_number;
             }
-            std::error_code rule::uint64_value (std::uint64_t const) {
+            std::error_code rule::uint64_value (std::uint64_t const value) {
+                (void) value;
                 return error::unexpected_number;
             }
-            std::error_code rule::double_value (double const) { return error::unexpected_number; }
-            std::error_code rule::boolean_value (bool const) { return error::unexpected_boolean; }
+            std::error_code rule::double_value (double const value) {
+                (void) value;
+                return error::unexpected_number;
+            }
+            std::error_code rule::boolean_value (bool const value) {
+                (void) value;
+                return error::unexpected_boolean;
+            }
             std::error_code rule::null_value () { return error::unexpected_null; }
             std::error_code rule::begin_array () { return error::unexpected_array; }
-            std::error_code rule::string_value (std::string const &) {
+            std::error_code rule::string_value (std::string const & value) {
+                (void) value;
                 return error::unexpected_string;
             }
             std::error_code rule::end_array () { return error::unexpected_end_array; }
             std::error_code rule::begin_object () { return error::unexpected_object; }
-            std::error_code rule::key (std::string const &) { return error::unexpected_object_key; }
+            std::error_code rule::key (std::string const & key) {
+                (void) key;
+                return error::unexpected_object_key;
+            }
             std::error_code rule::end_object () { return error::unexpected_end_object; }
 
             void rule::log_top_impl (bool const is_push) const {

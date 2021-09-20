@@ -76,7 +76,7 @@ namespace pstore {
             class ostream_base {
             public:
                 /// \param buffer_size  The number of characters in the output buffer.
-                explicit ostream_base (std::size_t buffer_size = 4 * 1024);
+                explicit ostream_base (std::size_t buffer_size = std::size_t{4} * 1024U);
 
                 ostream_base (ostream_base const &) = delete;
                 ostream_base (ostream_base &&) = delete;

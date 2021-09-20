@@ -42,7 +42,7 @@ namespace {
         root_object & operator= (root_object &&) noexcept = delete;
 
         pstore::gsl::czstring name () const noexcept override;
-        std::error_code key (std::string const & k) override;
+        std::error_code key (std::string const & key) override;
         std::error_code end_object () override;
 
     private:
@@ -61,19 +61,22 @@ namespace {
 
     // key
     // ~~~
-    std::error_code root_object::key (std::string const & k) {
-        using namespace pstore::exchange::import_ns;
+    std::error_code root_object::key (std::string const & key) {
+        using pstore::exchange::import_ns::error;
+        using pstore::exchange::import_ns::transaction_array;
+        using pstore::exchange::import_ns::uint64_rule;
+        using pstore::exchange::import_ns::uuid_rule;
 
         // TODO: check that 'version' is the first key that we see.
-        if (k == "version") {
+        if (key == "version") {
             seen_[version] = true;
             return push<uint64_rule> (&version_);
         }
-        if (k == "id") {
+        if (key == "id") {
             seen_[id] = true;
             return push<uuid_rule> (&id_);
         }
-        if (k == "transactions") {
+        if (key == "transactions") {
             seen_[transactions] = true;
             return push<transaction_array<pstore::transaction_lock>> (&names_, &paths_);
         }
@@ -83,7 +86,7 @@ namespace {
     // end object
     // ~~~~~~~~~~
     std::error_code root_object::end_object () {
-        using namespace pstore::exchange::import_ns;
+        using pstore::exchange::import_ns::error;
 
         if (!seen_.all ()) {
             return error::root_object_was_incomplete;

@@ -25,9 +25,8 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
-            void emit_paths (ostream_base & os, indent const ind, database const & db,
-                             unsigned const generation,
-                             gsl::not_null<string_mapping *> const string_table);
+            void emit_paths (ostream_base & os, indent ind, database const & db,
+                             unsigned generation, gsl::not_null<string_mapping *> string_table);
 
         } // end namespace export_ns
     }     // end namespace exchange

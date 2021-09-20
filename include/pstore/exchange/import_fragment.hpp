@@ -39,7 +39,7 @@ namespace pstore {
             //*                                |_|                      *
             class address_patch final : public patcher {
             public:
-                address_patch (gsl::not_null<database *> const db,
+                address_patch (gsl::not_null<database *> db,
                                extent<repo::fragment> const & ex) noexcept;
                 address_patch (address_patch const &) = delete;
                 address_patch (address_patch &&) = delete;
@@ -49,7 +49,7 @@ namespace pstore {
                 address_patch & operator= (address_patch const &) = delete;
                 address_patch & operator= (address_patch &&) = delete;
 
-                std::error_code operator() (transaction_base * const transaction) override;
+                std::error_code operator() (transaction_base * transaction) override;
 
             private:
                 gsl::not_null<database *> const db_;
@@ -64,10 +64,10 @@ namespace pstore {
             //-MARK: fragment sections
             class fragment_sections final : public rule {
             public:
-                fragment_sections (not_null<context *> const ctxt,
-                                   not_null<transaction_base *> const transaction,
-                                   not_null<string_mapping const *> const names,
-                                   not_null<index::digest const *> const digest);
+                fragment_sections (not_null<context *> ctxt,
+                                   not_null<transaction_base *> transaction,
+                                   not_null<string_mapping const *> names,
+                                   not_null<index::digest const *> digest);
 
                 gsl::czstring name () const noexcept override;
                 std::error_code key (std::string const & s) override;
@@ -118,8 +118,9 @@ namespace pstore {
                 /// Validates the fragment \p f.
                 ///
                 /// \param f  The fragment to be validated.
-                /// \returns No error is the fragment was valid or an opporiate error code if the fragment was not legal.
-                std::error_code check_fragment (repo::fragment const & f);
+                /// \returns No error is the fragment was valid or an opporiate error code if the
+                ///   fragment was not legal.
+                static std::error_code check_fragment (repo::fragment const & f);
             };
 
             //*   __                             _     _         _          *

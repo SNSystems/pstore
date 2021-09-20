@@ -95,7 +95,7 @@ namespace pstore {
                 return diff_out<OutputFunction>{fn};
             }
 
-            void emit_digest (ostream_base & os, uint128 const d);
+            void emit_digest (ostream_base & os, uint128 d);
 
             template <typename Iterator>
             void emit_string (ostream_base & os, Iterator first, Iterator last) {
@@ -125,8 +125,8 @@ namespace pstore {
             /// \param comments  A value indicating whether comment emission is enabled.
             /// \returns A reference to \p os.
             ostream_base & show_string (ostream_base & os, pstore::database const & db,
-                                        pstore::typed_address<pstore::indirect_string> const addr,
-                                        bool const comments);
+                                        pstore::typed_address<pstore::indirect_string> addr,
+                                        bool comments);
 
             /// Writes an array of values given by the range \p first to \p last to the output
             /// stream \p os. The output follows the JSON syntax of "[ a, b ]" except that each

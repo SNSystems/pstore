@@ -55,16 +55,16 @@ namespace pstore {
 
                 virtual gsl::czstring name () const noexcept = 0;
 
-                virtual std::error_code int64_value (std::int64_t v);
-                virtual std::error_code uint64_value (std::uint64_t v);
-                virtual std::error_code double_value (double v);
-                virtual std::error_code string_value (std::string const & v);
-                virtual std::error_code boolean_value (bool v);
+                virtual std::error_code int64_value (std::int64_t value);
+                virtual std::error_code uint64_value (std::uint64_t value);
+                virtual std::error_code double_value (double value);
+                virtual std::error_code string_value (std::string const & value);
+                virtual std::error_code boolean_value (bool value);
                 virtual std::error_code null_value ();
                 virtual std::error_code begin_array ();
                 virtual std::error_code end_array ();
                 virtual std::error_code begin_object ();
-                virtual std::error_code key (std::string const & k);
+                virtual std::error_code key (std::string const & key);
                 virtual std::error_code end_object ();
 
                 /// Creates an instance of type T and pushes it onto the parse stack. The provided
@@ -78,35 +78,35 @@ namespace pstore {
                 template <typename T, typename... Args>
                 std::error_code push (Args... args) {
                     context_->stack.push (std::make_unique<T> (context_, args...));
-                    log_top (true);
+                    this->log_top (true);
                     return {};
                 }
 
             protected:
-                /// Removes the top-most element from the parse-stack and replaces it with a newly
-                /// instantiate object.
+                /// Removes the top-most element from the parse stack and replaces it with a newly
+                /// instantiated object.
                 ///
                 /// \tparam T  The type of the new rule to instantiate.
                 /// \tparam Args The types of the arguments for the constructor of type T.
                 /// \param args The parameters to be passed to the contructor of the new instance of
-                /// type T.
+                ///   type T.
                 template <typename T, typename... Args>
                 std::error_code replace_top (Args... args) {
                     auto p = std::make_unique<T> (context_, args...);
-                    log_top (false);
+                    this->log_top (false);
                     // Remember the context pointer before we destroy 'this'.
                     auto * const context = this->get_context ();
                     context->stack.pop (); // Destroys this object.
                     context->stack.push (std::move (p));
-                    log_top (true);
+                    this->log_top (true);
                     return {};
                 }
 
-                /// Removes the top-most element from the parse-stack and returns "no-error".
+                /// Removes the top-most element from the parse stack and returns "no-error".
                 /// This member function is usually called to signal the end of the current grammar
                 /// rule.
                 std::error_code pop () {
-                    log_top (false);
+                    this->log_top (false);
                     context_->stack.pop ();
                     return {};
                 }
@@ -116,7 +116,7 @@ namespace pstore {
             private:
                 void log_top (bool const is_push) const {
                     if (logging_enabled ()) {
-                        log_top_impl (is_push);
+                        this->log_top_impl (is_push);
                     }
                 }
 

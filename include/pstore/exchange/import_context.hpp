@@ -30,7 +30,15 @@ namespace pstore {
 
             class patcher {
             public:
+                patcher () noexcept = default;
+                patcher (patcher const & rhs) noexcept = default;
+                patcher (patcher && rhs) noexcept = default;
+
                 virtual ~patcher () noexcept = default;
+
+                patcher & operator= (patcher const & rhs) noexcept = default;
+                patcher & operator= (patcher && rhs) noexcept = default;
+
                 virtual std::error_code operator() (transaction_base * t) = 0;
             };
 
