@@ -266,10 +266,12 @@ namespace pstore {
                 parent_type () noexcept = default;
 
                 /// Constructs a parent type object.
+                ///
                 /// \param idx  The pointer to either the parent node or a leaf node.
                 /// \param pos  If idx is a leaf node address, pos is set to the default value
                 ///             (not_found). Otherwise, pos refers to the child slot.
-                parent_type (index_pointer const idx, std::size_t const pos = not_found) noexcept
+                explicit parent_type (index_pointer const idx,
+                                      std::size_t const pos = not_found) noexcept
                         : node (idx)
                         , position (pos) {}
 
@@ -301,9 +303,11 @@ namespace pstore {
                 void * operator new (std::size_t) = delete;
                 void operator delete (void * p);
 
+                linear_node (linear_node && rhs) noexcept = delete;
+
                 ~linear_node () noexcept = default;
                 linear_node & operator= (linear_node const & rhs) = delete;
-                linear_node & operator= (linear_node && rhs) = delete;
+                linear_node & operator= (linear_node && rhs) noexcept = delete;
 
                 /// \name Construction
                 ///@{
@@ -455,7 +459,6 @@ namespace pstore {
                 /// \param size The capacity of this linear node.
                 explicit linear_node (std::size_t size);
                 linear_node (linear_node const & rhs);
-                linear_node (linear_node && rhs) = delete;
 
                 /// Allocates a new linear node in memory.
                 ///
@@ -594,11 +597,11 @@ namespace pstore {
                 /// body. This may be null if called on a heap-resident node. The second element is
                 /// the raw node pointer, that is, the address of a heap node or the result of
                 /// calling .get() on the store-pointer.
-                static auto get_node (database const & db, index_pointer const node)
+                static auto get_node (database const & db, index_pointer node)
                     -> std::pair<std::shared_ptr<internal_node const>, internal_node const *>;
 
                 /// Load an internal node from the store.
-                static auto read_node (database const & db, typed_address<internal_node> const addr)
+                static auto read_node (database const & db, typed_address<internal_node> addr)
                     -> std::shared_ptr<internal_node const>;
 
                 /// Returns a writable reference to an internal node. If the \p node parameter
@@ -624,7 +627,7 @@ namespace pstore {
                                                       index_pointer const node,
                                                       internal_node const & internal) {
                     if (node.is_heap ()) {
-                        internal_node * const inode = node.untag<internal_node *> ();
+                        auto * const inode = node.untag<internal_node *> ();
                         PSTORE_ASSERT (inode->signature_ == node_signature_);
                         return inode;
                     }

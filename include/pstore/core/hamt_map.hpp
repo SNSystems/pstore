@@ -584,10 +584,11 @@ namespace pstore {
                         if (child.is_internal ()) {
                             this->move_to_left_most_child (child);
                         } else {
-                            visited_parents_.push ({child});
+                            visited_parents_.push (details::parent_type{child});
                         }
                     } else {
-                        visited_parents_.push ({index_pointer{(*linear)[parent.position]}});
+                        visited_parents_.push (
+                            details::parent_type{index_pointer{(*linear)[parent.position]}});
                     }
                 }
             }
@@ -602,7 +603,7 @@ namespace pstore {
 
             std::shared_ptr<void const> store_node;
             while (!node.is_leaf ()) {
-                visited_parents_.push ({node, 0});
+                visited_parents_.push (details::parent_type{node, 0});
                 if (visited_parents_.size () <= details::max_internal_depth) {
                     internal_node const * internal = nullptr;
                     std::tie (store_node, internal) = internal_node::get_node (db_, node);
@@ -615,8 +616,8 @@ namespace pstore {
                 }
             }
 
-            // Push the leaf node in the top of stack.
-            visited_parents_.push ({node});
+            // Push the leaf on the stack.
+            visited_parents_.push (details::parent_type{node});
         }
 
 
@@ -722,7 +723,7 @@ namespace pstore {
             address const result =
                 serialize::write (serialize::archive::make_writer (transaction), v);
             PSTORE_ASSERT ((result.absolute () & (aligned_to - 1U)) == 0U);
-            parents->push ({index_pointer{result}});
+            parents->push (details::parent_type{index_pointer{result}});
 
             return result;
         }
@@ -745,8 +746,8 @@ namespace pstore {
                     auto const internal_ptr = index_pointer{
                         internal_node::allocate (internals_container_.get (), existing_leaf,
                                                  index_pointer{leaf_addr}, old_hash, new_hash)};
-                    parents->push (
-                        {internal_ptr, internal_node::get_new_index (new_hash, old_hash)});
+                    parents->push (details::parent_type{
+                        internal_ptr, internal_node::get_new_index (new_hash, old_hash)});
                     return internal_ptr;
                 }
 
@@ -766,7 +767,7 @@ namespace pstore {
                     transaction, existing_leaf, new_leaf, existing_hash, hash, shifts, parents);
                 auto const internal_ptr = index_pointer{
                     internal_node::allocate (internals_container_.get (), leaf_ptr, old_hash)};
-                parents->push ({internal_ptr, 0U});
+                parents->push (details::parent_type{internal_ptr, 0U});
                 return internal_ptr;
             }
 
@@ -775,7 +776,7 @@ namespace pstore {
                 linear_node::allocate (existing_leaf.to_address (),
                                        this->store_leaf_node (transaction, new_leaf, parents))
                     .release ()};
-            parents->push ({linear_ptr, 1U});
+            parents->push (details::parent_type{linear_ptr, 1U});
             return linear_ptr;
         }
 
@@ -851,7 +852,7 @@ namespace pstore {
                 node = inode;
             }
 
-            parents->push ({node, index});
+            parents->push (details::parent_type{node, index});
             new_node.release ();
             return {node, key_exists};
         }
@@ -936,7 +937,7 @@ namespace pstore {
                     if (is_upsert) {
                         result = this->store_leaf_node (transaction, value, parents);
                     } else {
-                        parents->push ({node});
+                        parents->push (details::parent_type{node});
                         result = node;
                     }
                     key_exists = true;
@@ -1111,7 +1112,7 @@ namespace pstore {
                 if (index == details::not_found) {
                     return this->cend (db);
                 }
-                parents.push ({node, index});
+                parents.push (details::parent_type{node, index});
 
                 // Go to next sub-trie level
                 node = child_node;
@@ -1122,7 +1123,7 @@ namespace pstore {
             PSTORE_ASSERT (node.is_leaf ());
             key_type const existing_key = get_key (db, node.to_address ());
             if (equal_ (existing_key, key)) {
-                parents.push ({node});
+                parents.push (details::parent_type{node});
                 return const_iterator (db, std::move (parents), this);
             }
             return this->cend (db);

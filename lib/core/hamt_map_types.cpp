@@ -328,7 +328,7 @@ namespace pstore {
 
                 this->bitmap_ = this->bitmap_ | bit_pos;
                 PSTORE_ASSERT (bit_count::pop_count (this->bitmap_) == old_size + 1);
-                parents->push ({index_pointer{this}, index});
+                parents->push (parent_type{index_pointer{this}, index});
             }
 
             // store_node
