@@ -75,11 +75,7 @@ namespace pstore {
             this->log (p, std::string{part1} + part2);
         }
         void logger::log (priority const p, gsl::czstring const part1, quoted const part2) {
-            auto message = std::string{part1};
-            message += '"';
-            message += static_cast<gsl::czstring> (part2);
-            message += '"';
-            this->log (p, message);
+            this->log (p, std::string{part1} + '"' + static_cast<gsl::czstring> (part2) + '"');
         }
 
         //*  _             _      _                         *
@@ -87,7 +83,7 @@ namespace pstore {
         //* | '_ \/ _` (_-< / _| | / _ \/ _` / _` / -_) '_| *
         //* |_.__/\__,_/__/_\__| |_\___/\__, \__, \___|_|   *
         //*                             |___/|___/          *
-        // time_string
+        // time string
         // ~~~~~~~~~~~
         std::size_t basic_logger::time_string (std::time_t const t,
                                                gsl::span<char, time_buffer_size> const & buffer) {
@@ -202,7 +198,7 @@ namespace {
                           static_cast<gsl::czstring> (part2)); //! OCLINT
     }
 
-    // priority_code
+    // priority code
     // ~~~~~~~~~~~~~
     os_log_type_t asl_logger::priority_code (priority const p) noexcept {
         switch (p) {
@@ -258,7 +254,7 @@ namespace {
         syslog (priority_code (p), "%s", message.c_str ());
     }
 
-    // priority_code
+    // priority code
     // ~~~~~~~~~~~~~
     int syslog_logger::priority_code (priority const p) noexcept {
         switch (p) {
@@ -365,7 +361,7 @@ namespace pstore {
             this->log_impl (str.str ());
         }
 
-        // priority_string
+        // priority string
         // ~~~~~~~~~~~~~~~
         gsl::czstring basic_logger::priority_string (priority const p) noexcept {
             switch (p) {
@@ -382,7 +378,7 @@ namespace pstore {
             return "emergency";
         }
 
-        // get_current_thread_name
+        // get current thread name
         // ~~~~~~~~~~~~~~~~~~~~~~~
         std::string basic_logger::get_current_thread_name () {
             std::string const name = threads::get_name ();
@@ -409,7 +405,7 @@ namespace pstore {
         //*****************************
         //*   f i l e _ l o g g e r   *
         //*****************************
-        // log_impl
+        // log impl
         // ~~~~~~~~
         void file_logger::log_impl (std::string const & message) {
             std::fputs (message.c_str (), file_);
