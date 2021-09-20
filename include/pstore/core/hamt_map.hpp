@@ -112,11 +112,17 @@ namespace pstore {
                         , index_ (other.index_) {
                     pos_.reset ();
                 }
+                iterator_base (iterator_base && other) noexcept
+                        : db_{other.db_}
+                        , visited_parents_{std::move (other.visited_parents_)}
+                        , index_{other.index_}
+                        , pos_{std::move (other.pos_)} {}
 
                 /// Copy constructor. Allows for implicit conversion from a regular iterator to a
                 /// const_iterator
                 template <bool Enable = IsConstIterator,
                           typename = typename std::enable_if<Enable>::type>
+                // NOLINTNEXTLINE(hicpp-explicit-conversions)
                 iterator_base (iterator_base<false> const & other) noexcept
                         : db_{other.db_}
                         , visited_parents_ (other.visited_parents_)
@@ -124,10 +130,25 @@ namespace pstore {
                     pos_.reset ();
                 }
 
+                ~iterator_base () noexcept = default;
+
                 iterator_base & operator= (iterator_base const & rhs) noexcept {
-                    visited_parents_ = rhs.visited_parents_;
-                    index_ = rhs.index_;
-                    pos_.reset ();
+                    if (&rhs != this) {
+                        assert (&db_ == &rhs.db_);
+                        visited_parents_ = rhs.visited_parents_;
+                        index_ = rhs.index_;
+                        pos_.reset ();
+                    }
+                    return *this;
+                }
+
+                iterator_base & operator= (iterator_base && rhs) noexcept {
+                    if (&rhs != this) {
+                        assert (&db_ == &rhs.db_);
+                        visited_parents_ = std::move (rhs.visited_parents_);
+                        index_ = rhs.index_;
+                        pos_ = std::move (rhs.pos_);
+                    }
                     return *this;
                 }
 
@@ -194,12 +215,13 @@ namespace pstore {
             /// An associative container that contains key-value pairs with unique keys.
             ///
             /// \param db A database to which the index belongs.
-            /// \param ip The index root address.
+            /// \param pos The index root address.
             /// \param hash A function that yields a hash from the key value.
             /// \param equal A function used to compare keys for equality.
-            hamt_map (database const & db,
-                      typed_address<header_block> ip = typed_address<header_block>::null (),
-                      Hash const & hash = Hash (), KeyEqual const & equal = KeyEqual ());
+            explicit hamt_map (
+                database const & db,
+                typed_address<header_block> pos = typed_address<header_block>::null (),
+                Hash const & hash = Hash (), KeyEqual const & equal = KeyEqual ());
             hamt_map (hamt_map const &) = delete;
             hamt_map (hamt_map &&) noexcept = delete;
 
