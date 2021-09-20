@@ -91,9 +91,10 @@ namespace pstore {
                                                key_equal>::const_iterator>;
             using iterator = const_iterator;
 
-            hamt_set (database const & db,
-                      typed_address<header_block> ip = typed_address<header_block>::null (),
-                      hasher const & hash = hasher ())
+            explicit hamt_set (
+                database const & db,
+                typed_address<header_block> ip = typed_address<header_block>::null (),
+                hasher const & hash = hasher ())
                     : map_ (db, ip, hash) {}
 
             /// \name Iterators
