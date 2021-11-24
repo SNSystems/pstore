@@ -32,6 +32,7 @@
 #include <cassert>
 #include <list>
 
+#include "pstore/adt/pointer_based_iterator.hpp"
 #include "pstore/support/assert.hpp"
 #include "pstore/support/inherit_const.hpp"
 
@@ -61,8 +62,6 @@ namespace pstore {
         static_assert (ActualSize >= sizeof (T), "ActualSize must be at least sizeof(T)");
         static_assert (ActualAlign >= alignof (T), "ActualAlign must be at least alignof(T)");
 
-        class chunk;
-        using chunk_list = std::list<chunk>;
         template <bool Const = true>
         class iterator_base;
 
@@ -79,6 +78,9 @@ namespace pstore {
         using const_iterator = iterator_base<true>;
         // using reverse_iterator =
         // using const_reverse_iterator =
+
+        class chunk;
+        using chunk_list = std::list<chunk>;
 
         /// The number of elements in an individual chunk.
         static constexpr std::size_t elements_per_chunk = ElementsPerChunk;
@@ -105,6 +107,21 @@ namespace pstore {
         iterator end () noexcept { return end_impl (*this); }
         const_iterator end () const noexcept { return end_impl (*this); }
         const_iterator cend () const noexcept { return end (); }
+
+
+
+        typename chunk_list::iterator chunks_begin () noexcept { return chunks_.begin (); }
+        typename chunk_list::const_iterator chunks_begin () const noexcept {
+            return chunks_.begin ();
+        }
+        typename chunk_list::const_iterator chunks_cbegin () noexcept { return chunks_.cbegin (); }
+        typename chunk_list::iterator chunks_end () noexcept { return chunks_.end (); }
+        typename chunk_list::const_iterator chunks_end () const noexcept { return chunks_.end (); }
+        typename chunk_list::const_iterator chunks_cend () noexcept { return chunks_.cend (); }
+
+        std::size_t chunks_size () const noexcept { return chunks_.size (); }
+
+
 
         void clear () {
             chunks_.clear ();
@@ -393,6 +410,7 @@ namespace pstore {
             return reinterpret_cast<T const &> (membs_[index]);
         }
         constexpr std::size_t size () const noexcept { return size_; }
+        constexpr bool empty () const noexcept { return size_ == 0U; }
 
         constexpr std::size_t capacity () const noexcept {
             return ElementsPerChunk - this->size ();
@@ -402,6 +420,12 @@ namespace pstore {
         const_reference front () const { return (*this)[0]; }
         reference back () { return (*this)[size_ - 1U]; }
         const_reference back () const { return (*this)[size_ - 1U]; }
+
+
+        pointer_based_iterator<T> begin () noexcept { return &(*this)[0]; }
+        pointer_based_iterator<T const> begin () const noexcept { return &(*this)[0]; }
+        pointer_based_iterator<T> end () noexcept { return begin () + size_; }
+        pointer_based_iterator<T const> end () const noexcept { return begin () + size_; }
 
         template <typename... Args>
         reference emplace_back (Args &&... args);
