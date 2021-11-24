@@ -387,6 +387,9 @@ namespace pstore {
               std::size_t ActualAlign>
     class chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk {
     public:
+        using iterator = pointer_based_iterator<T>;
+        using const_iterator = pointer_based_iterator<T const>;
+
         chunk () noexcept { // NOLINT
             // Don't use "=default" here. We don't want the zero initializer for membs_ to run.
         }
@@ -422,10 +425,10 @@ namespace pstore {
         const_reference back () const { return (*this)[size_ - 1U]; }
 
 
-        pointer_based_iterator<T> begin () noexcept { return &(*this)[0]; }
-        pointer_based_iterator<T const> begin () const noexcept { return &(*this)[0]; }
-        pointer_based_iterator<T> end () noexcept { return begin () + size_; }
-        pointer_based_iterator<T const> end () const noexcept { return begin () + size_; }
+        auto begin () noexcept { return iterator{&(*this)[0]}; }
+        auto begin () const noexcept { return const_iterator{&(*this)[0]}; }
+        auto end () noexcept { return iterator{begin () + size_}; }
+        auto end () const noexcept { return const_iterator{begin () + size_}; }
 
         template <typename... Args>
         reference emplace_back (Args &&... args);
