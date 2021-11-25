@@ -44,61 +44,61 @@ namespace {
     };
 
     // Limit the chunks to two elements each.
-    using cvector_int = pstore::chunked_sequence<int, std::size_t{2}>;
-    using cvector_simple = pstore::chunked_sequence<simple, std::size_t{2}>;
+    using cseq_int = pstore::chunked_sequence<int, std::size_t{2}>;
+    using cseq_simple = pstore::chunked_sequence<simple, std::size_t{2}>;
 
 } // end anonymous namespace
 
 TEST (ChunkedSequence, Init) {
-    cvector_int cv;
-    EXPECT_EQ (cv.size (), 0U);
-    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 0);
+    cseq_int cs;
+    EXPECT_EQ (cs.size (), 0U);
+    EXPECT_EQ (std::distance (std::begin (cs), std::end (cs)), 0);
 }
 
 TEST (ChunkedSequence, OneMember) {
-    cvector_simple cv;
-    cv.emplace_back (1);
+    cseq_simple cs;
+    cs.emplace_back (1);
 
-    EXPECT_EQ (cv.size (), 1U);
-    auto it = cv.begin ();
+    EXPECT_EQ (cs.size (), 1U);
+    auto it = cs.begin ();
     EXPECT_EQ (it->get (), 1);
     ++it;
-    EXPECT_EQ (it, cv.end ());
+    EXPECT_EQ (it, cs.end ());
 }
 
 TEST (ChunckedVector, PushBack) {
-    cvector_simple cv;
-    simple const & a = cv.push_back (simple{17});
-    simple const & b = cv.push_back (simple{19});
-    simple const & c = cv.push_back (simple{23});
-    EXPECT_EQ (cv.size (), 3U);
+    cseq_simple cs;
+    simple const & a = cs.push_back (simple{17});
+    simple const & b = cs.push_back (simple{19});
+    simple const & c = cs.push_back (simple{23});
+    EXPECT_EQ (cs.size (), 3U);
     EXPECT_EQ (a.get (), 17);
     EXPECT_EQ (b.get (), 19);
     EXPECT_EQ (c.get (), 23);
 }
 
 TEST (ChunckedVector, EmplaceBack) {
-    cvector_simple cv;
-    simple const & a = cv.emplace_back (17);
-    simple const & b = cv.emplace_back (19);
-    simple const & c = cv.emplace_back (23);
-    EXPECT_EQ (cv.size (), 3U);
+    cseq_simple cs;
+    simple const & a = cs.emplace_back (17);
+    simple const & b = cs.emplace_back (19);
+    simple const & c = cs.emplace_back (23);
+    EXPECT_EQ (cs.size (), 3U);
     EXPECT_EQ (a.get (), 17);
     EXPECT_EQ (b.get (), 19);
     EXPECT_EQ (c.get (), 23);
 }
 
 TEST (ChunckedVector, FrontAndBack) {
-    cvector_int cv;
-    cv.push_back (17);
-    cv.push_back (19);
-    cv.push_back (23);
-    EXPECT_EQ (cv.front (), 17);
-    EXPECT_EQ (cv.back (), 23);
+    cseq_int cs;
+    cs.push_back (17);
+    cs.push_back (19);
+    cs.push_back (23);
+    EXPECT_EQ (cs.front (), 17);
+    EXPECT_EQ (cs.back (), 23);
 }
 
 TEST (ChunkedSequence, Swap) {
-    cvector_int a, b;
+    cseq_int a, b;
     a.emplace_back (7);
     std::swap (a, b);
     EXPECT_EQ (a.size (), 0U);
@@ -107,10 +107,10 @@ TEST (ChunkedSequence, Swap) {
 }
 
 TEST (ChunkedSequence, Splice) {
-    cvector_int a;
+    cseq_int a;
     a.emplace_back (7);
 
-    cvector_int b;
+    cseq_int b;
     b.emplace_back (11);
 
     a.splice (std::move (b));
@@ -119,9 +119,9 @@ TEST (ChunkedSequence, Splice) {
 
 TEST (ChunkedSequence, SpliceOntoEmpty) {
     {
-        // Start with an empty CV and splice a populated CV onto it.
-        cvector_int a;
-        cvector_int b;
+        // Start with an empty CS and splice a populated CS onto it.
+        cseq_int a;
+        cseq_int b;
         b.emplace_back (11);
 
         a.splice (std::move (b));
@@ -129,9 +129,9 @@ TEST (ChunkedSequence, SpliceOntoEmpty) {
         EXPECT_THAT (a, testing::ElementsAre (11));
     }
     {
-        // Start with a populated CV and splice an empty CV onto it.
-        cvector_int c;
-        cvector_int d;
+        // Start with a populated CS and splice an empty CS onto it.
+        cseq_int c;
+        cseq_int d;
         c.emplace_back (13);
 
         c.splice (std::move (d));
@@ -141,7 +141,7 @@ TEST (ChunkedSequence, SpliceOntoEmpty) {
 }
 
 TEST (ChunkedSequence, Clear) {
-    cvector_int a;
+    cseq_int a;
     a.emplace_back (7);
     a.clear ();
     EXPECT_THAT (a.size (), 0U);
@@ -152,16 +152,16 @@ TEST (ChunkedSequence, Clear) {
 }
 
 TEST (ChunkedSequence, IteratorAssign) {
-    cvector_int cv;
-    cv.emplace_back (7);
-    cvector_int::iterator it = cv.begin ();
-    cvector_int::iterator it2 = it;                     // non-const copy ctor from non-const
-    it2 = it;                                           // non-const assign from non-const.
-    cvector_int::const_iterator cit = it;               // const copy ctor from non-const.
-    cvector_int::const_iterator cit2 = cit;             // copy ctor from const.
-    cit2 = cit;                                         // assign from const.
-    cit2 = it;                                          // assign from non-const.
-    cvector_int::const_iterator cit3 = std::move (cit); // move ctor from const.
+    cseq_int cs;
+    cs.emplace_back (7);
+    cseq_int::iterator it = cs.begin ();
+    cseq_int::iterator it2 = it;                     // non-const copy ctor from non-const
+    it2 = it;                                        // non-const assign from non-const.
+    cseq_int::const_iterator cit = it;               // const copy ctor from non-const.
+    cseq_int::const_iterator cit2 = cit;             // copy ctor from const.
+    cit2 = cit;                                      // assign from const.
+    cit2 = it;                                       // assign from non-const.
+    cseq_int::const_iterator cit3 = std::move (cit); // move ctor from const.
     EXPECT_EQ (*cit3, 7);
 }
 
@@ -178,12 +178,12 @@ namespace {
         }
 
     protected:
-        cvector_int cv_;
+        cseq_int cv_;
     };
 
 } // end anonymous namespace
 
-using iterator_types = testing::Types<cvector_int::iterator, cvector_int::const_iterator>;
+using iterator_types = testing::Types<cseq_int::iterator, cseq_int::const_iterator>;
 #ifdef PSTORE_IS_INSIDE_LLVM
 TYPED_TEST_CASE (CVIterator, iterator_types);
 #else
@@ -222,35 +222,39 @@ TYPED_TEST (CVIterator, Predecrement) {
 
 //  - An underscore '_' indicates uninitialized storage.
 //  - An arrow '->' indicates the list of chunks.
-TEST (ChunkedVectorResize, FillCurrentTailChunk) {
-    cvector_int cv;
-    cv.emplace_back (13);
+TEST (ChunkedSequenceResize, FillCurrentTailChunk) {
+    cseq_int cs;
+    cs.emplace_back (13);
     // Before the resize we have a single chunk:
     //     [ 13, _ ]
+    EXPECT_EQ (cs.chunks_size (), 1U);
     // After it, we fill the tail chunk with default-initialized int:
     //    [ 13, 0 ]
-    cv.resize (2U);
-    EXPECT_EQ (cv.size (), 2U);
-    EXPECT_EQ (cv.capacity (), 2U);
+    cs.resize (2U);
+    EXPECT_EQ (cs.chunks_size (), 1U);
+    EXPECT_EQ (cs.size (), 2U);
+    EXPECT_EQ (cs.capacity (), 2U);
 
-    cvector_int::const_iterator it = cv.begin ();
+    cseq_int::const_iterator it = cs.begin ();
     EXPECT_EQ (*it, 13) << "Element 0 (chunk 0, index 0)";
     std::advance (it, 1);
     EXPECT_EQ (*it, 0) << "Element 0 (chunk 0, index 1)";
 }
 
-TEST (ChunkedVectorResize, FillInitialChunkAndPartialSecond) {
-    cvector_int cv;
-    cv.emplace_back (17);
+TEST (ChunkedSequenceResize, FillInitialChunkAndPartialSecond) {
+    cseq_int cs;
+    cs.emplace_back (17);
     // Before the resize we have a single chunk:
     //     [ 17, _ ]
+    EXPECT_EQ (cs.chunks_size (), 1U);
     // Extending this to three members will produce:
     //     [ 17, 0 ] -> [ 0, _ ]
-    cv.resize (3U);
-    EXPECT_EQ (cv.size (), 3U);
-    EXPECT_EQ (cv.capacity (), 4U);
+    cs.resize (3U);
+    EXPECT_EQ (cs.chunks_size (), 2U);
+    EXPECT_EQ (cs.size (), 3U);
+    EXPECT_EQ (cs.capacity (), 4U);
 
-    cvector_int::const_iterator it = cv.begin ();
+    cseq_int::const_iterator it = cs.begin ();
     EXPECT_EQ (*it, 17) << "Element 0 (chunk 0, index 0)";
     std::advance (it, 1);
     EXPECT_EQ (*it, 0) << "Element 1 (chunk 0, index 1)";
@@ -258,16 +262,18 @@ TEST (ChunkedVectorResize, FillInitialChunkAndPartialSecond) {
     EXPECT_EQ (*it, 0) << "Element 2 (chunk 1, index 0)";
 }
 
-TEST (ChunkedVectorResize, ResizeWholeChunkPlus1) {
-    cvector_int cv;
+TEST (ChunkedSequenceResize, ResizeWholeChunkPlus1) {
+    cseq_int cs;
     // Resize from 0 to 5 elements:
     //     [ 0, 0 ] -> [ 0, 0 ] -> [ 0, _ ]
-    cv.resize (5U);
-    EXPECT_EQ (cv.size (), 5U);
-    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 5U);
-    EXPECT_EQ (cv.capacity (), 6U);
+    EXPECT_EQ (cs.chunks_size (), 1U);
+    cs.resize (5U);
+    EXPECT_EQ (cs.chunks_size (), 3U);
+    EXPECT_EQ (cs.size (), 5U);
+    EXPECT_EQ (std::distance (std::begin (cs), std::end (cs)), 5U);
+    EXPECT_EQ (cs.capacity (), 6U);
 
-    cvector_int::const_iterator it = cv.begin ();
+    cseq_int::const_iterator it = cs.begin ();
     EXPECT_EQ (*it, 0) << "Element 0 (chunk 0, index 0)";
     std::advance (it, 1);
     EXPECT_EQ (*it, 0) << "Element 1 (chunk 0, index 1)";
@@ -279,82 +285,115 @@ TEST (ChunkedVectorResize, ResizeWholeChunkPlus1) {
     EXPECT_EQ (*it, 0) << "Element 4 (chunk 1, index 1)";
 }
 
-TEST (ChunkedVectorResize, TwoElementsDownToOne) {
-    cvector_int cv;
-    cv.emplace_back (17);
-    cv.emplace_back (19);
+TEST (ChunkedSequenceResize, TwoElementsDownToOne) {
+    cseq_int cs;
+    cs.emplace_back (17);
+    cs.emplace_back (19);
     // Before: [ 17, 19 ]
+    EXPECT_EQ (cs.chunks_size (), 1U);
     // After: [ 17, _ ]
-    cv.resize (1U);
-    EXPECT_EQ (cv.size (), 1U);
-    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 1U);
-    EXPECT_EQ (cv.capacity (), 2U);
+    cs.resize (1U);
+    EXPECT_EQ (cs.chunks_size (), 1U);
+    EXPECT_EQ (cs.size (), 1U);
+    EXPECT_EQ (std::distance (std::begin (cs), std::end (cs)), 1U);
+    EXPECT_EQ (cs.capacity (), 2U);
 
-    cvector_int::const_iterator it = cv.begin ();
+    cseq_int::const_iterator it = cs.begin ();
     EXPECT_EQ (*it, 17) << "Element 0 (chunk 0, index 0)";
 }
 
-TEST (ChunkedVectorResize, TwoElementsDownToZero) {
-    cvector_int cv;
-    cv.emplace_back (17);
-    cv.emplace_back (19);
+TEST (ChunkedSequenceResize, TwoElementsDownToZero) {
+    cseq_int cs;
+    cs.emplace_back (17);
+    cs.emplace_back (19);
     // Before: [ 17, 19 ]
+    EXPECT_EQ (cs.chunks_size (), 1U);
     // After: [ _, _ ]
-    cv.resize (0U);
-    EXPECT_EQ (cv.size (), 0U);
-    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 0U);
-    EXPECT_EQ (cv.capacity (), 2U) << "There is always at least one chunk";
+    cs.resize (0U);
+    EXPECT_EQ (cs.chunks_size (), 1U);
+    EXPECT_EQ (cs.size (), 0U);
+    EXPECT_EQ (std::distance (std::begin (cs), std::end (cs)), 0U);
+    EXPECT_EQ (cs.capacity (), 2U) << "There is always at least one chunk";
 }
 
-TEST (ChunkedVectorResize, FiveElementsDownToOne) {
-    cvector_int cv;
-    cv.emplace_back (17);
-    cv.emplace_back (19);
-    cv.emplace_back (23);
-    cv.emplace_back (29);
-    cv.emplace_back (31);
+TEST (ChunkedSequenceResize, FiveElementsDownToOne) {
+    cseq_int cs;
+    cs.emplace_back (17);
+    cs.emplace_back (19);
+    cs.emplace_back (23);
+    cs.emplace_back (29);
+    cs.emplace_back (31);
     // Before: [ 17, 19 ] -> [ 23, 29 ] -> [ 31, _ ]
+    EXPECT_EQ (cs.chunks_size (), 3U);
     // After: [ 17, _ ]
-    cv.resize (1U);
-    EXPECT_EQ (cv.size (), 1U);
-    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 1U);
-    EXPECT_EQ (cv.capacity (), 2U);
+    cs.resize (1U);
+    EXPECT_EQ (cs.chunks_size (), 1U);
+    EXPECT_EQ (cs.size (), 1U);
+    EXPECT_EQ (std::distance (std::begin (cs), std::end (cs)), 1U);
+    EXPECT_EQ (cs.capacity (), 2U);
 
-    cvector_int::const_iterator it = cv.begin ();
+    cseq_int::const_iterator it = cs.begin ();
     EXPECT_EQ (*it, 17) << "Element 0 (chunk 0, index 0)";
 }
 
-TEST (ChunkedVectorResize, ThreeElementsDownToZero) {
-    cvector_int cv;
-    cv.emplace_back (37);
-    cv.emplace_back (41);
-    cv.emplace_back (43);
+TEST (ChunkedSequenceResize, ThreeElementsDownToZero) {
+    cseq_int cs;
+    cs.emplace_back (37);
+    cs.emplace_back (41);
+    cs.emplace_back (43);
     // Before: [ 37, 41 ] -> [ 43, _ ]
+    EXPECT_EQ (cs.chunks_size (), 2U);
     // After: [ _, _ ]
-    cv.resize (0U);
-    EXPECT_EQ (cv.size (), 0U);
-    EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)), 0U);
-    EXPECT_EQ (cv.capacity (), 2U);
-    EXPECT_TRUE (cv.empty ());
+    cs.resize (0U);
+    EXPECT_EQ (cs.chunks_size (), 1U);
+    EXPECT_EQ (cs.size (), 0U);
+    EXPECT_EQ (std::distance (std::begin (cs), std::end (cs)), 0U);
+    EXPECT_EQ (cs.capacity (), 2U);
+    EXPECT_TRUE (cs.empty ());
 }
 
-TEST (ChunkedVectorResize, ThreeElementsDownToOne) {
-    pstore::chunked_sequence<int, 3U> cv;
-    using difference_type = std::iterator_traits<decltype (cv)::iterator>::difference_type;
+TEST (ChunkedSequenceResize, ThreeElementsDownToOne) {
+    pstore::chunked_sequence<int, 3U> cs;
+    using difference_type = std::iterator_traits<decltype (cs)::iterator>::difference_type;
     {
         constexpr auto size1 = std::size_t{3};
-        cv.resize (size1);
-        EXPECT_EQ (cv.size (), size1);
-        EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)),
+        cs.resize (size1);
+        EXPECT_EQ (cs.size (), size1);
+        EXPECT_EQ (std::distance (std::begin (cs), std::end (cs)),
                    static_cast<difference_type> (size1));
-        EXPECT_TRUE (std::all_of (std::begin (cv), std::end (cv), [] (int x) { return x == 0; }));
+        EXPECT_TRUE (std::all_of (std::begin (cs), std::end (cs), [] (int x) { return x == 0; }));
     }
     {
         constexpr auto size2 = std::size_t{1};
-        cv.resize (size2);
-        EXPECT_EQ (cv.size (), size2);
-        EXPECT_EQ (std::distance (std::begin (cv), std::end (cv)),
+        cs.resize (size2);
+        EXPECT_EQ (cs.size (), size2);
+        EXPECT_EQ (std::distance (std::begin (cs), std::end (cs)),
                    static_cast<difference_type> (size2));
-        EXPECT_TRUE (std::all_of (std::begin (cv), std::end (cv), [] (int x) { return x == 0; }));
+        EXPECT_TRUE (std::all_of (std::begin (cs), std::end (cs), [] (int x) { return x == 0; }));
     }
+}
+
+TEST (ChunkedSequenceChunkIterators, Empty) {
+    pstore::chunked_sequence<int, 2U> cs;
+    EXPECT_EQ (cs.chunks_size (), 1U) << "A chunked sequence has at least one chunk";
+    decltype (cs)::chunk_list::iterator it = cs.chunks_begin ();
+    EXPECT_EQ (it->size (), 0U);
+    std::advance (it, 1);
+    EXPECT_EQ (it, cs.chunks_end ());
+}
+
+TEST (ChunkedSequenceChunkIterators, TwoChunks) {
+    pstore::chunked_sequence<int, 2U> cs;
+
+    cs.emplace_back (47);
+    cs.emplace_back (53);
+    cs.emplace_back (59);
+
+    EXPECT_EQ (cs.chunks_size (), 2U);
+    decltype (cs)::chunk_list::iterator it = cs.chunks_begin ();
+    EXPECT_EQ (it->size (), 2U);
+    std::advance (it, 1);
+    EXPECT_EQ (it->size (), 1U);
+    std::advance (it, 1);
+    EXPECT_EQ (it, cs.chunks_end ());
 }
