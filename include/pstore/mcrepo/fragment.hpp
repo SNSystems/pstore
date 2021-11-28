@@ -189,6 +189,7 @@ namespace pstore {
             /// Returns the array of section offsets.
             member_array const & members () const noexcept { return arr_; }
 
+            section_kind front () const noexcept { return arr_.get_indices ().front (); }
 
             const_iterator begin () const noexcept { return arr_.get_indices ().begin (); }
             const_iterator end () const noexcept { return arr_.get_indices ().end (); }
