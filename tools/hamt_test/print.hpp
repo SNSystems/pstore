@@ -19,88 +19,95 @@
 #ifndef PRINT_HPP
 #define PRINT_HPP
 
-#include <atomic>
 #include <iostream>
 #include <mutex>
 
 #include "pstore/core/database.hpp"
 
 namespace details {
+
     class ios_printer {
     public:
-        explicit ios_printer (std::ostream & os)
-                : os_ (os) {}
+        explicit constexpr ios_printer (std::ostream & os) noexcept
+                : os_{os} {}
         ios_printer (ios_printer const &) = delete;
+        ios_printer (ios_printer &&) noexcept = delete;
+
+        ~ios_printer () noexcept = default;
+
         ios_printer & operator= (ios_printer const &) = delete;
+        ios_printer & operator= (ios_printer &&) noexcept = delete;
 
         /// Writes one or more values to the output stream followed by a newline. If the preceding
         /// operation was a print_flush() then the output will also be prefixed by newline.
-        template <class... Args>
-        std::ostream & print (Args const &... args);
+        template <typename... Args>
+        std::ostream & print (Args &&... args);
 
         /// Writes one or more values to the output stream and flushes the stream.
-        template <class... Args>
-        std::ostream & print_flush (Args const &... args);
+        template <typename... Args>
+        std::ostream & print_flush (Args &&... args);
 
     private:
-        std::ostream & print_one () { return os_; }
+        std::ostream & print_one () noexcept { return os_; }
 
-        template <class A0, class... Args>
-        std::ostream & print_one (A0 const & a0, Args const &... args);
+        template <typename A0, typename... Args>
+        std::ostream & print_one (A0 && a0, Args &&... args);
 
         std::ostream & os_;
         std::mutex mutex_;
-        std::atomic<bool> cr_{false};
+        bool cr_ = false;
     };
 
-    template <class... Args>
-    std::ostream & ios_printer::print (Args const &... args) {
-        std::lock_guard<std::mutex> guard (mutex_);
-        if (!cr_.exchange (true)) {
+    template <typename... Args>
+    std::ostream & ios_printer::print (Args &&... args) {
+        std::lock_guard<std::mutex> _{mutex_};
+        if (!cr_) {
+            cr_ = true;
             this->print_one ('\n');
         }
-        return this->print_one (args...) << '\n';
+        return this->print_one (std::forward<Args> (args)...) << '\n';
     }
 
-    template <class... Args>
-    std::ostream & ios_printer::print_flush (Args const &... args) {
-        std::lock_guard<std::mutex> guard (mutex_);
+    template <typename... Args>
+    std::ostream & ios_printer::print_flush (Args &&... args) {
+        std::lock_guard<std::mutex> _{mutex_};
         cr_ = false;
-        return print_one (args...) << std::flush;
+        return print_one (std::forward<Args> (args)...) << std::flush;
     }
 
-    template <class A0, class... Args>
-    std::ostream & ios_printer::print_one (A0 const & a0, Args const &... args) {
+    template <typename A0, typename... Args>
+    std::ostream & ios_printer::print_one (A0 && a0, Args &&... args) {
         os_ << a0;
-        return print_one (args...);
+        return print_one (std::forward<Args> (args)...);
     }
 
     extern ios_printer cout;
     extern ios_printer cerr;
-} // namespace details
+
+} // end namespace details
 
 
-// print_cout/flush
+// print cout/flush
 // ~~~~~~~~~~~~~~~~
-template <class... Args>
-std::ostream & print_cout (Args const &... args) {
-    return ::details::cout.print (args...);
+template <typename... Args>
+std::ostream & print_cout (Args &&... args) {
+    return details::cout.print (std::forward<Args> (args)...);
 }
-template <class... Args>
-std::ostream & print_cout_flush (Args const &... args) {
-    return ::details::cout.print_flush (args...);
+template <typename... Args>
+std::ostream & print_cout_flush (Args &&... args) {
+    return details::cout.print_flush (std::forward<Args> (args)...);
 }
 
 
-// print_cerr/flush
+// print cerr/flush
 // ~~~~~~~~~~~~~~~~
-template <class... Args>
-std::ostream & print_cerr (Args const &... args) {
-    return ::details::cerr.print (args...);
+template <typename... Args>
+std::ostream & print_cerr (Args &&... args) {
+    return details::cerr.print (std::forward<Args> (args)...);
 }
-template <class... Args>
-std::ostream & print_cerr_flush (Args const &... args) {
-    return ::details::cerr.print_flush (args...);
+template <typename... Args>
+std::ostream & print_cerr_flush (Args &&... args) {
+    return details::cerr.print_flush (std::forward<Args> (args)...);
 }
 
 #endif // PRINT_HPP
