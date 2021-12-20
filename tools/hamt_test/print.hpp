@@ -28,7 +28,7 @@ namespace details {
 
     class ios_printer {
     public:
-        explicit constexpr ios_printer (std::ostream & os) noexcept
+        explicit ios_printer (std::ostream & os) noexcept
                 : os_{os} {}
         ios_printer (ios_printer const &) = delete;
         ios_printer (ios_printer &&) noexcept = delete;
@@ -103,11 +103,11 @@ std::ostream & print_cout_flush (Args &&... args) {
 // ~~~~~~~~~~~~~~~~
 template <typename... Args>
 std::ostream & print_cerr (Args &&... args) {
-    return details::cerr.print (std::forward<Args> (args)...);
+    return ::details::cerr.print (std::forward<Args> (args)...);
 }
 template <typename... Args>
 std::ostream & print_cerr_flush (Args &&... args) {
-    return details::cerr.print_flush (std::forward<Args> (args)...);
+    return ::details::cerr.print_flush (std::forward<Args> (args)...);
 }
 
 #endif // PRINT_HPP
