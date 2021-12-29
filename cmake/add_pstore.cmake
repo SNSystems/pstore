@@ -44,67 +44,90 @@ function (disable_warning_if_possible target_name flag result_var)
 endfunction()
 
 
-# pstore_enable_warnings
-# ~~~~~~~~~~~~~~~~~~~~~~
-function (pstore_enable_warnings)
+# pstore standalone compiler setup
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Sets the base warnings for a standalone build. This combines with the options
+# set by pstore_add_additional_compiler_flags which is used in both standalone
+# and "inside LLVM" builds.
+function (pstore_standalone_compiler_setup)
     cmake_parse_arguments (arg # prefix
         "IS_UNIT_TEST" # options
         "TARGET" # one-value-keywords
         "" # multi-value-keywords
         ${ARGN}
     )
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set (options
-            -Weverything
-            -Wno-c99-extensions
-            -Wno-c++98-compat
-            -Wno-c++98-compat-pedantic
-            -Wno-c++14-extensions
-            -Wno-disabled-macro-expansion
-            -Wno-exit-time-destructors
-            -Wno-global-constructors
-            -Wno-padded
-            -Wno-weak-vtables
+
+    # clang
+    # ~~~~~
+    set (clang_options )
+    # Optimization flags.
+    list (APPEND clang_options -mpopcnt)
+    # FIXME: This option is not supported with AppleClang.
+    #list (APPEND clang_options -fno-semantic-interposition)
+
+    # Lots of warnings.
+    list (APPEND clang_options
+        -Weverything
+        -Wno-c99-extensions
+        -Wno-c++98-compat
+        -Wno-c++98-compat-pedantic
+        -Wno-c++14-extensions
+        -Wno-disabled-macro-expansion
+        -Wno-exit-time-destructors
+        -Wno-global-constructors
+        -Wno-padded
+        -Wno-weak-vtables
+    )
+    if (${arg_IS_UNIT_TEST})
+        list (APPEND clang_options
+            -Wno-unused-member-function
+            -Wno-used-but-marked-unused
         )
-        if (${arg_IS_UNIT_TEST})
-            list (APPEND options
-                -Wno-unused-member-function
-                -Wno-used-but-marked-unused
-            )
-        endif ()
-        if (PSTORE_WERROR)
-            list (APPEND options -Werror)
-        endif ()
-    elseif (CMAKE_COMPILER_IS_GNUCXX)
-        set (options
-            -Wall
-            -Wextra
-            -pedantic
-        )
-        if (PSTORE_WERROR)
-            list (APPEND options -Werror)
-        endif ()
-    elseif (MSVC)
-        # Enable W4 but disable:
-        # 4324: structure was padded due to alignment specifier
-        set (options
-            -W4
-            -wd4324
-        )
-        if (PSTORE_WERROR)
-            list (APPEND options /WX)
-        endif ()
     endif ()
 
-    target_compile_options (${arg_TARGET} PRIVATE ${options})
+    # GCC
+    # ~~~
+    set (gcc_options )
+    # Optimization flags.
+    list (APPEND gcc_options
+        -fno-semantic-interposition
+        -mpopcnt
+    )
+    # Lots of warnings.
+    list (APPEND gcc_options
+        -Wall
+        -Wextra
+        -pedantic
+    )
 
-endfunction (pstore_enable_warnings)
+    # Visual Studio
+    # ~~~~~~~~~~~~~
+    set (msvc_options )
+    # Lots of warnings. Enable W4 but disable:
+    # 4324: structure was padded due to alignment specifier
+    list (APPEND msvc_options
+        -W4
+        -wd4324
+    )
+
+    if (PSTORE_WERROR)
+        list (APPEND clang_options -Werror)
+        list (APPEND gcc_options -Werror)
+        list (APPEND msvc_options /WX)
+    endif ()
+
+    target_compile_options (${arg_TARGET} PRIVATE
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${clang_options}>
+        $<$<CXX_COMPILER_ID:GNU>:${gcc_options}>
+        $<$<CXX_COMPILER_ID:MSVC>:${msvc_options}>
+    )
+
+endfunction (pstore_standalone_compiler_setup)
 
 
-########################################
-# add_pstore_additional_compiler_flags #
-########################################
-function (add_pstore_additional_compiler_flags target_name)
+# pstore add additional compiler flags
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function (pstore_add_additional_compiler_flags target_name)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         if (NOT PSTORE_EXCEPTIONS)
            target_compile_options (${target_name} PRIVATE -fno-exceptions -fno-rtti)
@@ -158,8 +181,8 @@ function (add_pstore_additional_compiler_flags target_name)
             -pedantic
         )
 
-	# A warning telling us that the signature will change in C++17 isn't important right now.
-	disable_warning_if_possible (${target_name} -Wno-noexcept-type      PSTORE_GCC_SUPPORTS_EXCEPT_TYPE)
+        # A warning telling us that the signature will change in C++17 isn't important right now.
+        disable_warning_if_possible (${target_name} -Wno-noexcept-type      PSTORE_GCC_SUPPORTS_EXCEPT_TYPE)
         disable_warning_if_possible (${target_name} -Wno-ignored-attributes PSTORE_GCC_SUPPORTS_IGNORED_ATTRIBUTES)
 
         if (PSTORE_COVERAGE)
@@ -211,7 +234,7 @@ function (add_pstore_additional_compiler_flags target_name)
         target_compile_definitions ("${target_name}" PRIVATE -DUNICODE -D_UNICODE)
     endif ()
 
-endfunction(add_pstore_additional_compiler_flags)
+endfunction(pstore_add_additional_compiler_flags)
 
 
 ####################
@@ -263,7 +286,7 @@ function (add_pstore_library)
             ADDITIONAL_HEADER_DIRS
             "${arg_HEADER_DIR}"
         )
-        add_pstore_additional_compiler_flags (${arg_TARGET})
+        pstore_add_additional_compiler_flags (${arg_TARGET})
     else ()
         add_library (${arg_TARGET} STATIC ${arg_SOURCES} ${include_files})
 
@@ -277,8 +300,8 @@ function (add_pstore_library)
             POSITION_INDEPENDENT_CODE Yes
         )
 
-        pstore_enable_warnings (TARGET ${arg_TARGET})
-        add_pstore_additional_compiler_flags (${arg_TARGET})
+        pstore_standalone_compiler_setup (TARGET ${arg_TARGET})
+        pstore_add_additional_compiler_flags (${arg_TARGET})
 
         target_include_directories (${arg_TARGET} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     endif (PSTORE_IS_INSIDE_LLVM)
@@ -316,7 +339,7 @@ endfunction (add_pstore_library)
 function (add_pstore_executable target)
     if (PSTORE_IS_INSIDE_LLVM)
         add_llvm_executable (${target} ${ARGN})
-        add_pstore_additional_compiler_flags (${target})
+        pstore_add_additional_compiler_flags (${target})
     else ()
         add_executable (${target} ${ARGN})
         set_target_properties (${target} PROPERTIES
@@ -324,8 +347,8 @@ function (add_pstore_executable target)
             CXX_STANDARD_REQUIRED Yes
             CXX_EXTENSIONS Off
         )
-        pstore_enable_warnings (TARGET ${target})
-        add_pstore_additional_compiler_flags (${target})
+        pstore_standalone_compiler_setup (TARGET ${target})
+        pstore_add_additional_compiler_flags (${target})
     endif (PSTORE_IS_INSIDE_LLVM)
 
     set_target_properties (${target} PROPERTIES FOLDER "pstore executables")
@@ -378,7 +401,7 @@ endfunction (add_pstore_example)
 function (add_pstore_test_library target_name)
     if (PSTORE_IS_INSIDE_LLVM)
         add_library (${target_name} STATIC ${ARGN})
-        add_pstore_additional_compiler_flags (${target_name})
+        pstore_add_additional_compiler_flags (${target_name})
         include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
         include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googlemock/include)
         target_link_libraries (${target_name} PUBLIC gtest)
@@ -389,8 +412,8 @@ function (add_pstore_test_library target_name)
             CXX_STANDARD_REQUIRED Yes
             CXX_EXTENSIONS Off
         )
-        pstore_enable_warnings (TARGET ${target_name})
-        add_pstore_additional_compiler_flags (${target_name})
+        pstore_standalone_compiler_setup (TARGET ${target_name})
+        pstore_add_additional_compiler_flags (${target_name})
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
         target_link_libraries (${target_name} PUBLIC gtest gmock)
     endif (PSTORE_IS_INSIDE_LLVM)
@@ -406,7 +429,7 @@ endfunction (add_pstore_test_library)
 function (add_pstore_unit_test target_name)
     if (PSTORE_IS_INSIDE_LLVM)
         add_unittest (PstoreUnitTests ${target_name} ${ARGN})
-        add_pstore_additional_compiler_flags (${target_name})
+        pstore_add_additional_compiler_flags (${target_name})
     else()
         add_executable (${target_name} ${ARGN})
         set_target_properties (${target_name} PROPERTIES
@@ -416,8 +439,8 @@ function (add_pstore_unit_test target_name)
             CXX_EXTENSIONS Off
         )
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-        pstore_enable_warnings (TARGET ${target_name} IS_UNIT_TEST)
-        add_pstore_additional_compiler_flags (${target_name})
+        pstore_standalone_compiler_setup (TARGET ${target_name} IS_UNIT_TEST)
+        pstore_add_additional_compiler_flags (${target_name})
         target_link_libraries (${target_name} PRIVATE pstore-unit-test-harness gtest gmock)
     endif (PSTORE_IS_INSIDE_LLVM)
 endfunction (add_pstore_unit_test)
