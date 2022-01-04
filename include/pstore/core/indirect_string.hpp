@@ -205,13 +205,17 @@ namespace pstore {
     } // end namespace serialize
 } // end namespace pstore
 
-template <>
-struct std::hash<pstore::indirect_string> {
-    size_t operator() (pstore::indirect_string const & str) const {
-        pstore::shared_sstring_view owner;
-        return std::hash<pstore::raw_sstring_view>{}(str.as_string_view (&owner));
-    }
-};
+namespace std {
+
+    template <>
+    struct hash<::pstore::indirect_string> {
+        size_t operator() (::pstore::indirect_string const & str) const {
+            ::pstore::shared_sstring_view owner;
+            return std::hash<pstore::raw_sstring_view>{}(str.as_string_view (&owner));
+        }
+    };
+
+} // namespace std
 
 namespace pstore {
 

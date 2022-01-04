@@ -59,7 +59,11 @@ namespace pstore {
     } // end namespace json
 } // end namespace pstore
 
-template <>
-struct std::is_error_code_enum<pstore::json::error_code> : std::true_type {};
+namespace std {
+
+    template <>
+    struct is_error_code_enum<::pstore::json::error_code> : std::true_type {};
+
+} // end namespace std
 
 #endif // PSTORE_JSON_JSON_ERROR_HPP

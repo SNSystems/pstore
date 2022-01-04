@@ -631,6 +631,7 @@ namespace pstore {
         raise_exception (std::out_of_range ("spare array index out of range"));
     }
 
+
     // operator==
     // ~~~~~~~~~~
     template <typename ValueType, typename BitmapType>
@@ -648,8 +649,10 @@ namespace pstore {
         return !(lhs == rhs);
     }
 
-    // get
-    // ~~~
+} // end namespace pstore
+
+namespace std {
+
     template <std::size_t Ip, typename ValueType, typename BitmapType>
     constexpr ValueType & get (pstore::sparse_array<ValueType, BitmapType> & arr) noexcept {
         static_assert (Ip < pstore::sparse_array<ValueType, BitmapType>::max_size (),
@@ -665,6 +668,6 @@ namespace pstore {
         return arr[Ip];
     }
 
-} // end namespace pstore
+} // end namespace std
 
 #endif // PSTORE_ADT_SPARSE_ARRAY_HPP

@@ -334,95 +334,103 @@ namespace pstore {
 } // end namespace pstore
 
 
-//*                                  _        _ _           _ _        *
-//*  _ __  _   _ _ __ ___   ___ _ __(_) ___  | (_)_ __ ___ (_) |_ ___  *
-//* | '_ \| | | | '_ ` _ \ / _ \ '__| |/ __| | | | '_ ` _ \| | __/ __| *
-//* | | | | |_| | | | | | |  __/ |  | | (__  | | | | | | | | | |_\__ \ *
-//* |_| |_|\__,_|_| |_| |_|\___|_|  |_|\___| |_|_|_| |_| |_|_|\__|___/ *
-//*                                                                    *
+namespace std {
+    //*                                  _        _ _           _ _        *
+    //*  _ __  _   _ _ __ ___   ___ _ __(_) ___  | (_)_ __ ___ (_) |_ ___  *
+    //* | '_ \| | | | '_ ` _ \ / _ \ '__| |/ __| | | | '_ ` _ \| | __/ __| *
+    //* | | | | |_| | | | | | |  __/ |  | | (__  | | | | | | | | | |_\__ \ *
+    //* |_| |_|\__,_|_| |_| |_|\___|_|  |_|\___| |_|_|_| |_| |_|_|\__|___/ *
+    //*                                                                    *
 
-// (Strictly speaking, we should be providing const and volatile versions of this specialization
-// as well.)
-template <>
-class std::numeric_limits<pstore::address> {
-    using base = std::numeric_limits<pstore::address::value_type>;
-    using type = pstore::address;
+    // (Strictly speaking, we should be providing const and volatile versions of this specialization
+    // as well.)
+    template <>
+    class numeric_limits<pstore::address> {
+        using base = std::numeric_limits<pstore::address::value_type>;
+        using type = pstore::address;
 
-public:
-    static constexpr const bool is_specialized = base::is_specialized;
-    static constexpr type min () noexcept { return pstore::address::null (); }
-    static constexpr type max () noexcept { return pstore::address::max (); }
-    static constexpr type lowest () noexcept { return pstore::address{base::lowest ()}; }
+    public:
+        static constexpr const bool is_specialized = base::is_specialized;
+        static constexpr type min () noexcept { return pstore::address::null (); }
+        static constexpr type max () noexcept { return pstore::address::max (); }
+        static constexpr type lowest () noexcept { return pstore::address{base::lowest ()}; }
 
-    static constexpr const int digits = base::digits;
-    static constexpr const int digits10 = base::digits10;
-    static constexpr const int max_digits10 = base::max_digits10;
-    static constexpr const bool is_signed = base::is_signed;
-    static constexpr const bool is_integer = base::is_integer;
-    static constexpr const bool is_exact = base::is_exact;
-    static constexpr const int radix = base::radix;
-    static constexpr type epsilon () noexcept { return pstore::address{base::epsilon ()}; }
-    static constexpr type round_error () noexcept { return pstore::address{base::round_error ()}; }
+        static constexpr const int digits = base::digits;
+        static constexpr const int digits10 = base::digits10;
+        static constexpr const int max_digits10 = base::max_digits10;
+        static constexpr const bool is_signed = base::is_signed;
+        static constexpr const bool is_integer = base::is_integer;
+        static constexpr const bool is_exact = base::is_exact;
+        static constexpr const int radix = base::radix;
+        static constexpr type epsilon () noexcept { return pstore::address{base::epsilon ()}; }
+        static constexpr type round_error () noexcept {
+            return pstore::address{base::round_error ()};
+        }
 
-    static constexpr const int min_exponent = base::min_exponent;
-    static constexpr const int min_exponent10 = base::min_exponent10;
-    static constexpr const int max_exponent = base::max_exponent;
-    static constexpr const int max_exponent10 = base::max_exponent10;
+        static constexpr const int min_exponent = base::min_exponent;
+        static constexpr const int min_exponent10 = base::min_exponent10;
+        static constexpr const int max_exponent = base::max_exponent;
+        static constexpr const int max_exponent10 = base::max_exponent10;
 
-    static constexpr const bool has_infinity = base::has_infinity;
-    static constexpr const bool has_quiet_NaN = base::has_quiet_NaN;         // NOLINT
-    static constexpr const bool has_signaling_NaN = base::has_signaling_NaN; // NOLINT
-    static constexpr const float_denorm_style has_denorm = base::has_denorm;
-    static constexpr const bool has_denorm_loss = base::has_denorm_loss;
-    static constexpr type infinity () noexcept { return pstore::address{base::infinity ()}; }
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    static constexpr type quiet_NaN () noexcept {
+        static constexpr const bool has_infinity = base::has_infinity;
+        static constexpr const bool has_quiet_NaN = base::has_quiet_NaN;         // NOLINT
+        static constexpr const bool has_signaling_NaN = base::has_signaling_NaN; // NOLINT
+        static constexpr const float_denorm_style has_denorm = base::has_denorm;
+        static constexpr const bool has_denorm_loss = base::has_denorm_loss;
+        static constexpr type infinity () noexcept { return pstore::address{base::infinity ()}; }
         // NOLINTNEXTLINE(readability-identifier-naming)
-        return pstore::address{base::quiet_NaN ()};
-    }
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    static constexpr type signaling_NaN () noexcept {
+        static constexpr type quiet_NaN () noexcept {
+            // NOLINTNEXTLINE(readability-identifier-naming)
+            return pstore::address{base::quiet_NaN ()};
+        }
         // NOLINTNEXTLINE(readability-identifier-naming)
-        return pstore::address{base::signaling_NaN ()};
-    }
-    static constexpr type denorm_min () noexcept { return pstore::address{base::denorm_min ()}; }
+        static constexpr type signaling_NaN () noexcept {
+            // NOLINTNEXTLINE(readability-identifier-naming)
+            return pstore::address{base::signaling_NaN ()};
+        }
+        static constexpr type denorm_min () noexcept {
+            return pstore::address{base::denorm_min ()};
+        }
 
-    static constexpr const bool is_iec559 = base::is_iec559;
-    static constexpr const bool is_bounded = base::is_bounded;
-    static constexpr const bool is_modulo = base::is_modulo;
+        static constexpr const bool is_iec559 = base::is_iec559;
+        static constexpr const bool is_bounded = base::is_bounded;
+        static constexpr const bool is_modulo = base::is_modulo;
 
-    static constexpr const bool traps = base::traps;
-    static constexpr const bool tinyness_before = base::tinyness_before;
-    static constexpr const float_round_style round_style = base::round_style;
-};
+        static constexpr const bool traps = base::traps;
+        static constexpr const bool tinyness_before = base::tinyness_before;
+        static constexpr const float_round_style round_style = base::round_style;
+    };
 
-//*  _                  _      *
-//* | |__    __ _  ___ | |__   *
-//* | '_ \  / _` |/ __|| '_ \  *
-//* | | | || (_| |\__ \| | | | *
-//* |_| |_| \__,_||___/|_| |_| *
-//*                            *
-template <>
-struct std::hash<pstore::address> {
-    using argument_type = pstore::address;
-    using result_type = std::size_t;
+    //*  _                  _      *
+    //* | |__    __ _  ___ | |__   *
+    //* | '_ \  / _` |/ __|| '_ \  *
+    //* | | | || (_| |\__ \| | | | *
+    //* |_| |_| \__,_||___/|_| |_| *
+    //*                            *
+    template <>
+    struct hash<pstore::address> {
+        using argument_type = pstore::address;
+        using result_type = std::size_t;
 
-    result_type operator() (argument_type const s) const {
-        auto const abs = s.absolute ();
-        return std::hash<std::remove_const<decltype (abs)>::type>{}(abs);
-    }
-};
+        result_type operator() (argument_type const s) const {
+            auto const abs = s.absolute ();
+            return std::hash<std::remove_const<decltype (abs)>::type>{}(abs);
+        }
+    };
 
-template <typename T>
-struct std::hash<pstore::typed_address<T>> {
-    using argument_type = pstore::typed_address<T>;
-    using result_type = std::size_t;
+    template <typename T>
+    struct hash<pstore::typed_address<T>> {
+        using argument_type = pstore::typed_address<T>;
+        using result_type = std::size_t;
 
-    result_type operator() (argument_type const s) const {
-        auto const addr = s.to_address ();
-        return std::hash<typename std::remove_const<decltype (addr)>::type>{}(addr);
-    }
-};
+        result_type operator() (argument_type const s) const {
+            auto const addr = s.to_address ();
+            return std::hash<typename std::remove_const<decltype (addr)>::type>{}(addr);
+        }
+    };
+
+} // end namespace std
+
 
 namespace pstore {
 

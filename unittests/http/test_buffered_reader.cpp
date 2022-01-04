@@ -51,7 +51,7 @@ TEST (HttpdBufferedReader, Span) {
     std::vector<std::uint8_t> v (requested_size, std::uint8_t{0xFF});
     pstore::error_or_n<int, byte_span> res = br.get_span (0, pstore::gsl::make_span (v));
     ASSERT_TRUE (res);
-    auto const & sp = pstore::get<1> (res);
+    auto const & sp = std::get<1> (res);
     ASSERT_EQ (sp.size (), 1);
     EXPECT_EQ (sp[0], std::uint8_t{0});
 }

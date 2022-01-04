@@ -198,14 +198,18 @@ namespace pstore {
 
 } // end namespace pstore
 
-template <typename DescriptorTraits>
-struct std::hash<pstore::details::descriptor<DescriptorTraits>> {
-    using argument_type = pstore::details::descriptor<DescriptorTraits>;
-    using result_type = std::size_t;
+namespace std {
 
-    result_type operator() (argument_type const & s) const noexcept {
-        return std::hash<typename argument_type::value_type> () (s.native_handle ());
-    }
-};
+    template <typename DescriptorTraits>
+    struct hash<pstore::details::descriptor<DescriptorTraits>> {
+        using argument_type = pstore::details::descriptor<DescriptorTraits>;
+        using result_type = std::size_t;
+
+        result_type operator() (argument_type const & s) const noexcept {
+            return std::hash<typename argument_type::value_type> () (s.native_handle ());
+        }
+    };
+
+} // end namespace std
 
 #endif // PSTORE_OS_DESCRIPTOR_HPP

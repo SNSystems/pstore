@@ -284,8 +284,8 @@ namespace pstore {
                          "Failed reading HTTP request: ", eri.get_error ().message ());
                     continue;
                 }
-                childfd = std::move (get<0> (eri));
-                request_info const & request = get<1> (eri);
+                childfd = std::move (std::get<0> (eri));
+                request_info const & request = std::get<1> (eri);
                 log (priority::info, "Request: ",
                      request.method () + ' ' + request.version () + ' ' + request.uri ());
 

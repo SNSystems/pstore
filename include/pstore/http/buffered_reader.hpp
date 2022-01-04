@@ -198,8 +198,8 @@ namespace pstore {
                     if (!x) {
                         return error_or_n<IO, byte_span>{x.get_error ()};
                     }
-                    io = std::move (get<0> (x));
-                    auto const & end = get<1> (x);
+                    io = std::move (std::get<0> (x));
+                    auto const & end = std::get<1> (x);
                     if (end == span_.begin ()) {
                         // that's the end of the source data.
                         is_eof_ = true;

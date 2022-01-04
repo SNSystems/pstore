@@ -89,7 +89,11 @@ namespace pstore {
     }     // end namespace exchange
 } // end namespace pstore
 
-template <>
-struct std::is_error_code_enum<pstore::exchange::import_ns::error> : std::true_type {};
+namespace std {
+
+    template <>
+    struct is_error_code_enum<pstore::exchange::import_ns::error> : std::true_type {};
+
+} // end namespace std
 
 #endif // PSTORE_EXCHANGE_IMPORT_ERROR_HPP

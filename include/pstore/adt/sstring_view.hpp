@@ -418,20 +418,24 @@ namespace pstore {
 
 } // namespace pstore
 
-template <typename StringType>
-struct std::equal_to<pstore::sstring_view<StringType>> {
-    template <typename S1, typename S2>
-    bool operator() (S1 const & x, S2 const & y) const {
-        return x == y;
-    }
-};
+namespace std {
 
-template <typename StringType>
-struct std::hash<pstore::sstring_view<StringType>> {
-    size_t operator() (pstore::sstring_view<StringType> const & str) const {
-        return static_cast<size_t> (
-            pstore::fnv_64a_buf (pstore::gsl::make_span (str.begin (), str.end ())));
-    }
-};
+    template <typename StringType>
+    struct equal_to<::pstore::sstring_view<StringType>> {
+        template <typename S1, typename S2>
+        bool operator() (S1 const & x, S2 const & y) const {
+            return x == y;
+        }
+    };
+
+    template <typename StringType>
+    struct hash<::pstore::sstring_view<StringType>> {
+        size_t operator() (::pstore::sstring_view<StringType> const & str) const {
+            return static_cast<size_t> (
+                ::pstore::fnv_64a_buf (::pstore::gsl::make_span (str.begin (), str.end ())));
+        }
+    };
+
+} // namespace std
 
 #endif // PSTORE_ADT_SSTRING_VIEW_HPP

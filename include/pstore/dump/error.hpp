@@ -48,7 +48,11 @@ namespace pstore {
     } // end namespace dump
 } // end namespace pstore
 
-template <>
-struct std::is_error_code_enum<pstore::dump::error_code> : std::true_type {};
+namespace std {
+
+    template <>
+    struct is_error_code_enum<pstore::dump::error_code> : std::true_type {};
+
+} // end namespace std
 
 #endif // PSTORE_DUMP_ERROR_HPP

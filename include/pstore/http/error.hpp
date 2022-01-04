@@ -74,7 +74,13 @@ namespace pstore {
     } // end namespace http
 } // end namespace pstore
 
-template <>
-struct std::is_error_code_enum<pstore::http::error_code> : std::true_type {};
+
+namespace std {
+
+    template <>
+    struct is_error_code_enum<pstore::http::error_code> : std::true_type {};
+
+} // end namespace std
+
 
 #endif // PSTORE_HTTP_ERROR_HPP

@@ -128,15 +128,19 @@ namespace pstore {
 
 } // end namespace pstore
 
-template <>
-struct std::is_error_code_enum<pstore::error_code> : std::true_type {};
-template <>
-struct std::is_error_code_enum<pstore::errno_erc> : std::true_type {};
+namespace std {
+
+    template <>
+    struct is_error_code_enum<pstore::error_code> : std::true_type {};
+    template <>
+    struct is_error_code_enum<pstore::errno_erc> : std::true_type {};
 
 #ifdef _WIN32
-template <>
-struct std::is_error_code_enum<pstore::win32_erc> : std::true_type {};
+    template <>
+    struct is_error_code_enum<pstore::win32_erc> : std::true_type {};
 #endif //_WIN32
+
+} // end namespace std
 
 namespace pstore {
 

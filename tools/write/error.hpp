@@ -25,6 +25,7 @@
 // ********************
 enum class write_error_code : int { unrecognized_compaction_mode = 1 };
 
+
 // ************************
 // * write error category *
 // ************************
@@ -39,7 +40,11 @@ public:
 
 std::error_code make_error_code (write_error_code e);
 
-template <>
-struct std::is_error_code_enum<write_error_category> : std::true_type {};
+namespace std {
+
+    template <>
+    struct is_error_code_enum<write_error_category> : std::true_type {};
+
+} // namespace std
 
 #endif // PSTORE_WRITE_ERROR_HPP
