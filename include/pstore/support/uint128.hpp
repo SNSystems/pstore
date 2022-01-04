@@ -34,23 +34,19 @@ namespace pstore {
     class uint128;
 } // end namespace pstore
 
-namespace std {
+template <>
+struct std::is_unsigned<pstore::uint128> : true_type {};
+template <>
+struct std::is_signed<pstore::uint128> : false_type {};
 
-    template <>
-    struct is_unsigned<pstore::uint128> : true_type {};
-    template <>
-    struct is_signed<pstore::uint128> : false_type {};
-
-    // Provide the is_(un)signed<__uint128_t> if we have support for the type in the compiler but
-    // not in the standard library.
+// Provide the is_(un)signed<__uint128_t> if we have support for the type in the compiler but
+// not in the standard library.
 #if defined(PSTORE_HAVE_UINT128_T) && !defined(PSTORE_HAVE_UINT128_TRAITS_SUPPORT)
-    template <>
-    struct is_unsigned<__uint128_t> : true_type {};
-    template <>
-    struct is_signed<__uint128_t> : false_type {};
+template <>
+struct std::is_unsigned<__uint128_t> : true_type {};
+template <>
+struct std::is_signed<__uint128_t> : false_type {};
 #endif // PSTORE_HAVE_UINT128_T && !PSTORE_HAVE_UINT128_TRAITS_SUPPORT
-
-} // namespace std
 
 namespace pstore {
 
@@ -467,68 +463,65 @@ namespace pstore {
 
 } // end namespace pstore
 
-namespace std {
-    template <>
-    struct hash<pstore::uint128> {
-        using argument_type = pstore::uint128;
-        using result_type = size_t;
+template <>
+struct std::hash<pstore::uint128> {
+    using argument_type = pstore::uint128;
+    using result_type = size_t;
 
-        result_type operator() (argument_type const & s) const {
-            return std::hash<std::uint64_t>{}(s.low ()) ^ std::hash<std::uint64_t>{}(s.high ());
-        }
-    };
+    result_type operator() (argument_type const & s) const {
+        return std::hash<std::uint64_t>{}(s.low ()) ^ std::hash<std::uint64_t>{}(s.high ());
+    }
+};
 
-    template <>
-    class numeric_limits<pstore::uint128> {
-        using type = pstore::uint128;
+template <>
+class std::numeric_limits<pstore::uint128> {
+    using type = pstore::uint128;
 
-    public:
-        static constexpr bool is_specialized = true;
-        static constexpr bool is_signed = false;
+public:
+    static constexpr bool is_specialized = true;
+    static constexpr bool is_signed = false;
 
-        static constexpr type min () noexcept { return {0U}; }
-        static constexpr type max () noexcept {
-            return {std::numeric_limits<std::uint64_t>::max (),
-                    std::numeric_limits<std::uint64_t>::max ()};
-        }
-        static constexpr type lowest () noexcept { return type{0U}; }
+    static constexpr type min () noexcept { return {0U}; }
+    static constexpr type max () noexcept {
+        return {std::numeric_limits<std::uint64_t>::max (),
+                std::numeric_limits<std::uint64_t>::max ()};
+    }
+    static constexpr type lowest () noexcept { return type{0U}; }
 
-        static constexpr const int digits = 128;
-        static constexpr const int digits10 = 38;
-        static constexpr const int max_digits10 = 0;
-        static constexpr const bool is_integer = true;
-        static constexpr const bool is_exact = true;
-        static constexpr const int radix = 2;
-        static constexpr type epsilon () noexcept { return {0U}; }
-        static constexpr type round_error () noexcept { return {0U}; }
+    static constexpr const int digits = 128;
+    static constexpr const int digits10 = 38;
+    static constexpr const int max_digits10 = 0;
+    static constexpr const bool is_integer = true;
+    static constexpr const bool is_exact = true;
+    static constexpr const int radix = 2;
+    static constexpr type epsilon () noexcept { return {0U}; }
+    static constexpr type round_error () noexcept { return {0U}; }
 
-        static constexpr const int min_exponent = 0;
-        static constexpr const int min_exponent10 = 0;
-        static constexpr const int max_exponent = 0;
-        static constexpr const int max_exponent10 = 0;
+    static constexpr const int min_exponent = 0;
+    static constexpr const int min_exponent10 = 0;
+    static constexpr const int max_exponent = 0;
+    static constexpr const int max_exponent10 = 0;
 
-        static constexpr const bool has_infinity = false;
-        static constexpr const bool has_quiet_NaN = false; // NOLINT(readability-identifier-naming)
-        // NOLINTNEXTLINE(readability-identifier-naming)
-        static constexpr const bool has_signaling_NaN = false;
-        static constexpr const float_denorm_style has_denorm = denorm_absent;
-        static constexpr const bool has_denorm_loss = false;
-        static constexpr type infinity () noexcept { return {0U}; }
-        // NOLINTNEXTLINE(readability-identifier-naming)
-        static constexpr type quiet_NaN () noexcept { return {0U}; }
-        // NOLINTNEXTLINE(readability-identifier-naming)
-        static constexpr type signaling_NaN () noexcept { return {0U}; }
-        static constexpr type denorm_min () noexcept { return {0U}; }
+    static constexpr const bool has_infinity = false;
+    static constexpr const bool has_quiet_NaN = false; // NOLINT(readability-identifier-naming)
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    static constexpr const bool has_signaling_NaN = false;
+    static constexpr const float_denorm_style has_denorm = denorm_absent;
+    static constexpr const bool has_denorm_loss = false;
+    static constexpr type infinity () noexcept { return {0U}; }
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    static constexpr type quiet_NaN () noexcept { return {0U}; }
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    static constexpr type signaling_NaN () noexcept { return {0U}; }
+    static constexpr type denorm_min () noexcept { return {0U}; }
 
-        static constexpr const bool is_iec559 = false;
-        static constexpr const bool is_bounded = true;
-        static constexpr const bool is_modulo = true;
+    static constexpr const bool is_iec559 = false;
+    static constexpr const bool is_bounded = true;
+    static constexpr const bool is_modulo = true;
 
-        static constexpr const bool traps = true;
-        static constexpr const bool tinyness_before = false;
-        static constexpr const float_round_style round_style = std::round_toward_zero;
-    };
-
-} // end namespace std
+    static constexpr const bool traps = true;
+    static constexpr const bool tinyness_before = false;
+    static constexpr const float_round_style round_style = std::round_toward_zero;
+};
 
 #endif // PSTORE_SUPPORT_UINT128_HPP

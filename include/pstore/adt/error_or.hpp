@@ -354,32 +354,25 @@ namespace pstore {
     template <typename... Args>
     using error_or_n = error_or<std::tuple<Args...>>;
 
-} // end namespace pstore
-
-// std::get<> support for error_or_n<>.
-namespace std {
 
     template <std::size_t I, class... Types>
-    typename std::tuple_element<I, std::tuple<Types...>>::type &
+    constexpr typename std::tuple_element<I, std::tuple<Types...>>::type &
     get (pstore::error_or_n<Types...> & eon) noexcept {
         return std::get<I> (*eon);
     }
 
     template <std::size_t I, class... Types>
-    typename std::tuple_element<I, std::tuple<Types...>>::type &&
+    constexpr typename std::tuple_element<I, std::tuple<Types...>>::type &&
     get (pstore::error_or_n<Types...> && eon) noexcept {
         return std::get<I> (*eon);
     }
 
     template <std::size_t I, class... Types>
-    typename std::tuple_element<I, std::tuple<Types...>>::type const &
+    constexpr typename std::tuple_element<I, std::tuple<Types...>>::type const &
     get (pstore::error_or_n<Types...> const & eon) noexcept {
         return std::get<I> (*eon);
     }
 
-} // end namespace std
-
-namespace pstore {
     namespace details {
 
         template <std::size_t N>

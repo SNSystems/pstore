@@ -77,16 +77,13 @@ namespace pstore {
     } // end namespace broker
 } // end namespace pstore
 
-// NOLINTNEXTLINE(cert-dcl58-cpp)
-namespace std {
-    template <>
-    struct hash<pstore::broker::size_pair> {
-        std::size_t operator() (pstore::broker::size_pair const & p) const {
-            auto const h = std::hash<std::size_t>{};
-            return h (p.first) ^ h (p.second);
-        }
-    };
-} // end namespace std
+template <>
+struct std::hash<pstore::broker::size_pair> {
+    std::size_t operator() (pstore::broker::size_pair const & p) const {
+        auto const h = std::hash<std::size_t>{};
+        return h (p.first) ^ h (p.second);
+    }
+};
 
 namespace pstore {
     namespace broker {

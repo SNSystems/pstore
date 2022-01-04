@@ -74,12 +74,8 @@ namespace {
 
 } // end anonymous namespace
 
-namespace std {
-
-    template <>
-    struct is_error_code_enum<genromfs_erc> : std::true_type {};
-
-} // end namespace std
+template <>
+struct std::is_error_code_enum<genromfs_erc> : std::true_type {};
 
 #define DEFAULT_VAR "fs"
 

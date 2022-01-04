@@ -72,13 +72,8 @@ namespace pstore {
     } // end namespace http
 } // end namespace pstore
 
-namespace std {
-
-    template <>
-    struct is_error_code_enum<pstore::http::ws_error> : std::true_type {};
-
-} // end namespace std
-
+template <>
+struct std::is_error_code_enum<pstore::http::ws_error> : std::true_type {};
 
 namespace pstore {
     namespace http {
@@ -502,8 +497,8 @@ namespace pstore {
                 return std::tuple<IO, bool>{std::move (io), true};
             }
 
-            io = std::get<0> (eo);
-            frame const & wsp = std::get<1> (eo);
+            io = get<0> (eo);
+            frame const & wsp = get<1> (eo);
 
             // "All control frames MUST have a payload length of 125 bytes or less and MUST
             // NOT be fragmented."

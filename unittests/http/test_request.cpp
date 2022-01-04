@@ -52,7 +52,7 @@ TEST (Request, Complete) {
     auto br = make_buffered_reader<int> (r.refill_function ());
     error_or_n<int, request_info> const res = read_request (br, io);
     ASSERT_TRUE (static_cast<bool> (res)) << "There was an error:" << res.get_error ();
-    auto const & request = std::get<1> (res);
+    auto const & request = pstore::get<1> (res);
     EXPECT_EQ (request.method (), "GET");
     EXPECT_EQ (request.uri (), "/uri");
     EXPECT_EQ (request.version (), "HTTP/1.1");

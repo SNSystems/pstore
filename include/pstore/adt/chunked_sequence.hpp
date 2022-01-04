@@ -600,20 +600,13 @@ namespace pstore {
         return old;
     }
 
-} // end namespace pstore
-
-// std::swap may be specialized in namespace std for program-defined types
-// NOLINTNEXTLINE(cert-dcl58-cpp)
-namespace std {
-
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
-    void
-    swap (pstore::chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign> & lhs,
-          pstore::chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign> & rhs) noexcept {
+    void swap (chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign> & lhs,
+               chunked_sequence<T, ElementsPerChunk, ActualSize, ActualAlign> & rhs) noexcept {
         lhs.swap (rhs);
     }
 
-} // end namespace std
+} // end namespace pstore
 
 #endif // PSTORE_ADT_CHUNKED_SEQUENCE_HPP

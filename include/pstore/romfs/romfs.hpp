@@ -45,12 +45,8 @@ namespace pstore {
     } // end namespace romfs
 } // end namespace pstore
 
-namespace std {
-
-    template <>
-    struct is_error_code_enum<pstore::romfs::error_code> : std::true_type {};
-
-} // namespace std
+template <>
+struct std::is_error_code_enum<pstore::romfs::error_code> : std::true_type {};
 
 namespace pstore {
     namespace romfs {

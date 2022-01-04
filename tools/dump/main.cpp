@@ -99,23 +99,15 @@ namespace {
 
 } // end anonymous namespace
 
-namespace std {
-
-    template <>
-    struct is_error_code_enum<dump_error_code> : std::true_type {};
-
-} // end namespace std
+template <>
+struct std::is_error_code_enum<dump_error_code> : std::true_type {};
 
 namespace {
 
     template <typename Index>
-    auto make_index (char const * name, pstore::database const & db, Index const & index)
-        -> pstore::dump::value_ptr {
+    pstore::dump::value_ptr make_index (char const * name, pstore::database const & db, Index const & index) {
         using namespace pstore::dump;
         array::container members;
-        auto r = index.make_range (db);
-        typename Index::const_iterator b = r.begin ();
-        typename Index::const_iterator e = r.end ();
         for (auto const & kvp : index.make_range (db)) {
             members.push_back (make_value (object::container{{"key", make_value (kvp.first)},
                                                              {"value", make_value (kvp.second)}}));
