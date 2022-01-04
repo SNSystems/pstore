@@ -13,7 +13,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-import * as d3 from './node_modules/d3/dist/d3.min.js'
 
 export function series (pull) {
   const n = 20 // The number of data points shown.
