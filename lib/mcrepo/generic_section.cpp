@@ -26,13 +26,13 @@ namespace pstore {
                       << ", addend:" << ifx.addend << '}';
         }
 
-        std::ostream & operator<< (std::ostream & os, reference_strength const & strength) {
-            return os << (strength == reference_strength::weak ? "weak" : "strong");
+        std::ostream & operator<< (std::ostream & os, binding const & b) {
+            return os << (b == binding::weak ? "weak" : "strong");
         }
 
         std::ostream & operator<< (std::ostream & os, external_fixup const & xfx) {
             return os << "{ name:" << xfx.name << ", type:" << static_cast<unsigned> (xfx.type)
-                      << ", strength:" << xfx.strength () << ", offset:" << xfx.offset
+                      << ", binding:" << xfx.strength () << ", offset:" << xfx.offset
                       << ", addend:" << xfx.addend << '}';
         }
 

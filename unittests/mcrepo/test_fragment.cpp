@@ -145,13 +145,13 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
         text.ifixups.emplace_back (internal_fixup{section_kind::text, 1, 1, 1});
         text.ifixups.emplace_back (internal_fixup{section_kind::data, 2, 2, 2});
         text.xfixups.emplace_back (external_fixup{indirect_string_address (3), relocation_type{3},
-                                                  pstore::repo::reference_strength::strong,
+                                                  pstore::repo::binding::strong,
                                                   UINT64_C (3) /*offset*/, INT64_C (3) /*addend*/});
         text.xfixups.emplace_back (external_fixup{indirect_string_address (4), relocation_type{4},
-                                                  pstore::repo::reference_strength::weak,
+                                                  pstore::repo::binding::weak,
                                                   UINT64_C (4) /*offset*/, INT64_C (4) /*addend*/});
         text.xfixups.emplace_back (external_fixup{indirect_string_address (5), relocation_type{5},
-                                                  pstore::repo::reference_strength::strong,
+                                                  pstore::repo::binding::strong,
                                                   UINT64_C (5) /*offset*/, INT64_C (5) /*addend*/});
     }
 
@@ -185,14 +185,14 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
                                             internal_fixup{section_kind::data, 2, 2, 2}));
     EXPECT_THAT (s.xfixups (),
                  ElementsAre (external_fixup{indirect_string_address (3), relocation_type{3},
-                                             pstore::repo::reference_strength::strong,
-                                             UINT64_C (3) /*offset*/, INT64_C (3) /*addend*/},
+                                             pstore::repo::binding::strong, UINT64_C (3) /*offset*/,
+                                             INT64_C (3) /*addend*/},
                               external_fixup{indirect_string_address (4), relocation_type{4},
-                                             pstore::repo::reference_strength::weak,
-                                             UINT64_C (4) /*offset*/, INT64_C (4) /*addend*/},
+                                             pstore::repo::binding::weak, UINT64_C (4) /*offset*/,
+                                             INT64_C (4) /*addend*/},
                               external_fixup{indirect_string_address (5), relocation_type{5},
-                                             pstore::repo::reference_strength::strong,
-                                             UINT64_C (5) /*offset*/, INT64_C (5) /*addend*/}));
+                                             pstore::repo::binding::strong, UINT64_C (5) /*offset*/,
+                                             INT64_C (5) /*addend*/}));
 }
 
 TEST_F (FragmentTest, MakeTextSectionWithLinkedDefinitions) {
