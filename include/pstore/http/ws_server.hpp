@@ -502,8 +502,8 @@ namespace pstore {
                 return std::tuple<IO, bool>{std::move (io), true};
             }
 
-            io = std::get<0> (eo);
-            frame const & wsp = std::get<1> (eo);
+            io = get<0> (eo);
+            frame const & wsp = get<1> (eo);
 
             // "All control frames MUST have a payload length of 125 bytes or less and MUST
             // NOT be fragmented."

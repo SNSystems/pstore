@@ -136,12 +136,12 @@ TEST (ErrorOr, Equal) {
 
 TEST (ErrorOrN, StdGet) {
     pstore::error_or_n<int, int> eo{pstore::in_place, 3, 5};
-    EXPECT_EQ (std::get<0> (eo), 3);
-    EXPECT_EQ (std::get<1> (eo), 5);
+    EXPECT_EQ (pstore::get<0> (eo), 3);
+    EXPECT_EQ (pstore::get<1> (eo), 5);
 
     pstore::error_or_n<int, int> const eo_const{pstore::in_place, 7, 11};
-    EXPECT_EQ (std::get<0> (eo_const), 7);
-    EXPECT_EQ (std::get<1> (eo_const), 11);
+    EXPECT_EQ (pstore::get<0> (eo_const), 7);
+    EXPECT_EQ (pstore::get<1> (eo_const), 11);
 }
 
 TEST (ErrorOrN, Bind) {

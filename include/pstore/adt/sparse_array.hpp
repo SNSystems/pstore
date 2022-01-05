@@ -649,25 +649,22 @@ namespace pstore {
         return !(lhs == rhs);
     }
 
-} // end namespace pstore
-
-namespace std {
-
+    // get
+    // ~~~
     template <std::size_t Ip, typename ValueType, typename BitmapType>
-    constexpr ValueType & get (pstore::sparse_array<ValueType, BitmapType> & arr) noexcept {
-        static_assert (Ip < pstore::sparse_array<ValueType, BitmapType>::max_size (),
+    constexpr ValueType & get (sparse_array<ValueType, BitmapType> & arr) noexcept {
+        static_assert (Ip < sparse_array<ValueType, BitmapType>::max_size (),
                        "Index out of bounds in std::get<> (sparse_array)");
         return arr[Ip];
     }
 
     template <std::size_t Ip, typename ValueType, typename BitmapType>
-    constexpr ValueType const &
-    get (pstore::sparse_array<ValueType, BitmapType> const & arr) noexcept {
-        static_assert (Ip < pstore::sparse_array<ValueType, BitmapType>::max_size (),
+    constexpr ValueType const & get (sparse_array<ValueType, BitmapType> const & arr) noexcept {
+        static_assert (Ip < sparse_array<ValueType, BitmapType>::max_size (),
                        "Index out of bounds in std::get<> (const sparse_array)");
         return arr[Ip];
     }
 
-} // end namespace std
+} // end namespace pstore
 
 #endif // PSTORE_ADT_SPARSE_ARRAY_HPP

@@ -122,7 +122,7 @@ TYPED_TEST (SparseArray, IndexInitializationList) {
         EXPECT_EQ (v, empty);
     }
 
-    EXPECT_EQ (std::get<2> (*arr), empty);
+    EXPECT_EQ (pstore::get<2> (*arr), empty);
 }
 
 namespace {
