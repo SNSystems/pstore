@@ -384,12 +384,11 @@ namespace pstore {
 
         namespace details {
 
-            // A simplified definition of std::aligned_storage to workaround a bug in Visual Stdio
+            // A simplified definition of std::aligned_storage to workaround a bug in Visual Studio
             // 2017 prior to v15.8. Microsoft's fix for that bug introduces a binary
-            // incompatibility. In order to avoid introducing that binary incompatibility to
-            // projects using store, we have our own version of aligned_sotrage here. (See the
-            // description of Microsoft's
-            // "_ENABLE_EXTENDED_ALIGNED_STORAGE" macro.)
+            // incompatibility. In order to avoid introducing that incompatibility to projects using
+            // pstore, we have our own version of aligned_storage here. (See the description of
+            // Microsoft's "_ENABLE_EXTENDED_ALIGNED_STORAGE" macro.)
             template <std::size_t Len, std::size_t Align>
             struct aligned_storage {
                 struct alignas (Align) type {
