@@ -143,14 +143,12 @@ TEST_F (GenericSection, RoundTripForPopulated) {
     exported_content.ifixups.emplace_back (
         pstore::repo::section_kind::read_only, pstore::repo::relocation_type{11},
         std::uint64_t{13} /*offset*/, std::int64_t{17} /*addend*/);
-    exported_content.xfixups.emplace_back (indir_strings[name1], pstore::repo::relocation_type{19},
-                                           pstore::repo::reference_strength::strong,
-                                           std::uint64_t{23} /*offset*/,
-                                           std::int64_t{29} /*addend*/);
-    exported_content.xfixups.emplace_back (indir_strings[name2], pstore::repo::relocation_type{31},
-                                           pstore::repo::reference_strength::weak,
-                                           std::uint64_t{37} /*offset*/,
-                                           std::int64_t{41} /*addend*/);
+    exported_content.xfixups.emplace_back (
+        indir_strings[name1], pstore::repo::relocation_type{19}, pstore::repo::binding::strong,
+        std::uint64_t{23} /*offset*/, std::int64_t{29} /*addend*/);
+    exported_content.xfixups.emplace_back (
+        indir_strings[name2], pstore::repo::relocation_type{31}, pstore::repo::binding::weak,
+        std::uint64_t{37} /*offset*/, std::int64_t{41} /*addend*/);
 
 
     std::string const exported_json =

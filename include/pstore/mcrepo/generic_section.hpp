@@ -96,12 +96,12 @@ namespace pstore {
 
         /// Defines the strength of an external reference. A "strong" reference must be resolved
         /// whereas a link with unresolved weak references will complete successfully.
-        enum class reference_strength {
+        enum class binding {
             strong,
             weak,
         };
 
-        std::ostream & operator<< (std::ostream & os, reference_strength const & strength);
+        std::ostream & operator<< (std::ostream & os, binding const & b);
 
 
         //*          _                     _    __ _                *
@@ -122,13 +122,12 @@ namespace pstore {
                     , addend{addend_} {}
 #endif // PSTORE_IS_INSIDE_LLVM
             constexpr external_fixup (typed_address<indirect_string> const name_,
-                                      relocation_type const type_,
-                                      reference_strength const strength,
+                                      relocation_type const type_, binding const strength,
                                       std::uint64_t const offset_,
                                       std::int64_t const addend_) noexcept
                     : name{name_}
                     , type{type_}
-                    , is_weak{strength == reference_strength::weak}
+                    , is_weak{strength == binding::weak}
                     , offset{offset_}
                     , addend{addend_} {}
 
@@ -145,8 +144,8 @@ namespace pstore {
                 return !operator== (rhs);
             }
 
-            constexpr reference_strength strength () const noexcept {
-                return is_weak ? reference_strength::weak : reference_strength::strong;
+            constexpr binding strength () const noexcept {
+                return is_weak ? binding::weak : binding::strong;
             }
 
             typed_address<indirect_string> name;
