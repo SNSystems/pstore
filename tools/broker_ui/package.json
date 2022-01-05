@@ -16,7 +16,7 @@
   "dependencies": {
     "bootstrap": "^4.4.1",
     "d3": "^7.0.0",
-    "electron": "^12.1.0",
+    "electron": "^16.0.0",
     "humanize-duration": "^3.27.0",
     "popper.js": "^1.16.0"
   },
