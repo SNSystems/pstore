@@ -56,8 +56,11 @@ namespace pstore {
                                                  if (xfx.is_weak) {
                                                      os1 << R"(,"is_weak":)" << xfx.is_weak;
                                                  }
-                                                 os1 << R"(,"offset":)" << xfx.offset
-                                                     << R"(,"addend":)" << xfx.addend << '}';
+                                                 os1 << R"(,"offset":)" << xfx.offset;
+                                                 if (xfx.addend != 0) {
+                                                     os1 << R"(,"addend":)" << xfx.addend;
+                                                 }
+                                                 os1 << '}';
                                                  return xfx.name;
                                              });
             }

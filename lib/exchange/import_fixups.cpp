@@ -108,6 +108,7 @@ namespace pstore {
                     , names_{names}
                     , fixups_{fixups} {
                 seen_[is_weak] = true; // 'is_weak' defaults to false if not present in the input.
+                seen_[addend] = true;  // 'addend' defaults to 0 if not present in the input.
             }
 
             // name

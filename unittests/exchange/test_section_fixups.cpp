@@ -586,17 +586,20 @@ TEST_F (ExternalFixupMembersImport, Addend) {
     pstore::exchange::import_ns::string_mapping imported_names;
     ASSERT_EQ (imported_names.add_string (&transaction, "name"), std::error_code{});
 
+    // The "addend" key is missing altogether. That's okay: the default is 0.
     {
-        auto const & parser1 =
-            this->parse (R"({ "name":0, "type":17, "offset":19 })", &db_, imported_names);
-        EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
-        EXPECT_EQ (
-            parser1.last_error (),
-            make_error_code (pstore::exchange::import_ns::error::xfixup_object_was_incomplete));
+        external_fixup_collection fixups;
+        auto const parser1 =
+            this->parse (R"({ "name":0, "type":17, "offset":19 })", &db_, imported_names, &fixups);
+        EXPECT_FALSE (parser1.has_error ())
+            << "JSON error was: " << parser1.last_error ().message ();
+        ASSERT_EQ (fixups.size (), 1U);
+        EXPECT_EQ (fixups[0].addend, 0);
     }
+    // The "addend" key has the wrong type.
     {
-        auto const & parser2 = this->parse (
-            R"({ "name":0, "type":17, "offset":19, "addend":true })", &db_, imported_names);
+        auto const parser2 = this->parse (R"({ "name":0, "type":17, "offset":19, "addend":true })",
+                                          &db_, imported_names);
         EXPECT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
         EXPECT_EQ (parser2.last_error (),
                    make_error_code (pstore::exchange::import_ns::error::unexpected_boolean));

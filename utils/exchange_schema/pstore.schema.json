@@ -58,7 +58,7 @@
                     "offset": { "type": "number" },
                     "addend": { "type": "number" }
                 },
-                "required": ["name", "type", "offset", "addend"],
+                "required": ["name", "type", "offset"],
                 "additionalProperties": false
             }
         },
