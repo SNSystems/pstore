@@ -110,17 +110,6 @@ namespace pstore {
         //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                  |_|    *
         struct external_fixup {
-            // TODO: remove. This ctor is retained to avoid breaking the downstream API in (very)
-            // short term.
-#ifdef PSTORE_IS_INSIDE_LLVM
-            constexpr external_fixup (typed_address<indirect_string> const name_,
-                                      relocation_type const type_, std::uint64_t const offset_,
-                                      std::int64_t const addend_) noexcept
-                    : name{name_}
-                    , type{type_}
-                    , offset{offset_}
-                    , addend{addend_} {}
-#endif // PSTORE_IS_INSIDE_LLVM
             constexpr external_fixup (typed_address<indirect_string> const name_,
                                       relocation_type const type_, binding const strength,
                                       std::uint64_t const offset_,
