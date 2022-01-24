@@ -94,7 +94,9 @@ namespace pstore {
         chunked_sequence & operator= (chunked_sequence const & other) noexcept = delete;
         chunked_sequence & operator= (chunked_sequence && other) noexcept;
 
+        /// Checks whether the container is empty.
         constexpr bool empty () const noexcept { return size_ == 0; }
+        /// Returns the number of elements in the container.
         constexpr size_type size () const noexcept { return size_; }
 
         iterator begin () noexcept { return {chunks_.begin (), 0U}; }
@@ -108,20 +110,34 @@ namespace pstore {
         const_iterator end () const noexcept { return end_impl (*this); }
         const_iterator cend () const noexcept { return end (); }
 
+        /// \name Chunk Access
+        ///@{
 
-
-        typename chunk_list::iterator chunks_begin () noexcept { return chunks_.begin (); }
-        typename chunk_list::const_iterator chunks_begin () const noexcept {
+        /// Returns an iterator to the beginning of the collection of chunks that are used to store
+        /// the container's members.
+        constexpr typename chunk_list::iterator chunks_begin () noexcept {
             return chunks_.begin ();
         }
-        typename chunk_list::const_iterator chunks_cbegin () noexcept { return chunks_.cbegin (); }
-        typename chunk_list::iterator chunks_end () noexcept { return chunks_.end (); }
-        typename chunk_list::const_iterator chunks_end () const noexcept { return chunks_.end (); }
-        typename chunk_list::const_iterator chunks_cend () noexcept { return chunks_.cend (); }
+        constexpr typename chunk_list::const_iterator chunks_begin () const noexcept {
+            return chunks_.begin ();
+        }
+        constexpr typename chunk_list::const_iterator chunks_cbegin () noexcept {
+            return chunks_.cbegin ();
+        }
+        /// Returns an iterator to the end of the collection of chunks that are used to store the
+        /// container's members.
+        constexpr typename chunk_list::iterator chunks_end () noexcept { return chunks_.end (); }
+        constexpr typename chunk_list::const_iterator chunks_end () const noexcept {
+            return chunks_.end ();
+        }
+        constexpr typename chunk_list::const_iterator chunks_cend () noexcept {
+            return chunks_.cend ();
+        }
 
-        std::size_t chunks_size () const noexcept { return chunks_.size (); }
+        /// Returns the number of chunks of storage being used by the container.
+        constexpr std::size_t chunks_size () const noexcept { return chunks_.size (); }
 
-
+        ///@}
 
         void clear () {
             chunks_.clear ();
@@ -425,10 +441,10 @@ namespace pstore {
         const_reference back () const { return (*this)[size_ - 1U]; }
 
 
-        auto begin () noexcept { return iterator{&(*this)[0]}; }
-        auto begin () const noexcept { return const_iterator{&(*this)[0]}; }
-        auto end () noexcept { return iterator{begin () + size_}; }
-        auto end () const noexcept { return const_iterator{begin () + size_}; }
+        constexpr auto begin () noexcept { return iterator{&(*this)[0]}; }
+        constexpr auto begin () const noexcept { return const_iterator{&(*this)[0]}; }
+        constexpr auto end () noexcept { return iterator{begin () + size_}; }
+        constexpr auto end () const noexcept { return const_iterator{begin () + size_}; }
 
         template <typename... Args>
         reference emplace_back (Args &&... args);
