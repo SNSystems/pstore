@@ -143,7 +143,7 @@ namespace pstore {
             //* \__,_|_|_\__,_/__/ *
             //*                    *
             void alias::set_original (option * const o) {
-                PSTORE_ASSERT (o != nullptr);
+                PSTORE_ASSERT (o != nullptr && o != this);
                 original_ = o;
             }
             bool alias::add_occurrence () { return original_->add_occurrence (); }
