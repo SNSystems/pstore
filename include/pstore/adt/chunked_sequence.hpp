@@ -516,40 +516,40 @@ namespace pstore {
         using reference = value_type &;
 
         iterator_base (list_iterator const it, std::size_t const index)
-                : it_{it}
+                : chunk_it_{it}
                 , index_{index} {}
         // Note that we want to allow implicit conversions from non-const to const iterators.
         iterator_base (iterator_base<false> const & rhs) // NOLINT(hicpp-explicit-conversions)
-                : it_{rhs.it_}
+                : chunk_it_{rhs.chunk_it_}
                 , index_{rhs.index_} {}
         iterator_base (iterator_base<false> && rhs) // NOLINT(hicpp-explicit-conversions)
-                : it_{std::move (rhs.it_)}
+                : chunk_it_{std::move (rhs.chunk_it_)}
                 , index_{std::move (rhs.index_)} {}
 
         iterator_base & operator= (iterator_base<false> const & rhs) {
-            it_ = rhs.it_;
+            chunk_it_ = rhs.chunk_it_;
             index_ = rhs.index_;
             return *this;
         }
 
         iterator_base & operator= (iterator_base<false> && rhs) {
             if (&rhs != this) {
-                it_ = std::move (rhs.it_);
+                chunk_it_ = std::move (rhs.it_);
                 index_ = std::move (rhs.index_);
             }
             return *this;
         }
 
         bool operator== (iterator_base const & other) const {
-            return it_ == other.it_ && index_ == other.index_;
+            return chunk_it_ == other.chunk_it_ && index_ == other.index_;
         }
         bool operator!= (iterator_base const & other) const { return !operator== (other); }
 
         /// Dereference operator
         /// \return the value of the element to which this iterator is currently
-        /// pointing
-        reference operator* () const noexcept { return (*it_)[index_]; }
-        pointer operator-> () const noexcept { return &(*it_)[index_]; }
+        /// pointing.
+        reference operator* () const noexcept { return (*chunk_it_)[index_]; }
+        pointer operator-> () const noexcept { return &(*chunk_it_)[index_]; }
 
         iterator_base & operator++ ();
         iterator_base operator++ (int);
@@ -557,7 +557,9 @@ namespace pstore {
         iterator_base operator-- (int);
 
     private:
-        list_iterator it_;
+        /// The iterator's position within the container's list of chunks.
+        list_iterator chunk_it_;
+        /// The iterator's position within the current chunk.
         std::size_t index_;
     };
 
@@ -568,8 +570,8 @@ namespace pstore {
     auto chunked_sequence<T, ElementsPerChunk, ActualSize,
                           ActualAlign>::iterator_base<IsConst>::operator++ ()
         -> iterator_base<IsConst> & {
-        if (++index_ >= it_->size ()) {
-            ++it_;
+        if (++index_ >= chunk_it_->size ()) {
+            ++chunk_it_;
             index_ = 0;
         }
         return *this;
@@ -597,9 +599,9 @@ namespace pstore {
         if (index_ > 0U) {
             --index_;
         } else {
-            --it_;
-            PSTORE_ASSERT (it_->size () > 0);
-            index_ = it_->size () - 1U;
+            --chunk_it_;
+            PSTORE_ASSERT (chunk_it_->size () > 0);
+            index_ = chunk_it_->size () - 1U;
         }
         return *this;
     }
