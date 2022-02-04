@@ -99,9 +99,9 @@ std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
 
 // loadu
 // ~~~~~
-pstore::database::unique_pointer<fragment const>
-fragment::loadu (pstore::database const & db, pstore::extent<fragment> const & location) {
-    return load_impl<database::unique_pointer<fragment const>> (
+pstore::unique_pointer<fragment const> fragment::loadu (pstore::database const & db,
+                                                        pstore::extent<fragment> const & location) {
+    return load_impl<unique_pointer<fragment const>> (
         location, [&db] (extent<fragment> const & x) { return db.getrou (x); });
 }
 

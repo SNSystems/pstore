@@ -187,7 +187,7 @@ TEST_F (Database, Read16Bytes) {
     {
         // Get a read-only unique-pointer to the memory and ensure that its contents are the values
         // we just put there.
-        pstore::database::unique_pointer<std::uint8_t const> u =
+        pstore::unique_pointer<std::uint8_t const> u =
             db.getrou (pstore::typed_address<std::uint8_t> (addr), size);
         auto * const up = u.get ();
         std::vector<std::uint8_t> const u_actuals{up, up + size};

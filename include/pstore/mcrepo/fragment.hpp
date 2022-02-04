@@ -141,8 +141,8 @@ namespace pstore {
             /// \param db  The database from which the fragment is to be read.
             /// \param location  The address and size of the fragment data.
             /// \returns  A unique pointer to the fragment instance.
-            static database::unique_pointer<fragment const>
-            loadu (pstore::database const & db, pstore::extent<fragment> const & location);
+            static unique_pointer<fragment const> loadu (pstore::database const & db,
+                                                         pstore::extent<fragment> const & location);
 
             /// Provides a pointer to an individual fragment instance given a transaction and an
             /// extent describing its address and size.

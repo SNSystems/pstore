@@ -28,6 +28,45 @@
 
 namespace pstore {
 
+    template <typename T>
+    using unique_deleter = void (*) (T * p);
+    template <typename T>
+    using unique_pointer = std::unique_ptr<T, unique_deleter<T>>;
+
+    /// A deleter function for use with unique_pointer<>. This version of the function is used
+    /// when the requested storage lies entirely within a single allocated region.
+    template <typename T>
+    inline void deleter_nop (T *) noexcept {}
+    /// A deleter function for use with unique_pointer<>. This version of the function is used
+    /// to recover memory for spanning pointers.
+    ///
+    /// \param p  Points to the memory to be freed.
+    template <typename T>
+    void deleter (T * const p) noexcept {
+        delete[] p;
+    }
+
+    template <>
+    inline void deleter<void> (void * const p) noexcept {
+        deleter (reinterpret_cast<std::uint8_t *> (p));
+    }
+    template <>
+    inline void deleter<void const> (void const * const p) noexcept {
+        deleter (reinterpret_cast<std::uint8_t const *> (p));
+    }
+
+    template <typename To, typename From>
+    unique_pointer<To> unique_pointer_cast (unique_pointer<From> && p) {
+        // Note that we know that the cast of the deleter function is safe. This function will
+        // either be deleter_nop (in the vast majority of instances) or deleter<> whose
+        // underlying memory is always allocated as uint8_t[] by get_spanningu().
+        return unique_pointer<To const> (
+            reinterpret_cast<To const *> (p.release ()),
+            reinterpret_cast<unique_deleter<To const>> (p.get_deleter ()));
+    }
+
+
+
     //*       _       _        _                      *
     //*    __| | __ _| |_ __ _| |__   __ _ ___  ___   *
     //*   / _` |/ _` | __/ _` | '_ \ / _` / __|/ _ \  *
@@ -128,11 +167,6 @@ namespace pstore {
         std::shared_ptr<void const> getro (address const addr, std::size_t const size) const {
             return this->get (addr, size, true /*initialized*/, false /*writable*/);
         }
-
-        template <typename T>
-        using unique_deleter = void (*) (T * p);
-        template <typename T>
-        using unique_pointer = std::unique_ptr<T, unique_deleter<T>>;
 
         unique_pointer<void const> getrou (address const addr, std::size_t const size) const {
             return this->getu (addr, size, true /*initialized*/);
@@ -419,31 +453,6 @@ namespace pstore {
         shared_memory<shared> shared_;
         std::shared_ptr<heartbeat> heartbeat_;
 
-        /// A deleter function for use with unique_pointer<>. This version of the function is used
-        /// when the requested storage lies entirely within a single allocated region.
-        template <typename T>
-        static void deleter_nop (T *) noexcept {}
-        /// A deleter function for use with unique_pointer<>. This version of the function is used
-        /// to recover memory for spanning pointers.
-        ///
-        /// \param p  Points to the memory to be freed.
-        template <typename T>
-        static void deleter (T * const p) noexcept {
-            delete[] p;
-        }
-
-        template <typename To, typename From>
-        static unique_pointer<To> unique_pointer_cast (unique_pointer<From> && p) {
-            // Note that we know that the cast of the deleter function is safe. This function will
-            // either be deleter_nop (in the vast majority of instances) or deleter<> whose
-            // underlying memory is always allocated as uint8_t[] by get_spanningu().
-            return unique_pointer<To const> (
-                reinterpret_cast<To const *> (p.release ()),
-                reinterpret_cast<unique_deleter<To const>> (p.get_deleter ()));
-        }
-
-
-
         /// Clears the index cache: the next time that an index is requested it will be read from
         /// the disk. Used after a sync() operation has changed the current database view.
         void clear_index_cache ();
@@ -535,17 +544,6 @@ namespace pstore {
         // number of elements of type T. For this reason we call the plain address version of
         // getro().
         return std::static_pointer_cast<T const> (this->getro (ex.addr.to_address (), ex.size));
-    }
-
-    // deleter
-    // ~~~~~~~
-    template <>
-    inline void database::deleter<void> (void * const p) noexcept {
-        deleter (reinterpret_cast<std::uint8_t *> (p));
-    }
-    template <>
-    inline void database::deleter<void const> (void const * const p) noexcept {
-        deleter (reinterpret_cast<std::uint8_t const *> (p));
     }
 
     // getrou
