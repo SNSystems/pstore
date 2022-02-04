@@ -27,12 +27,14 @@
 namespace pstore {
     namespace repo {
 
+// Note that we place the values that represent internal linkages first to simplify the decision
+// about whether a symbol has static or global linkage.
 #define PSTORE_REPO_LINKAGES                                                                       \
+    X (internal_no_symbol)                                                                         \
+    X (internal)                                                                                   \
     X (append)                                                                                     \
     X (common)                                                                                     \
     X (external)                                                                                   \
-    X (internal_no_symbol)                                                                         \
-    X (internal)                                                                                   \
     X (link_once_any)                                                                              \
     X (link_once_odr)                                                                              \
     X (weak_any)                                                                                   \
