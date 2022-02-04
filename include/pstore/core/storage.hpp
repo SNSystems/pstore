@@ -151,6 +151,7 @@ namespace pstore {
         }
         ///@}
 
+        /// \name Converting a store address to a shared pointer.
         ///@{
         std::shared_ptr<void const> address_to_pointer (address const addr) const noexcept {
             return address_to_pointer_impl (*this, addr);
@@ -160,15 +161,32 @@ namespace pstore {
         }
 
         template <typename T>
-        std::shared_ptr<T const> address_to_pointer (typed_address<T> addr) const noexcept {
+        std::shared_ptr<T const> address_to_pointer (typed_address<T> const addr) const noexcept {
             return std::static_pointer_cast<T const> (address_to_pointer (addr.to_address ()));
         }
         template <typename T>
-        std::shared_ptr<T> address_to_pointer (typed_address<T> addr) noexcept {
+        std::shared_ptr<T> address_to_pointer (typed_address<T> const addr) noexcept {
             return std::static_pointer_cast<T> (address_to_pointer (addr.to_address ()));
         }
         ///@}
 
+        /// \name Converting a store address to a raw pointers.
+        ///@{
+        std::uint8_t * address_to_raw_pointer (address const addr) noexcept {
+            return address_to_raw_pointer_impl (*this, addr);
+        }
+        std::uint8_t const * address_to_raw_pointer (address const addr) const noexcept {
+            return address_to_raw_pointer_impl (*this, addr);
+        }
+        template <typename T>
+        T * address_to_raw_pointer (typed_address<T> const addr) noexcept {
+            return address_to_raw_pointer (addr.to_address ());
+        }
+        template <typename T>
+        T const * address_to_raw_pointer (typed_address<T> const addr) const noexcept {
+            return address_to_raw_pointer (addr.to_address ());
+        }
+        ///@}
 
         // For unit testing only.
         region_container const & regions () const { return regions_; }
@@ -186,11 +204,35 @@ namespace pstore {
         static auto segment_base_impl (Storage & storage,
                                        address::segment_type const segment) noexcept -> ResultType;
 
+        /// Converts a store address to the corresponding shared pointer.
+        ///
+        /// \tparam Storage  The type of the storage object. Should be the const or non-const
+        ///   storage class.
+        /// \tparam ResultType  The type of the result as derived from the const-ness
+        ///   of Storage.
+        ///
+        /// \param storage  The instance of the storage class.
+        /// \param addr  The store address.
+        /// \returns  The pointer which corresponds to \p addr.
         template <typename Storage,
                   typename ResultType = typename inherit_const<Storage, std::shared_ptr<void>,
                                                                std::shared_ptr<void const>>::type>
-        static auto address_to_pointer_impl (Storage & storage, address const addr) noexcept
-            -> ResultType;
+        static ResultType address_to_pointer_impl (Storage & storage, address const addr) noexcept;
+
+        /// Converts a store address to the corresponding raw pointer.
+        ///
+        /// \tparam Storage  The type of the storage object. Should be the const or non-const
+        ///   storage class.
+        /// \tparam ResultType  The type of the result as derived from the const-ness
+        ///   of Storage.
+        ///
+        /// \param storage  The instance of the storage class.
+        /// \param addr  The store address.
+        /// \returns  The raw pointer which corresponds to \p addr.
+        template <typename Storage, typename ResultType = typename inherit_const<
+                                        Storage, std::uint8_t *, std::uint8_t const *>::type>
+        static ResultType address_to_raw_pointer_impl (Storage & storage, address addr) noexcept;
+
 
         /// The Segment Address Table: an array of pointers to the base-address of each segment's
         /// memory-mapped storage and their corresponding region object.
@@ -204,19 +246,19 @@ namespace pstore {
         region_container regions_;
     };
 
-    // segment_base
+    // segment base
     // ~~~~~~~~~~~~
     template <typename Storage, typename ResultType>
     inline auto storage::segment_base_impl (Storage & storage,
                                             address::segment_type const segment) noexcept
         -> ResultType {
         PSTORE_ASSERT (segment < storage.sat_->size ());
-        auto & e = (*storage.sat_)[segment];
+        sat_entry & e = (*storage.sat_)[segment];
         PSTORE_ASSERT (e.is_valid ());
         return e.value;
     }
 
-    // address_to_pointer
+    // address to pointer
     // ~~~~~~~~~~~~~~~~~~
     template <typename Storage, typename ResultType>
     inline auto storage::address_to_pointer_impl (Storage & storage, address const addr) noexcept
@@ -227,7 +269,20 @@ namespace pstore {
                 std::static_pointer_cast<uint8_type> (segment_base).get () + addr.offset ()};
     }
 
-    // request_spans_regions
+    template <typename Storage, typename ResultType>
+    inline ResultType storage::address_to_raw_pointer_impl (Storage & storage,
+                                                            address const addr) noexcept {
+
+        address::segment_type const segment = addr.segment ();
+        PSTORE_ASSERT (segment < storage.sat_->size ());
+        sat_entry & e = (*storage.sat_)[segment];
+        PSTORE_ASSERT (e.is_valid ());
+        return static_cast<ResultType> (static_cast<std::uint8_t *> (e.value.get ()) +
+                                        addr.offset ());
+    }
+
+
+    // request spans regions
     // ~~~~~~~~~~~~~~~~~~~~~
     inline bool storage::request_spans_regions (address const & addr, std::size_t const size) const
         noexcept {

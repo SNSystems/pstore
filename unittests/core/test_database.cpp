@@ -22,6 +22,7 @@
 #include <limits>
 #include <memory>
 #include <mutex>
+#include <numeric>
 #include <vector>
 
 // Third party
@@ -111,6 +112,8 @@ TEST_F (Database, GetEndPastLogicalEOF) {
     std::size_t size = db.size () + 1;
     check_for_error ([&db, addr, size] () { db.getro (addr, size); },
                      pstore::error_code::bad_address);
+    check_for_error ([&db, addr, size] () { db.getrou (addr, size); },
+                     pstore::error_code::bad_address);
 }
 
 TEST_F (Database, GetStartPastLogicalEOF) {
@@ -120,6 +123,8 @@ TEST_F (Database, GetStartPastLogicalEOF) {
     auto const addr = pstore::address{db.size () + 1};
     constexpr std::size_t size = 1;
     check_for_error ([&db, addr, size] () { db.getro (addr, size); },
+                     pstore::error_code::bad_address);
+    check_for_error ([&db, addr, size] () { db.getrou (addr, size); },
                      pstore::error_code::bad_address);
 }
 
@@ -133,6 +138,8 @@ TEST_F (Database, GetLocationOverflows) {
     std::size_t const size = std::numeric_limits<std::uint64_t>::max () - addr.absolute () + 1U;
     ASSERT_TRUE (addr + size < addr); // This addition is attended to overflow.
     check_for_error ([&db, addr, size] () { db.getro (addr, size); },
+                     pstore::error_code::bad_address);
+    check_for_error ([&db, addr, size] () { db.getrou (addr, size); },
                      pstore::error_code::bad_address);
 }
 
@@ -150,6 +157,44 @@ TEST_F (Database, Allocate16Bytes) {
     pstore::address addr2 = db.allocate (size, align);
     EXPECT_EQ (addr.absolute () + 16, addr2.absolute ());
 }
+
+TEST_F (Database, Read16Bytes) {
+    pstore::database db{store_.file ()};
+    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+
+    // Initial allocation.
+    constexpr auto size = 16U;
+    constexpr auto align = 1U;
+    pstore::address addr = db.allocate (size, align);
+    {
+        // Get a writable pointer to this memory and populate it with some values.
+        std::shared_ptr<std::uint8_t> w =
+            db.getrw (pstore::typed_address<std::uint8_t> (addr), size);
+        auto * const p = w.get ();
+        std::iota (p, p + size, std::uint8_t{0});
+    }
+    std::array<std::uint8_t, size> const expected{0, 1, 2,  3,  4,  5,  6,  7,
+                                                  8, 9, 10, 11, 12, 13, 14, 15};
+    {
+        // Get a read-only shared-pointer to the memory and ensure that its contents are the values
+        // we just put there.
+        std::shared_ptr<std::uint8_t const> s =
+            db.getro (pstore::typed_address<std::uint8_t> (addr), size);
+        auto * const sp = s.get ();
+        std::vector<std::uint8_t> const s_actuals{sp, sp + size};
+        EXPECT_THAT (s_actuals, testing::ElementsAreArray (expected));
+    }
+    {
+        // Get a read-only unique-pointer to the memory and ensure that its contents are the values
+        // we just put there.
+        pstore::database::unique_pointer<std::uint8_t const> u =
+            db.getrou (pstore::typed_address<std::uint8_t> (addr), size);
+        auto * const up = u.get ();
+        std::vector<std::uint8_t> const u_actuals{up, up + size};
+        EXPECT_THAT (u_actuals, testing::ElementsAreArray (expected));
+    }
+}
+
 
 TEST_F (Database, Allocate16BytesAligned1024) {
     pstore::database db{store_.file ()};

@@ -97,7 +97,15 @@ std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
         location, [&db] (extent<fragment> const & x) { return db.getro (x); });
 }
 
-// section_offset_is_valid [static]
+// loadu
+// ~~~~~
+pstore::database::unique_pointer<fragment const>
+fragment::loadu (pstore::database const & db, pstore::extent<fragment> const & location) {
+    return load_impl<database::unique_pointer<fragment const>> (
+        location, [&db] (extent<fragment> const & x) { return db.getrou (x); });
+}
+
+// section offset is valid [static]
 // ~~~~~~~~~~~~~~~~~~~~~~~
 template <section_kind Key, typename InstanceType>
 std::uint64_t
@@ -113,7 +121,7 @@ fragment::section_offset_is_valid (fragment const & f, pstore::extent<fragment> 
                : offset + size;
 }
 
-// fragment_appears_valid [static]
+// fragment appears valid [static]
 // ~~~~~~~~~~~~~~~~~~~~~~
 bool fragment::fragment_appears_valid (fragment const & f, pstore::extent<fragment> const & fext) {
 #if PSTORE_SIGNATURE_CHECKS_ENABLED
@@ -159,7 +167,7 @@ bool fragment::fragment_appears_valid (fragment const & f, pstore::extent<fragme
     return true;
 }
 
-// size_bytes
+// size bytes
 // ~~~~~~~~~~
 std::size_t fragment::size_bytes () const {
     if (arr_.size () == 0) {
@@ -174,21 +182,21 @@ std::size_t fragment::size_bytes () const {
 }
 
 
-// section_align
+// section align
 // ~~~~~~~~~~~~~
 unsigned pstore::repo::section_align (fragment const & f, section_kind const kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->align ();
 }
 
-// section_size
+// section size
 // ~~~~~~~~~~~~~
 std::size_t pstore::repo::section_size (fragment const & f, section_kind const kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->size ();
 }
 
-// section_ifixups
+// section ifixups
 // ~~~~~~~~~~~~~~~
 container<internal_fixup> pstore::repo::section_ifixups (fragment const & f,
                                                          section_kind const kind) {
@@ -196,7 +204,7 @@ container<internal_fixup> pstore::repo::section_ifixups (fragment const & f,
     return make_dispatcher (f, kind, &buffer)->ifixups ();
 }
 
-// section_xfixups
+// section xfixups
 // ~~~~~~~~~~~~~~~
 container<external_fixup> pstore::repo::section_xfixups (fragment const & f,
                                                          section_kind const kind) {
@@ -204,7 +212,7 @@ container<external_fixup> pstore::repo::section_xfixups (fragment const & f,
     return make_dispatcher (f, kind, &buffer)->xfixups ();
 }
 
-// section_data
+// section data
 // ~~~~~~~~~~~~
 container<std::uint8_t> pstore::repo::section_value (fragment const & f, section_kind const kind) {
     dispatcher_buffer buffer;

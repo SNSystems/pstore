@@ -126,14 +126,23 @@ namespace pstore {
             static pstore::extent<fragment> alloc (Transaction & transaction, Iterator first,
                                                    Iterator last);
 
-            /// Provides a pointer to an individual fragment instance given a database and a extent
-            /// describing its address and size.
+            /// Returns a shared pointer to a read-only individual fragment instance given a
+            /// database instance and a extent describing its address and size.
             ///
             /// \param db  The database from which the fragment is to be read.
             /// \param location  The address and size of the fragment data.
-            /// \returns  A pointer to the fragment instance.
+            /// \returns  A shared pointer to the fragment instance.
             static std::shared_ptr<fragment const> load (database const & db,
                                                          extent<fragment> const & location);
+
+            /// Returns a unique pointer to a read-only individual fragment instance given a
+            /// database instance and a extent describing its address and size.
+            ///
+            /// \param db  The database from which the fragment is to be read.
+            /// \param location  The address and size of the fragment data.
+            /// \returns  A unique pointer to the fragment instance.
+            static database::unique_pointer<fragment const>
+            loadu (pstore::database const & db, pstore::extent<fragment> const & location);
 
             /// Provides a pointer to an individual fragment instance given a transaction and an
             /// extent describing its address and size.
@@ -223,8 +232,8 @@ namespace pstore {
                 padding1_ = 0; // assignment to silence an "unused" warning from clang.
             }
 
-            /// Returns pointer to an individual fragment instance given a function which can yield
-            /// it given the object's extent.
+            /// Returns a pointer to an individual fragment instance given a function which can
+            /// yield it given the object's extent.
             template <typename ReturnType, typename GetOp>
             static ReturnType load_impl (extent<fragment> const & location, GetOp get);
 

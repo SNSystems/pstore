@@ -129,41 +129,64 @@ namespace pstore {
             return this->get (addr, size, true /*initialized*/, false /*writable*/);
         }
 
-        /// Load a block of data starting at the address and size specified by \p ex.
+        template <typename T>
+        using unique_deleter = void (*) (T * p);
+        template <typename T>
+        using unique_pointer = std::unique_ptr<T, unique_deleter<T>>;
+
+        unique_pointer<void const> getrou (address const addr, std::size_t const size) const {
+            return this->getu (addr, size, true /*initialized*/);
+        }
+        /// Load a block of data starting at the address and size specified by \p ex and return an
+        /// immutable shared pointer.
         ///
+        /// \tparam T  The data type to be loaded.
         /// \param ex The extent of of the data to be loaded.
         /// \return A read-only pointer to the loaded data.
         template <typename T,
-                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
-        std::shared_ptr<T const> getro (extent<T> const & ex) const {
-            if (ex.addr.to_address ().absolute () % alignof (T) != 0) {
-                raise (error_code::bad_alignment);
-            }
-            // Note that ex.size specifies the size in bytes of the data to be loaded, not the
-            // number of elements of type T. For this reason we call the plain address version of
-            // getro().
-            return std::static_pointer_cast<T const> (this->getro (ex.addr.to_address (), ex.size));
-        }
+                  typename = typename std::enable_if_t<std::is_standard_layout<T>::value>>
+        std::shared_ptr<T const> getro (extent<T> const & ex) const;
 
-        /// Returns a pointer to a immutable instance of type T.
+        /// Load a block of data starting at the address and size specified by \p ex and return an
+        /// immutable unique pointer.
+        ///
+        /// \tparam T  The data type to be loaded.
+        /// \param ex The extent of of the data to be loaded.
+        /// \return A read-only pointer to the loaded data.
+        template <typename T,
+                  typename = typename std::enable_if_t<std::is_standard_layout<T>::value>>
+        unique_pointer<T const> getrou (extent<T> const & ex) const;
+
+        /// Returns a shared-pointer to a immutable instance of type T.
         ///
         /// \tparam T  The type to be loaded. Must be standard-layout.
         /// \param addr The address at which the data begins.
         /// \return A read-only pointer to the loaded data.
         template <typename T,
-                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+                  typename = typename std::enable_if_t<std::is_standard_layout<T>::value>>
         std::shared_ptr<T const> getro (typed_address<T> const addr) const {
             return this->getro (addr, std::size_t{1});
         }
 
-        /// Returns a pointer to a read-only array of instances of type T.
+        /// Returns a unique-pointer to a immutable instance of type T.
+        ///
+        /// \tparam T  The type to be loaded. Must be standard-layout.
+        /// \param addr The address at which the data begins.
+        /// \return A read-only pointer to the loaded data.
+        template <typename T,
+                  typename = typename std::enable_if_t<std::is_standard_layout<T>::value>>
+        unique_pointer<T const> getrou (typed_address<T> const addr) const {
+            return this->getrou (addr, std::size_t{1});
+        }
+
+        /// Returns a shared-pointer to a read-only array of instances of type T.
         ///
         /// \tparam T  The type to be loaded. Must be standard-layout.
         /// \param addr The address at which the data begins.
         /// \param elements The number of elements in the T[] array.
         /// \return A read-only pointer to the loaded data.
         template <typename T,
-                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+                  typename = typename std::enable_if_t<std::is_standard_layout<T>::value>>
         std::shared_ptr<T const> getro (typed_address<T> const addr,
                                         std::size_t const elements) const {
             if (addr.to_address ().absolute () % alignof (T) != 0) {
@@ -172,6 +195,17 @@ namespace pstore {
             return std::static_pointer_cast<T const> (
                 this->getro (addr.to_address (), sizeof (T) * elements));
         }
+
+        /// Returns a unique-pointer to a read-only array of instances of type T.
+        ///
+        /// \tparam T  The type to be loaded. Must be standard-layout.
+        /// \param addr The address at which the data begins.
+        /// \param elements The number of elements in the T[] array.
+        /// \return A read-only pointer to the loaded data.
+        template <typename T,
+                  typename = typename std::enable_if_t<std::is_standard_layout<T>::value>>
+        unique_pointer<T const> getrou (typed_address<T> const addr,
+                                        std::size_t const elements) const;
         ///@}
 
         ///@{
@@ -236,6 +270,7 @@ namespace pstore {
         // (Virtual for mocking.)
         virtual auto get (address addr, std::size_t size, bool initialized, bool writable) const
             -> std::shared_ptr<void const>;
+        unique_pointer<void const> getu (address addr, std::size_t size, bool initialized) const;
 
         ///@{
         enum class vacuum_mode {
@@ -384,6 +419,31 @@ namespace pstore {
         shared_memory<shared> shared_;
         std::shared_ptr<heartbeat> heartbeat_;
 
+        /// A deleter function for use with unique_pointer<>. This version of the function is used
+        /// when the requested storage lies entirely within a single allocated region.
+        template <typename T>
+        static void deleter_nop (T *) noexcept {}
+        /// A deleter function for use with unique_pointer<>. This version of the function is used
+        /// to recover memory for spanning pointers.
+        ///
+        /// \param p  Points to the memory to be freed.
+        template <typename T>
+        static void deleter (T * const p) noexcept {
+            delete[] p;
+        }
+
+        template <typename To, typename From>
+        static unique_pointer<To> unique_pointer_cast (unique_pointer<From> && p) {
+            // Note that we know that the cast of the deleter function is safe. This function will
+            // either be deleter_nop (in the vast majority of instances) or deleter<> whose
+            // underlying memory is always allocated as uint8_t[] by get_spanningu().
+            return unique_pointer<To const> (
+                reinterpret_cast<To const *> (p.release ()),
+                reinterpret_cast<unique_deleter<To const>> (p.get_deleter ()));
+        }
+
+
+
         /// Clears the index cache: the next time that an index is requested it will be read from
         /// the disk. Used after a sync() operation has changed the current database view.
         void clear_index_cache ();
@@ -391,14 +451,38 @@ namespace pstore {
         /// Returns the lowest address from which a writable pointer can be obtained.
         address first_writable_address () const;
 
+        /// Validates the arguments passed to one of the get()/getu() functions.
+        ///
+        /// \param addr  The start address of the data to be copied.
+        /// \param size  The number of bytes of data to be copied.
+        /// \param writable  True if the memory is to be writable.
+        void check_get_params (address const addr, std::size_t const size,
+                               bool const writable) const;
+
         /// Returns a block of data from the store which spans more than one region. A fresh block
         /// of memory is allocated to which blocks of data from the store are copied. If a writable
         /// pointer is requested, the data will be copied back to the store when the pointer is
         /// released.
-        auto get_spanning (address addr, std::size_t size, bool initialized, bool writable) const
-            -> std::shared_ptr<void const>;
+        ///
+        /// \param addr  The start address of the data to be copied.
+        /// \param size  The number of bytes of data to be copied.
+        /// \param initialized  True if the data must be populated from the store before being
+        ///   returned.
+        /// \param writable  True if the memory is to be writable.
+        //  \returns  A copy of the data which will be flushed as necessary on release.
+        std::shared_ptr<void const> get_spanning (address addr, std::size_t size, bool initialized,
+                                                  bool writable) const;
 
-
+        /// Returns a block of data from the store which spans more than one region. A fresh block
+        /// of memory is allocated to which blocks of data from the store are copied.
+        ///
+        /// \param addr  The start address of the data to be copied.
+        /// \param size  The number of bytes of data to be copied.
+        /// \param initialized  True if the data must be populated from the store before being
+        ///   returned.
+        /// \returns  A copy of the data which will be freed on release.
+        unique_pointer<void const> get_spanningu (address addr, std::size_t size,
+                                                  bool initialized) const;
 
         template <typename File>
         static typed_address<trailer> get_footer_pos (File & file);
@@ -415,8 +499,8 @@ namespace pstore {
         ///
         /// \param path  The path to the file to be opened.
         /// \param am  The database access mode. If writable, the file will be created if it does
-        /// not already exist. If read-only and the file does not exist, the returned file handle
-        /// will be a nullptr.
+        ///   not already exist. If read-only and the file does not exist, the returned file handle
+        ///   will be a nullptr.
         /// \returns A file handle to the opened database file which may be null if the file could
         /// not be opened.
         static auto open (std::string const & path, access_mode am)
@@ -426,7 +510,6 @@ namespace pstore {
         /// all of the class constructors.
         void finish_init (bool access_tick_enabled);
     };
-
 
     // (ctor)
     // ~~~~~~
@@ -441,8 +524,53 @@ namespace pstore {
         this->finish_init (access_tick_enabled);
     }
 
+    // getro
+    // ~~~~~
+    template <typename T, typename>
+    std::shared_ptr<T const> database::getro (extent<T> const & ex) const {
+        if (ex.addr.to_address ().absolute () % alignof (T) != 0) {
+            raise (error_code::bad_alignment);
+        }
+        // Note that ex.size specifies the size in bytes of the data to be loaded, not the
+        // number of elements of type T. For this reason we call the plain address version of
+        // getro().
+        return std::static_pointer_cast<T const> (this->getro (ex.addr.to_address (), ex.size));
+    }
 
-    // get_footer_pos [static]
+    // deleter
+    // ~~~~~~~
+    template <>
+    inline void database::deleter<void> (void * const p) noexcept {
+        deleter (reinterpret_cast<std::uint8_t *> (p));
+    }
+    template <>
+    inline void database::deleter<void const> (void const * const p) noexcept {
+        deleter (reinterpret_cast<std::uint8_t const *> (p));
+    }
+
+    // getrou
+    // ~~~~~~
+    template <typename T, typename>
+    auto database::getrou (extent<T> const & ex) const -> unique_pointer<T const> {
+        if (ex.addr.to_address ().absolute () % alignof (T) != 0) {
+            raise (error_code::bad_alignment);
+        }
+        // ex.size specifies the size in bytes of the data to be loaded, not the number of elements
+        // of type T. For this reason we call the plain address version of getro().
+        return unique_pointer_cast<T const> (this->getrou (ex.addr.to_address (), ex.size));
+    }
+
+    template <typename T, typename>
+    auto database::getrou (typed_address<T> const addr, std::size_t const elements) const
+        -> unique_pointer<T const> {
+        if (addr.to_address ().absolute () % alignof (T) != 0) {
+            raise (error_code::bad_alignment);
+        }
+        return unique_pointer_cast<T const> (
+            this->getrou (addr.to_address (), sizeof (T) * elements));
+    }
+
+    // get footer pos [static]
     // ~~~~~~~~~~~~~~
     template <typename File>
     auto database::get_footer_pos (File & file) -> typed_address<trailer> {

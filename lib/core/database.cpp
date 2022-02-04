@@ -330,13 +330,13 @@ namespace pstore {
         return file;
     }
 
-    // first_writable_address
+    // first writable address
     // ~~~~~~~~~~~~~~~~~~~~~~
     address database::first_writable_address () const {
         return (header_->footer_pos.load () + 1).to_address ();
     }
 
-    // get_spanning
+    // get spanning
     // ~~~~~~~~~~~~
     auto database::get_spanning (address const addr, std::size_t const size, bool const initialized,
                                  bool const writable) const -> std::shared_ptr<void const> {
@@ -374,10 +374,28 @@ namespace pstore {
         return std::static_pointer_cast<void const> (result);
     }
 
-    // get
-    // ~~~
-    auto database::get (address const addr, std::size_t const size, bool const initialized,
-                        bool const writable) const -> std::shared_ptr<void const> {
+    // get spanningu
+    // ~~~~~~~~~~~~~
+    auto database::get_spanningu (address const addr, std::size_t const size,
+                                  bool const initialized) const -> unique_pointer<void const> {
+        // Create the memory block that we'll be returning, attaching a suitable deleter
+        // which will be responsible for copying the data back to the store (if we're providing
+        // a writable pointer).
+        unique_pointer<std::uint8_t> result{new std::uint8_t[size], deleter};
+        if (initialized) {
+            // Copy from the data store's regions to the newly allocated memory block.
+            storage_.copy<storage::copy_from_store_traits> (
+                addr, size, result.get (),
+                [] (std::uint8_t const * const src, std::uint8_t * const dest,
+                    std::size_t const n) { std::memcpy (dest, src, n); });
+        }
+        return {result.release (), deleter};
+    }
+
+    // check get params
+    // ~~~~~~~~~~~~~~~~
+    void database::check_get_params (address const addr, std::size_t const size,
+                                     bool const writable) const {
         if (closed_) {
             raise (pstore::error_code::store_closed);
         }
@@ -391,11 +409,28 @@ namespace pstore {
         if (start > logical_size || size > logical_size - start) {
             raise (error_code::bad_address);
         }
+    }
 
+    // get
+    // ~~~
+    auto database::get (address const addr, std::size_t const size, bool const initialized,
+                        bool const writable) const -> std::shared_ptr<void const> {
+        this->check_get_params (addr, size, writable);
         if (storage_.request_spans_regions (addr, size)) {
             return this->get_spanning (addr, size, initialized, writable);
         }
         return storage_.address_to_pointer (addr);
+    }
+
+    // getu
+    // ~~~~
+    auto database::getu (address addr, std::size_t size, bool initialized) const
+        -> unique_pointer<void const> {
+        this->check_get_params (addr, size, false);
+        if (storage_.request_spans_regions (addr, size)) {
+            return this->get_spanningu (addr, size, initialized);
+        }
+        return {storage_.address_to_raw_pointer (addr), deleter_nop<void const>};
     }
 
     // allocate
