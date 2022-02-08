@@ -59,7 +59,7 @@ std::string pstore::error_category::message (int const error) const {
         result = "an attempt was made to allocate data without an open transaction";
         break;
     case error_code::bad_address:
-        result = "an attempt to address an address outside of the allocated storage";
+        result = "an attempt to access an address outside of the allocated storage";
         break;
     case error_code::read_only_address:
         result = "there was an attempt to write to read-only storage";

@@ -51,7 +51,7 @@ namespace pstore {
     X (store_closed)         /*an attempt to read or write from a store which is not open*/        \
     X (cannot_allocate_after_commit) /*cannot allocate data after a transaction has been           \
                                         committed*/                                                \
-    X (bad_address)       /*an attempt to address an address outside of the allocated storage*/    \
+    X (bad_address)       /* an attempt to access an address outside of the allocated storage */   \
     X (read_only_address) /* an attempt to write to read-only storage*/                            \
     X (did_not_read_number_of_bytes_requested)                                                     \
     X (uuid_parse_error)                                                                           \
