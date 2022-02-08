@@ -58,6 +58,9 @@ namespace pstore {
         using reference = value_type &;
         using iterator_category = std::random_access_iterator_tag;
 
+        explicit constexpr pointer_based_iterator (std::nullptr_t) noexcept
+                : pos_{nullptr} {}
+
         template <typename Other, typename = typename std::enable_if_t<
                                       std::is_const<T>::value && !std::is_const<Other>::value>>
         explicit constexpr pointer_based_iterator (Other const * const pos) noexcept
