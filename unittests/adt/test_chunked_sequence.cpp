@@ -66,7 +66,7 @@ TEST (ChunkedSequence, OneMember) {
     EXPECT_EQ (it, cs.end ());
 }
 
-TEST (ChunckedVector, PushBack) {
+TEST (ChunkedSequence, PushBack) {
     cseq_simple cs;
     simple const & a = cs.push_back (simple{17});
     simple const & b = cs.push_back (simple{19});
@@ -77,7 +77,20 @@ TEST (ChunckedVector, PushBack) {
     EXPECT_EQ (c.get (), 23);
 }
 
-TEST (ChunckedVector, EmplaceBack) {
+// A test using a container which uses an "ActualSize" value that is greater than sizeof(int).
+TEST (ChunkedSequence, OverSizedPushBack) {
+    pstore::chunked_sequence<int, std::size_t{2}, sizeof (int) * 2> cs;
+    int const & a = cs.push_back (17);
+    int const & b = cs.push_back (19);
+    int const & c = cs.push_back (23);
+    EXPECT_EQ (cs.size (), 3U);
+    EXPECT_EQ (a, 17);
+    EXPECT_EQ (b, 19);
+    EXPECT_EQ (c, 23);
+    EXPECT_THAT (cs, testing::ElementsAre (17, 19, 23));
+}
+
+TEST (ChunkedSequence, EmplaceBack) {
     cseq_simple cs;
     simple const & a = cs.emplace_back (17);
     simple const & b = cs.emplace_back (19);
@@ -88,7 +101,7 @@ TEST (ChunckedVector, EmplaceBack) {
     EXPECT_EQ (c.get (), 23);
 }
 
-TEST (ChunckedVector, FrontAndBack) {
+TEST (ChunkedSequence, FrontAndBack) {
     cseq_int cs;
     cs.push_back (17);
     cs.push_back (19);
@@ -239,6 +252,9 @@ TEST (ChunkedSequenceResize, FillCurrentTailChunk) {
     EXPECT_EQ (*it, 13) << "Element 0 (chunk 0, index 0)";
     std::advance (it, 1);
     EXPECT_EQ (*it, 0) << "Element 0 (chunk 0, index 1)";
+
+    cs.emplace_back (17);
+    EXPECT_THAT (cs, ::testing::ElementsAre (13, 0, 17));
 }
 
 TEST (ChunkedSequenceResize, FillInitialChunkAndPartialSecond) {
@@ -300,6 +316,9 @@ TEST (ChunkedSequenceResize, TwoElementsDownToOne) {
 
     cseq_int::const_iterator it = cs.begin ();
     EXPECT_EQ (*it, 17) << "Element 0 (chunk 0, index 0)";
+
+    cs.emplace_back (23);
+    EXPECT_THAT (cs, testing::ElementsAre (17, 23));
 }
 
 TEST (ChunkedSequenceResize, TwoElementsDownToZero) {
@@ -371,6 +390,8 @@ TEST (ChunkedSequenceResize, ThreeElementsDownToOne) {
                    static_cast<difference_type> (size2));
         EXPECT_TRUE (std::all_of (std::begin (cs), std::end (cs), [] (int x) { return x == 0; }));
     }
+    cs.emplace_back (3);
+    EXPECT_THAT (cs, testing::ElementsAre (0, 3));
 }
 
 TEST (ChunkedSequenceChunkIterators, Empty) {
