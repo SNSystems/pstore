@@ -197,4 +197,17 @@ namespace pstore {
         return {owner->data (), length};
     }
 
+    // get unique sstring view
+    // ~~~~~~~~~~~~~~~~~~~~~~~
+    raw_sstring_view
+    get_unique_sstring_view (database const & db, address const addr, std::size_t const length,
+                             gsl::not_null<unique_pointer_sstring_view *> const owner) {
+        *owner = unique_pointer_sstring_view{
+            db.getrou (
+                typed_address<char>::make (addr + std::max (varint::encoded_size (length), 2U)),
+                length),
+            length};
+        return {owner->data (), length};
+    }
+
 } // end namespace pstore

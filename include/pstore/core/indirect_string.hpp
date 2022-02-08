@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "pstore/core/sstring_view_archive.hpp"
+#include "pstore/core/database.hpp"
 
 namespace pstore {
 
@@ -299,6 +300,19 @@ namespace pstore {
     /// \result  A view of the requested string.
     raw_sstring_view get_sstring_view (database const & db, address addr, std::size_t length,
                                        gsl::not_null<shared_sstring_view *> owner);
+
+
+    using unique_pointer_sstring_view = sstring_view<unique_pointer<char const>>;
+
+    template <>
+    struct pointer_traits<unique_pointer<char const>>
+            : details::pointer_traits_helper<unique_pointer<char const>> {};
+
+    raw_sstring_view
+    get_unique_sstring_view (database const & db, address const addr, std::size_t const length,
+                             gsl::not_null<unique_pointer_sstring_view *> const owner);
+
+
 
 } // end namespace pstore
 

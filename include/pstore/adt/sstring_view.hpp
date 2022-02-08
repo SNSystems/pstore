@@ -102,6 +102,14 @@ namespace pstore {
     struct pointer_traits<std::unique_ptr<char[]>>
             : details::pointer_traits_helper<std::unique_ptr<char[]>> {};
 
+
+    template <>
+    struct pointer_traits<std::unique_ptr<char const>>
+            : details::pointer_traits_helper<std::unique_ptr<char const>> {};
+    template <>
+    struct pointer_traits<std::unique_ptr<char>>
+            : details::pointer_traits_helper<std::unique_ptr<char>> {};
+
     //*        _       _                 _             *
     //*  _____| |_ _ _(_)_ _  __ _  __ _(_)_____ __ __ *
     //* (_-<_-<  _| '_| | ' \/ _` | \ V / / -_) V  V / *
