@@ -74,20 +74,21 @@ namespace pstore {
     struct pointer_traits<char const *> {
         static constexpr bool is_pointer = true;
         using value_type = char const;
-        static char const * as_raw (char const * const p) noexcept { return p; }
+        static constexpr char const * as_raw (char const * const p) noexcept { return p; }
     };
 
     namespace details {
+
         template <typename T>
         struct pointer_traits_helper {
             static constexpr bool is_pointer = true;
             using value_type = typename T::element_type;
-            static_assert (std::is_same<value_type, char>::value ||
-                               std::is_same<value_type, char const>::value,
+            static_assert (std::is_same<std::remove_const_t<value_type>, char>::value,
                            "pointer element type must be char or char const");
-            static char const * as_raw (T const & p) noexcept { return p.get (); }
+            static constexpr char const * as_raw (T const & p) noexcept { return p.get (); }
         };
-    } // namespace details
+
+    } // end namespace details
 
     template <>
     struct pointer_traits<std::shared_ptr<char const>>
@@ -103,12 +104,12 @@ namespace pstore {
             : details::pointer_traits_helper<std::unique_ptr<char[]>> {};
 
 
-    template <>
-    struct pointer_traits<std::unique_ptr<char const>>
-            : details::pointer_traits_helper<std::unique_ptr<char const>> {};
-    template <>
-    struct pointer_traits<std::unique_ptr<char>>
-            : details::pointer_traits_helper<std::unique_ptr<char>> {};
+    template <typename Deleter>
+    struct pointer_traits<std::unique_ptr<char const, Deleter>>
+            : details::pointer_traits_helper<std::unique_ptr<char const, Deleter>> {};
+    template <typename Deleter>
+    struct pointer_traits<std::unique_ptr<char, Deleter>>
+            : details::pointer_traits_helper<std::unique_ptr<char, Deleter>> {};
 
     //*        _       _                 _             *
     //*  _____| |_ _ _(_)_ _  __ _  __ _(_)_____ __ __ *
@@ -130,8 +131,9 @@ namespace pstore {
         using reference = value_type &;
         using const_reference = value_type const &;
         using const_iterator = value_type const *;
-        using iterator = const_iterator; ///< Because sstring_view refers to a constant sequence,
-                                         /// iterator and const_iterator are the same type.
+        /// iterator and const_iterator are the same type because sstring_view refers to a constant
+        /// sequence.
+        using iterator = const_iterator;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using reverse_iterator = const_reverse_iterator;
         using size_type = std::size_t;
@@ -139,7 +141,8 @@ namespace pstore {
         static constexpr auto const npos = static_cast<size_type> (-1);
 
         // 7.3, sstring_view constructors and assignment operators
-        constexpr sstring_view () noexcept = default;
+        constexpr sstring_view () noexcept
+                : ptr_{} {}
         sstring_view (PointerType ptr, size_type const size) noexcept
                 : ptr_{std::move (ptr)}
                 , size_{size} {}
@@ -228,7 +231,7 @@ namespace pstore {
         }
 
     private:
-        PointerType ptr_ = nullptr;
+        PointerType ptr_;
         size_type size_ = size_type{0};
     };
 
