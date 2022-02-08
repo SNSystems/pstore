@@ -540,9 +540,7 @@ namespace pstore {
                               typename SequenceContainer::value_type, internal_node>::value>::type>
                 static internal_node * allocate (SequenceContainer * const container,
                                                  internal_node const & other) {
-                    container->emplace_back (other);
-                    // TODO: in C++17 we can use the emplace_back return value.
-                    return &container->back ();
+                    return &container->emplace_back (other);
                 }
 
                 /// Construct an internal node with a single child.
@@ -559,9 +557,7 @@ namespace pstore {
                               typename SequenceContainer::value_type, internal_node>::value>::type>
                 static internal_node * allocate (SequenceContainer * container,
                                                  index_pointer const & leaf, hash_type const hash) {
-                    container->emplace_back (leaf, hash);
-                    // TODO: in C++17 we can use the emplace_back return value.
-                    return &container->back ();
+                    return &container->emplace_back (leaf, hash);
                 }
 
                 /// Construct an internal node with two children.
@@ -582,9 +578,8 @@ namespace pstore {
                 allocate (SequenceContainer * container, index_pointer const & existing_leaf,
                           index_pointer const & new_leaf, hash_type const existing_hash,
                           hash_type const new_hash) {
-                    container->emplace_back (existing_leaf, new_leaf, existing_hash, new_hash);
-                    // TODO: in C++17 we can use the emplace_back return value.
-                    return &container->back ();
+                    return &container->emplace_back (existing_leaf, new_leaf, existing_hash,
+                                                     new_hash);
                 }
 
                 /// Return a pointer to an internal node. If the node is in-store, it is loaded and
