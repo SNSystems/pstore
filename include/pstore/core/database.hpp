@@ -304,7 +304,9 @@ namespace pstore {
         // (Virtual for mocking.)
         virtual auto get (address addr, std::size_t size, bool initialized, bool writable) const
             -> std::shared_ptr<void const>;
-        unique_pointer<void const> getu (address addr, std::size_t size, bool initialized) const;
+        // (Virtual for mocking.)
+        virtual unique_pointer<void const> getu (address addr, std::size_t size,
+                                                 bool initialized) const;
 
         ///@{
         enum class vacuum_mode {

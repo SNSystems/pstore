@@ -198,10 +198,17 @@ namespace {
             MOCK_CONST_METHOD4 (get, std::shared_ptr<void const> (pstore::address, std::size_t,
                                                                   bool /*is_initialized*/,
                                                                   bool /*is_writable*/));
+            MOCK_CONST_METHOD3 (getu,
+                                pstore::unique_pointer<void const> (pstore::address, std::size_t,
+                                                                    bool /*is_initialized*/));
 
             auto base_get (pstore::address const & addr, std::size_t size, bool is_initialized,
                            bool is_writable) const -> std::shared_ptr<void const> {
                 return pstore::database::get (addr, size, is_initialized, is_writable);
+            }
+            auto base_getu (pstore::address const & addr, std::size_t size,
+                            bool is_initialized) const -> pstore::unique_pointer<void const> {
+                return pstore::database::getu (addr, size, is_initialized);
             }
         };
     };
@@ -218,6 +225,10 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
     auto invoke_base_get = Invoke (&db, &mock_database::base_get);
     EXPECT_CALL (db, get (_, _, _, _)).WillRepeatedly (invoke_base_get);
 
+    // All calls to db.getu() are forwarded to the real implementation.
+    auto invoke_base_getu = Invoke (&db, &mock_database::base_getu);
+    EXPECT_CALL (db, getu (_, _, _)).WillRepeatedly (invoke_base_getu);
+
     // Append 'original' to the store.
     std::array<std::uint64_t, 2> const original{{
         UINT64_C (0xF0F0F0F0F0F0F0F0),
@@ -229,13 +240,12 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
     pstore::typed_address<std::uint64_t> addr = append_uint64 (transaction, original[0]);
     append_uint64 (transaction, original[1]);
 
-    // Now use the serializer to read a span of two uint64_ts. We expect the database.get()
+    // Now use the serializer to read a span of two uint64_ts. We expect the database.getu()
     // method to be called exactly once for this operation.
     std::array<std::uint64_t, 2> actual;
-    EXPECT_CALL (
-        db, get (addr.to_address (), sizeof (actual), true /*initialized*/, false /*writable*/))
+    EXPECT_CALL (db, getu (addr.to_address (), sizeof (actual), true /*initialized*/))
         .Times (1)
-        .WillOnce (invoke_base_get);
+        .WillOnce (invoke_base_getu);
 
     using namespace pstore::serialize;
     read (archive::database_reader (db, addr.to_address ()),

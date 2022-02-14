@@ -148,7 +148,7 @@ namespace pstore {
                 PSTORE_ASSERT (extra_for_alignment < sizeof (Ty));
                 addr_ += extra_for_alignment;
                 // Load the data.
-                auto result = db_.getro (typed_address<Ty> (addr_));
+                auto result = db_.getrou (typed_address<Ty> (addr_));
                 addr_ += sizeof (Ty);
                 // Copy to the destination.
                 new (&v) Ty (*result);
@@ -168,7 +168,7 @@ namespace pstore {
 
                 // Load the data.
                 auto const size = unsigned_cast (span.size_bytes ());
-                auto src = db_.getro (typed_address<std::uint8_t> (addr_), size);
+                auto src = db_.getrou (typed_address<std::uint8_t> (addr_), size);
                 addr_ += size;
 
                 // Copy to the destination span.
