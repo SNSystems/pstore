@@ -308,9 +308,12 @@ namespace pstore {
 
             private:
                 void next () noexcept {
-                    for (; bitmap_ != 0U && (bitmap_ & 1U) == 0U; bitmap_ >>= 1U) {
-                        ++pos_;
+                    if (bitmap_ == 0U) {
+                        return;
                     }
+                    auto const trailing_zeros = bit_count::ctz (bitmap_);
+                    bitmap_ >>= trailing_zeros;
+                    pos_ += trailing_zeros;
                 }
                 BitmapType bitmap_;
                 std::size_t pos_ = 0;
