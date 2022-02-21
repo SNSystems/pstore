@@ -92,13 +92,13 @@ namespace pstore {
         /// Create a database from a pre-opened file. This interface is intended to enable
         /// the database class to be unit tested.
         template <typename File>
-        explicit database (std::shared_ptr<File> file,
+        explicit database (std::shared_ptr<File> const & file,
                            std::unique_ptr<system_page_size_interface> && page_size,
                            std::unique_ptr<region::factory> && region_factory,
                            bool access_tick_enabled = true);
 
         template <typename File>
-        explicit database (std::shared_ptr<File> file, bool access_tick_enabled = true)
+        explicit database (std::shared_ptr<File> const & file, bool access_tick_enabled = true)
                 : database (file, std::make_unique<system_page_size> (),
                             region::get_factory (file, storage::full_region_size,
                                                  storage::min_region_size),
@@ -525,11 +525,11 @@ namespace pstore {
     // (ctor)
     // ~~~~~~
     template <typename File>
-    database::database (std::shared_ptr<File> file,
+    database::database (std::shared_ptr<File> const & file,
                         std::unique_ptr<system_page_size_interface> && page_size,
                         std::unique_ptr<region::factory> && region_factory,
                         bool const access_tick_enabled)
-            : storage_{std::move (file), std::move (page_size), std::move (region_factory)}
+            : storage_{file, std::move (page_size), std::move (region_factory)}
             , size_{database::get_footer_pos (*file)} {
 
         this->finish_init (access_tick_enabled);
