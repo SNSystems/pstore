@@ -82,7 +82,7 @@ TEST_F (DbArchive, ReadAUint64Span) {
 
     // Now the read the array back again.
     pstore::serialize::archive::database_reader archive (db, addr.to_address ());
-    std::array<std::uint64_t, 2> actual;
+    std::array<std::uint64_t, 2> actual{{UINT64_C (0)}};
     pstore::serialize::read (archive, ::pstore::gsl::span<std::uint64_t>{actual});
 
     EXPECT_THAT (original, ContainerEq (actual));
