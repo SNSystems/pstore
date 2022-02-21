@@ -33,7 +33,6 @@ TEST (BrokerMessageType, BadPartNo) {
     check_for_error (create, ::pstore::error_code::bad_message_part_number);
 }
 
-
 TEST (BrokerMessageType, EmptyString) {
     std::uint32_t const mid = 1234;
     std::uint16_t const part = 21;
@@ -70,8 +69,6 @@ TEST (BrokerMessageType, LongStringIsTruncated) {
 
     EXPECT_THAT (actual.payload, ::testing::ContainerEq (expected_payload));
 }
-
-
 
 TEST (BrokerMessageType, ShortPayloadUsingIterator) {
     std::string const payload = "hello world";
@@ -120,8 +117,6 @@ TEST (BrokerMessageType, TooLongIteratorRangeIsTruncated) {
     generate (std::begin (expected_payload), expected_payload.size ());
     EXPECT_THAT (actual.payload, ::testing::ContainerEq (expected_payload));
 }
-
-
 
 TEST (BrokerMessageType, NegativeDistanceBetweenIterators) {
     char const payload[] = "payload";
