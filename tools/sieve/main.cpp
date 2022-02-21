@@ -72,22 +72,53 @@ namespace {
         return result;
     }
 
-    std::function<std::ostream &()> open_output_file (std::string const & path) {
-        if (path == "-") {
-            return [] () { return std::ref (std::cout); };
-        }
+    //*   __ _ _                                   *
+    //*  / _(_) |___   ___ _ __  ___ _ _  ___ _ _  *
+    //* |  _| | / -_) / _ \ '_ \/ -_) ' \/ -_) '_| *
+    //* |_| |_|_\___| \___/ .__/\___|_||_\___|_|   *
+    //*                   |_|                      *
+    class file_opener {
+    public:
+        explicit file_opener (std::string const & path);
+        file_opener (file_opener const &) = delete;
 
-        auto file = std::make_shared<std::ofstream> (
+        file_opener & operator= (file_opener const &) = delete;
+        file_opener & operator= (file_opener &&) = delete;
+
+        std::ostream & get_stream () const noexcept { return *out_; }
+
+    private:
+        std::unique_ptr<std::ofstream> file_;
+        std::ostream * out_ = nullptr;
+
+        static std::unique_ptr<std::ofstream> open_file (std::string const & path);
+    };
+
+    // (ctor)
+    // ~~~~~~
+    file_opener::file_opener (std::string const & path) {
+        if (path == "-") {
+            out_ = &std::cout;
+            return;
+        }
+        file_ = file_opener::open_file (path);
+        out_ = file_.get ();
+    }
+
+    // open file
+    // ~~~~~~~~~
+    std::unique_ptr<std::ofstream> file_opener::open_file (std::string const & path) {
+        auto file = std::make_unique<std::ofstream> (
             path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
         if (!file->is_open ()) {
             std::ostringstream str;
             str << "Could not open " << pstore::quoted (path);
             pstore::raise (std::errc::no_such_file_or_directory, str.str ());
         }
-        return [file] () { return std::ref (*file); };
+        return file;
     }
 
-} // anonymous namespace
+} // end anonymous namespace
 
 
 #if defined(_WIN32)
@@ -100,13 +131,13 @@ int main (int argc, char * argv[]) {
     PSTORE_TRY {
         user_options const opt = user_options::get (argc, argv);
 
-        auto out = open_output_file (opt.output);
+        file_opener const out{opt.output};
         if (opt.maximum <= std::numeric_limits<std::uint16_t>::max ()) {
-            write_output (sieve<std::uint16_t> (opt.maximum), opt.endianness, out);
+            write_output (sieve<std::uint16_t> (opt.maximum), opt.endianness, out.get_stream ());
         } else if (opt.maximum <= std::numeric_limits<std::uint32_t>::max ()) {
-            write_output (sieve<std::uint32_t> (opt.maximum), opt.endianness, out);
+            write_output (sieve<std::uint32_t> (opt.maximum), opt.endianness, out.get_stream ());
         } else {
-            write_output (sieve<std::uint64_t> (opt.maximum), opt.endianness, out);
+            write_output (sieve<std::uint64_t> (opt.maximum), opt.endianness, out.get_stream ());
         }
     }
     // clang-format off

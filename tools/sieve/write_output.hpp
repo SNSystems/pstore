@@ -109,8 +109,8 @@ inline std::uint8_t * write<std::uint64_t, endian::native> (std::uint64_t v, std
     return out;
 }
 
-template <typename ContainerType, typename GetOutputStreamFn>
-void write_output (ContainerType const & primes, endian output_endian, GetOutputStreamFn out) {
+template <typename ContainerType>
+void write_output (ContainerType const & primes, endian output_endian, std::ostream & os) {
 
     using int_type = typename ContainerType::value_type;
     std::vector<std::uint8_t> bytes;
@@ -133,8 +133,8 @@ void write_output (ContainerType const & primes, endian output_endian, GetOutput
         }
         break;
     }
-    out ().write (reinterpret_cast<std::ofstream::char_type const *> (bytes.data ()),
-                  static_cast<std::streamsize> (sizeof (std::uint8_t) * bytes.size ()));
+    os.write (reinterpret_cast<std::ofstream::char_type const *> (bytes.data ()),
+              static_cast<std::streamsize> (sizeof (std::uint8_t) * bytes.size ()));
 }
 
 #endif // WRITE_OUTPUT_HPP
