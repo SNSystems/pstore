@@ -65,7 +65,7 @@ TEST (BrokerMessageType, LongStringIsTruncated) {
 
     pstore::brokerface::message_type const actual{0, 0, 1, long_payload};
 
-    pstore::brokerface::message_type::payload_type expected_payload;
+    pstore::brokerface::message_type::payload_type expected_payload{{'\0'}};
     std::fill (std::begin (expected_payload), std::end (expected_payload), 'A');
 
     EXPECT_THAT (actual.payload, ::testing::ContainerEq (expected_payload));
@@ -102,7 +102,7 @@ TEST (BrokerMessageType, MaxLengthIteratorRange) {
     pstore::brokerface::message_type const actual{0, 0, 1, std::begin (long_payload),
                                                   std::end (long_payload)};
 
-    pstore::brokerface::message_type::payload_type expected_payload;
+    pstore::brokerface::message_type::payload_type expected_payload{{'\0'}};
     generate (std::begin (expected_payload), expected_payload.size ());
     EXPECT_THAT (actual.payload, ::testing::ContainerEq (expected_payload));
 }
@@ -116,7 +116,7 @@ TEST (BrokerMessageType, TooLongIteratorRangeIsTruncated) {
     pstore::brokerface::message_type const actual (0, 0, 1, std::begin (long_payload),
                                                    std::end (long_payload));
 
-    pstore::brokerface::message_type::payload_type expected_payload;
+    pstore::brokerface::message_type::payload_type expected_payload{{'\0'}};
     generate (std::begin (expected_payload), expected_payload.size ());
     EXPECT_THAT (actual.payload, ::testing::ContainerEq (expected_payload));
 }
