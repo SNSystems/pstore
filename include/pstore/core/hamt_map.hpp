@@ -839,8 +839,6 @@ namespace pstore {
             // If the insertion resulted in our child node being reallocated, then this node needs
             // to be heap-allocated and the child reference updated. The original child pointer may
             // also need to be freed.
-
-            std::unique_ptr<internal_node> new_node;
             if (new_child != child_slot) {
                 internal_node * const inode =
                     internal_node::make_writable (internals_container_.get (), node, *internal);
@@ -853,7 +851,6 @@ namespace pstore {
             }
 
             parents->push (details::parent_type{node, index});
-            new_node.release ();
             return {node, key_exists};
         }
 
