@@ -30,16 +30,15 @@ Its design goals are:
 
 pstore is built and tested on a variety of platforms:
 
--   Ubuntu Linux 14.04 LTS Trusty Tahr: building with GCC 5.5.0 and GCC 9.2.1
--   Ubuntu Linux 16.04 LTS Xenial Xerus: building with Clang 3.8.0 and Clang 9.0.1
--   macOS: building with Xcode 9.3
--   Windows: building with Visual Studio 2017 version 15.9
+-   Ubuntu Linux 20.04.3 LTS: building with GCC 7.5.0, GCC 10.3.0, Clang 8.0.1, and Clang 12.0.0. We also build with the [official GCC 5.5.0](https://hub.docker.com/layers/gcc/library/gcc/5.5.0/images/sha256-37139c6da088e06151617e741dc1dc62adefa3a4c9b9d28fc29ac83e629b4575?context=explore) docker image.
+-   macOS: building with Xcode 13.2
+-   Windows: building with Visual Studio 2019 16.11
 
 In addition, there’s support for FreeBSD 11, NetBSD 9.1, and Solaris 11.4.
 
 To build it, you’ll also need the following tools:
 
--   [cmake](http://cmake.org) (version 3.4 or later, version 3.8 or later if using Visual Studio 2017)
+-   [cmake](http://cmake.org) (version 3.4 or later, version 3.8 or later if using Visual Studio)
 
 Optionally:
 
