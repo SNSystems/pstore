@@ -64,11 +64,10 @@ namespace pstore {
                     *(last++) = 0;
                 }
                 // Emit the string length.
-                auto const resl = serialize::write (std::forward<Archive> (archive),
-                                                    gsl::make_span (&(*first), &(*last)));
+                auto const resl = serialize::write (archive, gsl::make_span (&(*first), &(*last)));
 
                 // Emit the string body.
-                serialize::write (std::forward<Archive> (archive), gsl::make_span (str));
+                serialize::write (archive, gsl::make_span (str));
                 return resl;
             }
 
@@ -79,8 +78,7 @@ namespace pstore {
                 // but might not be enough for the entire value.
                 static_assert (varint::max_output_length >= 2,
                                "maximum encoded varint length must be >= 2");
-                serialize::read_uninit (std::forward<Archive> (archive),
-                                        gsl::make_span (encoded_length.data (), 2));
+                serialize::read_uninit (archive, gsl::make_span (encoded_length.data (), 2));
 
                 auto const varint_length = varint::decode_size (std::begin (encoded_length));
                 PSTORE_ASSERT (varint_length > 0);
@@ -89,8 +87,7 @@ namespace pstore {
                 if (varint_length > 2) {
                     PSTORE_ASSERT (varint_length <= encoded_length.size ());
                     serialize::read_uninit (
-                        std::forward<Archive> (archive),
-                        gsl::make_span (encoded_length.data () + 2, varint_length - 2));
+                        archive, gsl::make_span (encoded_length.data () + 2, varint_length - 2));
                 }
 
                 return varint::decode (encoded_length.data (), varint_length);
@@ -127,7 +124,7 @@ namespace pstore {
                 };
                 std::unique_ptr<value_type, decltype (dtor)> deleter (&str, dtor);
 
-                auto const length = string_helper::read_length (std::forward<Archive> (archive));
+                auto const length = string_helper::read_length (archive);
                 str.resize (length);
 
 #ifdef PSTORE_HAVE_NON_CONST_STD_STRING_DATA
@@ -139,8 +136,7 @@ namespace pstore {
 #endif
                 // Now read the body of the string.
                 serialize::read_uninit (
-                    std::forward<Archive> (archive),
-                    gsl::make_span (data, static_cast<std::ptrdiff_t> (length)));
+                    archive, gsl::make_span (data, static_cast<std::ptrdiff_t> (length)));
 
                 // Release ownership from the deleter so that the initialized object is returned to
                 // the caller.
@@ -182,10 +178,9 @@ namespace pstore {
             static auto write (Archive && archive, Container const & ty)
                 -> archive_result_type<Archive> {
                 // TODO: size_t is not a fixed-size type. Prefer uintXX_t.
-                auto result =
-                    serialize::write (std::forward<Archive> (archive), std::size_t{ty.size ()});
+                auto result = serialize::write (archive, std::size_t{ty.size ()});
                 for (typename Container::value_type const & m : ty) {
-                    serialize::write (std::forward<Archive> (archive), m);
+                    serialize::write (archive, m);
                 }
                 return result;
             }
@@ -202,17 +197,14 @@ namespace pstore {
             /// \param archive The archive from which the container will be read.
             /// \param inserter A function which is responsible for inserting each of the
             ///                 Container::value_type elements from the archive into the container.
-
             template <typename Archive>
             static void read (Archive && archive, insert_callback inserter) {
                 Container result;
                 // TODO: size_t is not a fixed-size type. Prefer uintXX_t.
-                auto const num_members =
-                    serialize::read<std::size_t> (std::forward<Archive> (archive));
+                auto const num_members = serialize::read<std::size_t> (archive);
                 auto num_read = std::size_t{0};
                 for (; num_read < num_members; ++num_read) {
-                    inserter (serialize::read<typename Container::value_type> (
-                        std::forward<Archive> (archive)));
+                    inserter (serialize::read<typename Container::value_type> (archive));
                 }
             }
         };
@@ -262,8 +254,8 @@ namespace pstore {
             static auto write (Archive && archive, value_type const & value)
                 -> archive_result_type<Archive> {
 
-                auto const result = serialize::write (std::forward<Archive> (archive), value.first);
-                serialize::write (std::forward<Archive> (archive), value.second);
+                auto const result = serialize::write (archive, value.first);
+                serialize::write (archive, value.second);
                 return result;
             }
 
@@ -274,8 +266,8 @@ namespace pstore {
             /// will be read.
             template <typename Archive>
             static void read (Archive && archive, value_type & value) {
-                serialize::read_uninit (std::forward<Archive> (archive), value.first);
-                serialize::read_uninit (std::forward<Archive> (archive), value.second);
+                serialize::read_uninit (archive, value.first);
+                serialize::read_uninit (archive, value.second);
             }
         };
     } // namespace serialize
