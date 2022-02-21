@@ -20,9 +20,12 @@
 #include <string>
 
 namespace vacuum {
+
     struct user_options {
-        bool daemon_mode;
+        bool daemon_mode = false;
         std::string src_path;
     };
-} // namespace vacuum
+
+} // end namespace vacuum
+
 #endif // PSTORE_VACUUM_OPTIONS_HPP
