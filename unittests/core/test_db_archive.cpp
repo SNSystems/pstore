@@ -185,49 +185,78 @@ TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
 
 namespace {
 
-    class DbArchiveReadSpan : public EmptyStore {
+
+    class DbArchiveReadSpan : public testing::Test {
+    private:
+        using unique_pointer = pstore::unique_pointer<void const>;
+
     protected:
         class mock_database : public pstore::database {
         public:
-            explicit mock_database (std::shared_ptr<pstore::file::in_memory> file)
-                    : pstore::database (std::move (file)) {
-
+            explicit mock_database (std::shared_ptr<pstore::file::in_memory> const & file)
+                    : pstore::database{file} {
                 this->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
             }
 
             MOCK_CONST_METHOD4 (get, std::shared_ptr<void const> (pstore::address, std::size_t,
                                                                   bool /*is_initialized*/,
                                                                   bool /*is_writable*/));
-            MOCK_CONST_METHOD3 (getu,
-                                pstore::unique_pointer<void const> (pstore::address, std::size_t,
-                                                                    bool /*is_initialized*/));
+            MOCK_CONST_METHOD3 (getu, unique_pointer (pstore::address, std::size_t,
+                                                      bool /*is_initialized*/));
 
             auto base_get (pstore::address const & addr, std::size_t size, bool is_initialized,
                            bool is_writable) const -> std::shared_ptr<void const> {
                 return pstore::database::get (addr, size, is_initialized, is_writable);
             }
             auto base_getu (pstore::address const & addr, std::size_t size,
-                            bool is_initialized) const -> pstore::unique_pointer<void const> {
+                            bool is_initialized) const -> unique_pointer {
                 return pstore::database::getu (addr, size, is_initialized);
             }
         };
+
+        InMemoryStore store_;
     };
 
 } // end anonymous namespace
 
+// A workaround for an issue with some versions GNU libc++ that was exposed by the GCC 5.5.0 CI
+// build. Prior to a change in 2018-09-18, std::is_default_constructible<> would return true for
+// pstore::unique_pointer<> but a static assertion would fire when the default constructor was used.
+// This code injects a specialization of BuiltinDefaultValue<> into Google Mock which bypasses
+// std::is_default_constructible<>.
+#if defined(__GLIBCXX__) && __GLIBCXX__ < 20180918
+namespace testing {
+    namespace internal {
+
+        template <typename T, typename D>
+        class BuiltInDefaultValue<std::unique_ptr<T, D>> {
+        public:
+            static constexpr bool Exists () noexcept { return is_default_constructible; }
+            static std::unique_ptr<T, D> Get () {
+                return BuiltInDefaultValueGetter<std::unique_ptr<T, D>,
+                                                 is_default_constructible>::Get ();
+            }
+
+        private:
+            static constexpr bool is_default_constructible = false;
+        };
+
+    } // end namespace internal
+} // end namespace testing
+#endif // defined (__GLIBCXX__) && __GLIBCXX__ < 20180918
+
 TEST_F (DbArchiveReadSpan, ReadUint64Span) {
-    using ::testing::_;
-    using ::testing::Invoke;
+    using testing::_;
+    using testing::Invoke;
 
-    mock_database db{this->file ()};
+    mock_database db{store_.file ()};
 
-    // All calls to db.get() are forwarded to the real implementation.
-    auto invoke_base_get = Invoke (&db, &mock_database::base_get);
-    EXPECT_CALL (db, get (_, _, _, _)).WillRepeatedly (invoke_base_get);
+    // Calls to db.get() are forwarded to the real implementation.
+    ON_CALL (db, get (_, _, _, _)).WillByDefault (Invoke (&db, &mock_database::base_get));
 
     // All calls to db.getu() are forwarded to the real implementation.
     auto invoke_base_getu = Invoke (&db, &mock_database::base_getu);
-    EXPECT_CALL (db, getu (_, _, _)).WillRepeatedly (invoke_base_getu);
+    ON_CALL (db, getu (_, _, _)).WillByDefault (invoke_base_getu);
 
     // Append 'original' to the store.
     std::array<std::uint64_t, 2> const original{{
@@ -250,4 +279,6 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
     using namespace pstore::serialize;
     read (archive::database_reader (db, addr.to_address ()),
           pstore::gsl::span<std::uint64_t>{actual});
+
+    EXPECT_THAT (actual, testing::ContainerEq (original));
 }
