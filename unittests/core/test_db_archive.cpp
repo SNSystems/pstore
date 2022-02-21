@@ -249,7 +249,7 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
     using testing::_;
     using testing::Invoke;
 
-    mock_database db{store_.file ()};
+    testing::NiceMock<mock_database> db{store_.file ()};
 
     // Calls to db.get() are forwarded to the real implementation.
     ON_CALL (db, get (_, _, _, _)).WillByDefault (Invoke (&db, &mock_database::base_get));
