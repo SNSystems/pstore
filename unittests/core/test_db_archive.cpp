@@ -41,12 +41,15 @@ namespace {
         return addr;
     }
 
-    class DbArchive : public EmptyStore {};
+    class DbArchive : public testing::Test {
+    protected:
+        InMemoryStore store_;
+    };
 
 } // end anonymous namespace
 
 TEST_F (DbArchive, ReadASingleUint64) {
-    pstore::database db{this->file ()};
+    pstore::database db{store_.file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::uint64_t v1 = UINT64_C (0xF0F0F0F0F0F0F0F0);
@@ -66,7 +69,7 @@ TEST_F (DbArchive, ReadASingleUint64) {
 TEST_F (DbArchive, ReadAUint64Span) {
     using ::testing::ContainerEq;
 
-    pstore::database db{this->file ()};
+    pstore::database db{store_.file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::array<std::uint64_t, 2> const original{{
@@ -89,7 +92,7 @@ TEST_F (DbArchive, ReadAUint64Span) {
 }
 
 TEST_F (DbArchive, WriteASingleUint64) {
-    pstore::database db{this->file ()};
+    pstore::database db{store_.file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::uint64_t const original = UINT64_C (0xF0F0F0F0F0F0F0F0);
@@ -110,7 +113,7 @@ TEST_F (DbArchive, WriteASingleUint64) {
 }
 
 TEST_F (DbArchive, WriteAUint64Span) {
-    pstore::database db{this->file ()};
+    pstore::database db{store_.file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::array<std::uint64_t, 2> const original{{
@@ -137,7 +140,7 @@ TEST_F (DbArchive, WriteAUint64Span) {
 
 namespace {
 
-    class DbArchiveWriteSpan : public EmptyStore {
+    class DbArchiveWriteSpan : public testing::Test {
     protected:
         class mock_transaction : public pstore::transaction<std::unique_lock<mock_mutex>> {
         public:
@@ -150,6 +153,8 @@ namespace {
                 return inherited::allocate (size, align);
             }
         };
+
+        InMemoryStore store_;
     };
 
 } // end anonymous namespace
@@ -158,7 +163,7 @@ TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
     using ::testing::_;
     using ::testing::Invoke;
 
-    pstore::database db{this->file ()};
+    pstore::database db{store_.file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::array<std::uint64_t, 2> original{{
