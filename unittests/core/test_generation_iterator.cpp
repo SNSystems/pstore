@@ -33,11 +33,10 @@ using pstore::generation_iterator;
 
 namespace {
 
-    class GenerationIterator : public EmptyStore {
+    class GenerationIterator : public testing::Test {
     public:
         GenerationIterator ()
-                : EmptyStore{}
-                , db_{this->file ()} {
+                : db_{store_.file ()} {
             db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         }
 
@@ -53,6 +52,7 @@ namespace {
         using trailer_address = pstore::typed_address<pstore::trailer>;
 
     private:
+        InMemoryStore store_;
         pstore::database db_;
     };
 
@@ -66,6 +66,7 @@ TEST_F (GenerationIterator, GenerationContainerBegin) {
     generation_iterator const expected = generation_iterator{&d, d.footer_pos ()};
     EXPECT_EQ (expected, actual);
 }
+
 TEST_F (GenerationIterator, GenerationContainerEnd) {
     this->add_transaction ();
 

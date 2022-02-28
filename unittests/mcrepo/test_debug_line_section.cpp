@@ -37,10 +37,10 @@
 
 namespace {
 
-    class DebugLineSection : public EmptyStore {
+    class DebugLineSection : public testing::Test {
     public:
         DebugLineSection ()
-                : db_{this->file ()} {
+                : db_{store_.file ()} {
             db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         }
 
@@ -49,6 +49,7 @@ namespace {
         using transaction_type = pstore::transaction<lock_guard>;
 
         mock_mutex mutex_;
+        InMemoryStore store_;
         pstore::database db_;
     };
 

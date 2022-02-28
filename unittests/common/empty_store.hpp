@@ -19,8 +19,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+
+#include <gmock/gmock.h>
 
 #include "pstore/core/database.hpp"
 #include "pstore/core/transaction.hpp"
@@ -42,6 +42,7 @@ private:
     static constexpr std::size_t page_size_ = 4096;
 };
 
+// TODO: remove this class and prefer aggregation of InMemoryStore.
 class EmptyStore : public ::testing::Test, public InMemoryStore {
 };
 
