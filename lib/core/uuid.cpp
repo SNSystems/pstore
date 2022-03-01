@@ -20,6 +20,7 @@
 #include "pstore/core/uuid.hpp"
 
 #include <iomanip>
+#include <mutex>
 #include <ostream>
 
 #include "pstore/support/error.hpp"
@@ -69,12 +70,15 @@ namespace pstore {
     // (ctor)
     // ~~~~~~
     uuid::uuid () {
-        static random_generator<unsigned> random;
-        auto const generator = [] () {
-            constexpr auto max = std::numeric_limits<std::uint8_t>::max ();
-            return static_cast<std::uint8_t> (random.get (max));
-        };
-        std::generate (std::begin (data_), std::end (data_), generator);
+        {
+            static std::mutex mutex;
+            static random_generator<unsigned short> random;
+            std::lock_guard<std::mutex> _{mutex};
+            std::generate (std::begin (data_), std::end (data_), [] () {
+                return static_cast<std::uint8_t> (random.get () %
+                                                  std::numeric_limits<std::uint8_t>::max ());
+            });
+        }
 
         // Set variant: must be 0b10xxxxxx
         data_[variant_octet] &= 0b10111111;
