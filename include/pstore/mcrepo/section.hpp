@@ -43,6 +43,7 @@ namespace pstore {
     X (thread_data)                                                                                \
     X (thread_bss)                                                                                 \
     X (debug_line)                                                                                 \
+    X (debug_loc)                                                                                  \
     X (debug_string)                                                                               \
     X (debug_ranges)                                                                               \
     X (linked_definitions)
