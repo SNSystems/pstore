@@ -80,16 +80,22 @@ jobs:
                       os: ubuntu-latest
 
 
-                    - name: Windows-latest/MSVC/Debug
+                    - name: Windows-latest/VS2022/Debug
                       build_type: Debug
                       generator: Visual Studio 17 2022
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
                       os: windows-latest
 
-                    - name: Windows-latest/MSVC/Release
+                    - name: Windows-latest/VS2022/Release
                       build_type: Release
                       generator: Visual Studio 17 2022
                       os: windows-latest
+
+                    - name: Windows-2016/VS2019/Debug
+                      build_type: Debug
+                      generator: Visual Studio 16 2019
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+                      os: Windows-2016
 
         name: ${{ matrix.name }}
         runs-on: ${{ matrix.os }}
