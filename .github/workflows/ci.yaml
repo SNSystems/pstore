@@ -6,6 +6,8 @@ jobs:
         strategy:
             matrix:
                 include:
+                    # macOS builds
+                    # ~~~~~~~~~~~~
                     - name: macOS-latest/Xcode/Debug
                       build_type: Debug
                       generator: Xcode
@@ -18,6 +20,8 @@ jobs:
                       os: macos-latest
 
 
+                    # Ubuntu builds
+                    # ~~~~~~~~~~~~~
                     - name: Ubuntu-latest/gcc-7.5/Debug
                       apt_install: g++-7
                       build_type: Debug
@@ -79,17 +83,29 @@ jobs:
                       options: '-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold'
                       os: ubuntu-latest
 
-
-                    - name: Windows-latest/MSVC/Debug
+                    # Windows builds
+                    # ~~~~~~~~~~~~~~
+                    - name: Windows-latest/VS2022/Debug
                       build_type: Debug
-                      generator: Visual Studio 16 2019
+                      generator: Visual Studio 17 2022
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
                       os: windows-latest
 
-                    - name: Windows-latest/MSVC/Release
+                    - name: Windows-latest/VS2022/Release
+                      build_type: Release
+                      generator: Visual Studio 17 2022
+                      os: windows-latest
+
+                    - name: Windows-2019/VS2019/Debug
+                      build_type: Debug
+                      generator: Visual Studio 16 2019
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+                      os: Windows-2019
+
+                    - name: Windows-2019/VS2019/Release
                       build_type: Release
                       generator: Visual Studio 16 2019
-                      os: windows-latest
+                      os: Windows-2019
 
         name: ${{ matrix.name }}
         runs-on: ${{ matrix.os }}
@@ -102,7 +118,7 @@ jobs:
 
             - name: Install Dependencies (Linux)
               if: matrix.os == 'ubuntu-latest' && matrix.apt_install != ''
-              run: sudo apt-get install -y ${{ matrix.apt_install }}
+              run: sudo apt-get update && sudo apt-get install -y ${{ matrix.apt_install }}
 
 
 
