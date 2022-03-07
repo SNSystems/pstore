@@ -91,11 +91,11 @@ jobs:
                       generator: Visual Studio 17 2022
                       os: windows-latest
 
-                    - name: Windows-2016/VS2019/Debug
+                    - name: Windows-2019/VS2019/Debug
                       build_type: Debug
                       generator: Visual Studio 16 2019
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
-                      os: Windows-2016
+                      os: Windows-2019
 
         name: ${{ matrix.name }}
         runs-on: ${{ matrix.os }}
