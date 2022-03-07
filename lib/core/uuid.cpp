@@ -72,9 +72,12 @@ namespace pstore {
     uuid::uuid () {
         {
             static std::mutex mutex;
-            static random_generator<std::uint8_t> random;
+            static random_generator<unsigned short> random;
             std::lock_guard<std::mutex> _{mutex};
-            std::generate (std::begin (data_), std::end (data_), [] () { return random.get (); });
+            std::generate (std::begin (data_), std::end (data_), [] () {
+                return static_cast<std::uint8_t> (random.get () %
+                                                  std::numeric_limits<std::uint8_t>::max ());
+            });
         }
 
         // Set variant: must be 0b10xxxxxx
