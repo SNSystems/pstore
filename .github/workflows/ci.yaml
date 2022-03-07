@@ -102,7 +102,7 @@ jobs:
 
             - name: Install Dependencies (Linux)
               if: matrix.os == 'ubuntu-latest' && matrix.apt_install != ''
-              run: sudo apt-get install -y ${{ matrix.apt_install }}
+              run: sudo apt-get update && sudo apt-get install -y ${{ matrix.apt_install }}
 
 
 
