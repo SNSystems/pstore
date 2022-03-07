@@ -82,7 +82,7 @@ jobs:
 
                     - name: Windows-latest/MSVC/Debug
                       build_type: Debug
-                      generator: Visual Studio 16 2019
+                      generator: Visual Studio 17 2022
                       options: '-DPSTORE_ALWAYS_SPANNING=Yes'
                       os: windows-latest
 
