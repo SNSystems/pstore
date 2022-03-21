@@ -74,21 +74,27 @@ namespace pstore {
     void storage::shrink (std::uint64_t const new_size) {
         // We now look backwards through the regions, discarding segments and regions introduced
         // by this transaction
-        while (regions_.size () > 0) {
-            auto const region = regions_.back ();
+        while (!regions_.empty ()) {
+            region::memory_mapper_ptr const & region = regions_.back ();
             if (region->offset () <= new_size) {
                 return;
             }
 
-            // remove segments
-            // TODO: there's no need to repeatedly iterate over the entire table here!
-            for (auto & sat_segment : *sat_) {
-                if (sat_segment.region != nullptr &&
-                    sat_segment.region->data () == region->data ()) {
-                    sat_segment.region = nullptr;
-                    sat_segment.value = nullptr;
-                }
-            }
+            // Remove the entries in the segment address table.
+            PSTORE_ASSERT (region->offset () % address::segment_size == 0 &&
+                           region->size () % address::segment_size == 0);
+            auto const sp = gsl::make_span (*sat_).subspan (
+                region->offset () / address::segment_size, region->size () / address::segment_size);
+            std::for_each (std::begin (sp), std::end (sp), [&region] (sat_entry & segment) {
+                PSTORE_ASSERT (segment.region == region);
+                segment.region = nullptr;
+                segment.value = nullptr;
+            });
+            // Check that we caught every reference to this region.
+            PSTORE_ASSERT (std::all_of (
+                std::begin (*sat_), std::end (*sat_),
+                [&region] (sat_entry const & segment) { return segment.region != region; }));
+
             // remove region
             regions_.pop_back ();
         }
