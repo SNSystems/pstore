@@ -22,15 +22,19 @@
 #include "pstore/exchange/import_linked_definitions_section.hpp"
 #include "pstore/exchange/export_section.hpp"
 
+// Standard library includes
 #include <iterator>
 #include <sstream>
 
+// 3rd party includes
 #include <gmock/gmock.h>
 
+// pstore includes
 #include "pstore/exchange/export_fragment.hpp"
 #include "pstore/exchange/import_fragment.hpp"
 #include "pstore/json/json.hpp"
 
+// Local includes
 #include "empty_store.hpp"
 
 using namespace pstore;
@@ -51,10 +55,10 @@ namespace {
     protected:
         using transaction_lock = std::unique_lock<mock_mutex>;
 
-        InMemoryStore export_store_;
+        in_memory_store export_store_;
         database export_db_;
 
-        InMemoryStore import_store_;
+        in_memory_store import_store_;
         database import_db_;
 
         // Build and export a fragment which contains a linked-definitions section with the contents

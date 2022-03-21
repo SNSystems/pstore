@@ -14,12 +14,16 @@
 //
 //===----------------------------------------------------------------------===//
 #include "pstore/core/hamt_set.hpp"
+
 // Standard library includes
 #include <random>
+
 // 3rd party includes
 #include <gtest/gtest.h>
+
 // pstore includes
 #include "pstore/core/transaction.hpp"
+
 // local includes
 #include "empty_store.hpp"
 
@@ -47,7 +51,7 @@ namespace {
 
     protected:
         mock_mutex mutex_;
-        InMemoryStore store_;
+        in_memory_store store_;
         pstore::database db_;
         set index_;
     };

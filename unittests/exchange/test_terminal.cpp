@@ -38,7 +38,8 @@ namespace {
         }
 
     private:
-        InMemoryStore db_storage_;
+        in_memory_store db_storage_;
+
     protected:
         pstore::database db_;
     };

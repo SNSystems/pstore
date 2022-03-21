@@ -14,22 +14,24 @@
 //
 //===----------------------------------------------------------------------===//
 #include "empty_store.hpp"
+
+// Standard library includes
 #include <cstdlib>
+
+// pstore includes
 #include "pstore/support/error.hpp"
 
-constexpr std::size_t InMemoryStore::file_size;
-constexpr std::size_t InMemoryStore::page_size_;
+constexpr std::size_t in_memory_store::file_size;
+constexpr std::size_t in_memory_store::page_size_;
 
-InMemoryStore::InMemoryStore ()
+// (ctor)
+// ~~~~~~
+in_memory_store::in_memory_store ()
         : buffer_{pstore::aligned_valloc (file_size, page_size_)}
         , file_{std::make_shared<pstore::file::in_memory> (buffer_, file_size)} {
     pstore::database::build_new_store (*file_);
 }
 
-InMemoryStore::~InMemoryStore () = default;
-
-
-EmptyStoreFile::EmptyStoreFile ()
-        : file_{std::make_shared<pstore::file::file_handle> ()} {}
-
-EmptyStoreFile::~EmptyStoreFile () = default;
+// (dtor)
+// ~~~~~~
+in_memory_store::~in_memory_store () = default;

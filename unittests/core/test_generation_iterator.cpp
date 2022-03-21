@@ -21,10 +21,13 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/core/generation_iterator.hpp"
+
 // 3rd party includes
 #include <gtest/gtest.h>
+
 // pstore includes
 #include "pstore/core/transaction.hpp"
+
 // Local includes
 #include "empty_store.hpp"
 
@@ -52,7 +55,7 @@ namespace {
         using trailer_address = pstore::typed_address<pstore::trailer>;
 
     private:
-        InMemoryStore store_;
+        in_memory_store store_;
         pstore::database db_;
     };
 

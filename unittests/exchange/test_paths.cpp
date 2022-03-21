@@ -33,7 +33,7 @@
 #include "pstore/json/json.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
 
-// local includes
+// Local includes
 #include "add_export_strings.hpp"
 #include "empty_store.hpp"
 
@@ -53,10 +53,10 @@ namespace {
             import_db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         }
 
-        InMemoryStore export_store_;
+        in_memory_store export_store_;
         pstore::database export_db_;
 
-        InMemoryStore import_store_;
+        in_memory_store import_store_;
         pstore::database import_db_;
     };
 

@@ -16,9 +16,14 @@
 #include "pstore/exchange/export_fixups.hpp"
 #include "pstore/exchange/import_fixups.hpp"
 
+// Standard library includes
 #include <sstream>
 #include <vector>
 
+// 3rd party includes
+#include <gmock/gmock.h>
+
+// pstore includes
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/json/json.hpp"
 #include "pstore/exchange/export_ostream.hpp"
@@ -27,8 +32,7 @@
 #include "pstore/exchange/import_non_terminals.hpp"
 #include "pstore/exchange/import_strings_array.hpp"
 
-#include <gmock/gmock.h>
-
+// Local includes
 #include "add_export_strings.hpp"
 #include "compare_external_fixups.hpp"
 
@@ -49,7 +53,7 @@ namespace {
         }
 
     private:
-        InMemoryStore db_storage_;
+        in_memory_store db_storage_;
 
     protected:
         pstore::database db_;
@@ -148,7 +152,7 @@ namespace {
         }
 
     private:
-        InMemoryStore db_storage_;
+        in_memory_store db_storage_;
 
     protected:
         pstore::database db_;
@@ -309,10 +313,10 @@ namespace {
                                                     pstore::exchange::import_ns::string_mapping *,
                                                     xfixup_collection *>;
 
-        InMemoryStore export_store_;
+        in_memory_store export_store_;
         pstore::database export_db_;
 
-        InMemoryStore import_store_;
+        in_memory_store import_store_;
         pstore::database import_db_;
     };
 
@@ -453,7 +457,7 @@ namespace {
             return parse (src, db, names, &fixups);
         }
 
-        InMemoryStore store_;
+        in_memory_store store_;
         pstore::database db_;
     };
 

@@ -16,15 +16,19 @@
 #include "pstore/exchange/import_generic_section.hpp"
 #include "pstore/exchange/export_section.hpp"
 
+// Standard library includes
 #include <iterator>
 #include <sstream>
 
+// 3rd party includes
 #include <gtest/gtest.h>
 
+// pstore includes
 #include "pstore/exchange/import_section_to_importer.hpp"
 #include "pstore/exchange/import_strings_array.hpp"
 #include "pstore/json/json.hpp"
 
+// Local includes
 #include "add_export_strings.hpp"
 #include "compare_external_fixups.hpp"
 #include "empty_store.hpp"
@@ -45,10 +49,10 @@ namespace {
 
         using transaction_lock = std::unique_lock<mock_mutex>;
 
-        InMemoryStore export_store_;
+        in_memory_store export_store_;
         pstore::database export_db_;
 
-        InMemoryStore import_store_;
+        in_memory_store import_store_;
         pstore::database import_db_;
     };
 
@@ -240,7 +244,7 @@ namespace {
         }
 
     protected:
-        InMemoryStore store_;
+        in_memory_store store_;
         pstore::database db_;
     };
 

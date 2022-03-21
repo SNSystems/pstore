@@ -49,7 +49,7 @@ namespace {
         using transaction_type = pstore::transaction<lock_guard>;
 
         mock_mutex mutex_;
-        InMemoryStore store_;
+        in_memory_store store_;
         pstore::database db_;
     };
 

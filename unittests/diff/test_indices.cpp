@@ -15,12 +15,15 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/diff_dump/diff_value.hpp"
+
 // Standard library includes
 #include <functional>
 #include <memory>
 #include <mutex>
+
 // 3rd party includes
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
+
 // pstore includes
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/core/hamt_map.hpp"
@@ -29,6 +32,7 @@
 #include "pstore/core/indirect_string.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
 #include "pstore/core/transaction.hpp"
+
 // Local includes
 #include "empty_store.hpp"
 #include "split.hpp"
@@ -47,7 +51,7 @@ namespace {
 
     protected:
         mock_mutex mutex_;
-        InMemoryStore store_;
+        in_memory_store store_;
         pstore::database db_;
     };
 

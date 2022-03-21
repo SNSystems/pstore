@@ -15,11 +15,11 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/core/hamt_map.hpp"
 
-// Standard library
+// Standard library includes
 #include <random>
 #include <list>
 
-// 3rd party
+// 3rd party includes
 #include <gtest/gtest.h>
 
 // pstore includes
@@ -57,7 +57,7 @@ namespace {
 
     protected:
         mock_mutex mutex_;
-        InMemoryStore store_;
+        in_memory_store store_;
         pstore::database db_;
     };
 
@@ -371,7 +371,7 @@ namespace {
         using index_type = pstore::index::hamt_map<std::string, std::string>;
 
         mock_mutex mutex_;
-        InMemoryStore store_;
+        in_memory_store store_;
         pstore::database db_;
     };
 

@@ -22,26 +22,32 @@
 
 #include "pstore/core/sstring_view_archive.hpp"
 
+// Standard library includes
 #include <vector>
+
+// 3rd party includes
 #include <gmock/gmock.h>
 
+// pstore includes
 #include "pstore/core/transaction.hpp"
 #include "pstore/core/db_archive.hpp"
 #include "pstore/support/assert.hpp"
 
+// local includes
 #include "empty_store.hpp"
 
 namespace {
     using shared_sstring_view = pstore::sstring_view<std::shared_ptr<char const>>;
 
-    class SStringViewArchive : public EmptyStore {
+    class SStringViewArchive : public testing::Test {
     public:
         SStringViewArchive ()
-                : db_{this->file ()} {
+                : db_{store_.file ()} {
             db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         }
 
     protected:
+        in_memory_store store_;
         pstore::database db_;
 
         pstore::address current_pos (pstore::transaction_base & t) const;
@@ -50,6 +56,8 @@ namespace {
         static shared_sstring_view make_shared_sstring_view (char const * s);
     };
 
+    // make shared sstring view
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
     shared_sstring_view SStringViewArchive::make_shared_sstring_view (char const * s) {
         auto const length = std::strlen (s);
         auto ptr = std::shared_ptr<char> (new char[length], [] (char * p) { delete[] p; });
@@ -57,10 +65,14 @@ namespace {
         return {ptr, length};
     }
 
+    // current pos
+    // ~~~~~~~~~~~
     pstore::address SStringViewArchive::current_pos (pstore::transaction_base & t) const {
         return t.allocate (0U, 1U); // allocate 0 bytes to get the current EOF.
     }
 
+    // as vector
+    // ~~~~~~~~~
     std::vector<char> SStringViewArchive::as_vector (pstore::typed_address<char> first,
                                                      pstore::typed_address<char> last) const {
         PSTORE_ASSERT (last >= first);
@@ -73,7 +85,8 @@ namespace {
         // Convert them to a vector so that they're easy to compare.
         return {ptr.get (), ptr.get () + num_chars};
     }
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (SStringViewArchive, Empty) {
     auto str = make_shared_sstring_view ("");

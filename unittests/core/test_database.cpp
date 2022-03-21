@@ -18,20 +18,20 @@
 // "Self" include
 #include "pstore/core/database.hpp"
 
-// Standard library
+// Standard library includes
 #include <limits>
 #include <memory>
 #include <mutex>
 #include <numeric>
 #include <vector>
 
-// Third party
+// Third party includes
 #include <gmock/gmock.h>
 
-// pstore library
+// pstore library includes
 #include "pstore/support/portab.hpp"
 
-// Local
+// Local includes
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
 
@@ -39,7 +39,7 @@ namespace {
 
     class Database : public ::testing::Test {
     protected:
-        InMemoryStore store_;
+        in_memory_store store_;
     };
 
 } // end anonymous namespace
@@ -215,7 +215,7 @@ namespace {
 
     class OpenCorruptStore : public ::testing::Test {
     protected:
-        InMemoryStore store_;
+        in_memory_store store_;
 
         pstore::header * get_header ();
         void check_database_open (pstore::error_code err) const;

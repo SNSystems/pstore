@@ -16,7 +16,7 @@
 
 #include "pstore/core/db_archive.hpp"
 
-// Stadard includes
+// Standard includes
 #include <array>
 #include <cstdint>
 
@@ -43,7 +43,7 @@ namespace {
 
     class DbArchive : public testing::Test {
     protected:
-        InMemoryStore store_;
+        in_memory_store store_;
     };
 
 } // end anonymous namespace
@@ -154,7 +154,7 @@ namespace {
             }
         };
 
-        InMemoryStore store_;
+        in_memory_store store_;
     };
 
 } // end anonymous namespace
@@ -190,7 +190,6 @@ TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
 
 namespace {
 
-
     class DbArchiveReadSpan : public testing::Test {
     private:
         using unique_pointer = pstore::unique_pointer<void const>;
@@ -219,7 +218,7 @@ namespace {
             }
         };
 
-        InMemoryStore store_;
+        in_memory_store store_;
     };
 
 } // end anonymous namespace

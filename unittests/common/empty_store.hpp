@@ -16,22 +16,25 @@
 #ifndef EMPTY_STORE_HPP
 #define EMPTY_STORE_HPP
 
+// Standard library includes
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
 
+// 3rd party includes
 #include <gmock/gmock.h>
 
+// pstore includes
 #include "pstore/core/database.hpp"
 #include "pstore/core/transaction.hpp"
 
-class InMemoryStore {
+class in_memory_store {
 public:
     static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;
 
     // Build an empty, in-memory database.
-    InMemoryStore ();
-    ~InMemoryStore ();
+    in_memory_store ();
+    ~in_memory_store ();
 
     std::shared_ptr<pstore::file::in_memory> const & file () const { return file_; }
     std::shared_ptr<std::uint8_t> const & buffer () const { return buffer_; }
@@ -40,23 +43,6 @@ private:
     std::shared_ptr<std::uint8_t> buffer_;
     std::shared_ptr<pstore::file::in_memory> file_;
     static constexpr std::size_t page_size_ = 4096;
-};
-
-// TODO: remove this class and prefer aggregation of InMemoryStore.
-class EmptyStore : public ::testing::Test, public InMemoryStore {
-};
-
-class EmptyStoreFile : public ::testing::Test {
-public:
-    // Build an empty, file database.
-    EmptyStoreFile ();
-    ~EmptyStoreFile () override;
-
-protected:
-    std::shared_ptr<pstore::file::file_handle> const & file () { return file_; }
-
-private:
-    std::shared_ptr<pstore::file::file_handle> file_;
 };
 
 struct mock_mutex {

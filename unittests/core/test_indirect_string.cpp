@@ -15,25 +15,30 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/core/indirect_string.hpp"
+
+// 3rd party includes
 #include <gtest/gtest.h>
 
+// pstore includes
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/serialize/types.hpp"
 
+// Local includes
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
 
 namespace {
 
-    class IndirectString : public EmptyStore {
+    class IndirectString : public testing::Test {
     public:
         IndirectString ()
-                : db_{this->file ()} {
+                : db_{store_.file ()} {
             db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         }
 
     protected:
+        in_memory_store store_;
         pstore::database db_;
     };
 
@@ -169,14 +174,15 @@ TEST_F (IndirectString, BadDatabaseAddress) {
 
 namespace {
 
-    class IndirectStringAdder : public EmptyStore {
+    class IndirectStringAdder : public testing::Test {
     public:
         IndirectStringAdder ()
-                : db_{this->file ()} {
+                : db_{store_.file ()} {
             db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         }
 
     protected:
+        in_memory_store store_;
         pstore::database db_;
     };
 

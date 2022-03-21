@@ -17,7 +17,7 @@
 #include "pstore/core/transaction.hpp"
 
 // 3rd party includes
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 // pstore includes
 #include "pstore/os/memory_mapper.hpp"
@@ -75,6 +75,7 @@ namespace {
 
 
 namespace {
+
     template <typename T, typename U>
     std::shared_ptr<T> cast (std::shared_ptr<U> p) {
 #ifdef PSTORE_CPP_RTTI
@@ -83,6 +84,12 @@ namespace {
         return std::static_pointer_cast<T> (p);
 #endif
     }
+
+    class EmptyStore : public ::testing::Test {
+    protected:
+        in_memory_store store_;
+    };
+
 } // end anonymous namespace
 
 
@@ -96,8 +103,8 @@ TEST_F (EmptyStore, ProtectAllOfOneRegion) {
     EXPECT_CALL (*page_size, get ()).WillRepeatedly (Return (fixed_page_size_bytes));
 
     // Create the data store instance. It will use 4K pages mapped using mock_mapper instances.
-    pstore::database db{this->file (), std::move (page_size),
-                        std::make_unique<mock_region_factory> (this->file (),
+    pstore::database db{store_.file (), std::move (page_size),
+                        std::make_unique<mock_region_factory> (store_.file (),
                                                                pstore::storage::min_region_size,
                                                                pstore::storage::min_region_size)};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
@@ -117,13 +124,13 @@ TEST_F (EmptyStore, ProtectAllOfOneRegion) {
     if (pstore::database::small_files_enabled ()) {
         EXPECT_CALL (*r0.get (), read_only (_, _)).Times (0);
     } else {
-        void * addr = reinterpret_cast<std::uint8_t *> (this->file ()->data ().get ()) +
+        void * addr = reinterpret_cast<std::uint8_t *> (store_.file ()->data ().get ()) +
                       fixed_page_size_bytes;
-        EXPECT_CALL (*r0.get (), read_only (addr, this->file ()->size () - fixed_page_size_bytes))
+        EXPECT_CALL (*r0.get (), read_only (addr, store_.file ()->size () - fixed_page_size_bytes))
             .Times (1);
     }
 
-    db.protect (pstore::address::null (), pstore::address{this->file ()->size ()});
+    db.protect (pstore::address::null (), pstore::address{store_.file ()->size ()});
 }
 
 TEST_F (EmptyStore, ProtectAllOfTwoRegions) {
@@ -135,8 +142,8 @@ TEST_F (EmptyStore, ProtectAllOfTwoRegions) {
     EXPECT_CALL (*page_size, get ()).WillRepeatedly (Return (fixed_page_size_bytes));
 
     // Create the data store instance. It will use 4K pages mapped using mock_mapper instances.
-    pstore::database db{this->file (), std::move (page_size),
-                        std::make_unique<mock_region_factory> (this->file (),
+    pstore::database db{store_.file (), std::move (page_size),
+                        std::make_unique<mock_region_factory> (store_.file (),
                                                                pstore::address::segment_size,
                                                                pstore::address::segment_size)};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
@@ -157,13 +164,13 @@ TEST_F (EmptyStore, ProtectAllOfTwoRegions) {
     // - The second should be the size of the region minus the size of that missing first page.
     std::uint64_t r0_protect_size = r0->size () - fixed_page_size_bytes;
     EXPECT_CALL (*r0.get (),
-                 read_only (reinterpret_cast<std::uint8_t *> (this->file ()->data ().get ()) +
+                 read_only (reinterpret_cast<std::uint8_t *> (store_.file ()->data ().get ()) +
                                 fixed_page_size_bytes,
                             r0_protect_size))
         .Times (1);
 
     EXPECT_CALL (*r1.get (),
-                 read_only (reinterpret_cast<std::uint8_t *> (this->file ()->data ().get ()) +
+                 read_only (reinterpret_cast<std::uint8_t *> (store_.file ()->data ().get ()) +
                                 pstore::address::segment_size,
                             4096U))
         .Times (1);

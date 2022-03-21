@@ -15,14 +15,18 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/core/diff.hpp"
 
+// Standard library includes
 #include <functional>
 #include <memory>
 #include <mutex>
 
+// 3rd party includes
 #include <gmock/gmock.h>
 
+// pstore includes
 #include "pstore/core/index_types.hpp"
 
+// Local includes
 #include "empty_store.hpp"
 #include "split.hpp"
 
@@ -39,7 +43,7 @@ namespace {
         pstore::extent<char> add (transaction_type & transaction, std::string const & key,
                                   std::string const & value);
 
-        InMemoryStore store_;
+        in_memory_store store_;
         pstore::database db_;
 
         mock_mutex mutex_;
