@@ -28,7 +28,6 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_generation_iterator.cpp
     test_hamt_map.cpp
     test_hamt_set.cpp
-    test_heartbeat.cpp
     test_indirect_string.cpp
     test_protect.cpp
     test_region.cpp

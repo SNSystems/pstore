@@ -43,8 +43,6 @@ list (APPEND PSTORE_SRC
     database.cpp
     file_header.cpp
     generation_iterator.cpp
-    heartbeat.cpp
-    heartbeat.hpp
     index_types.cpp
     indirect_string.cpp
     region.cpp

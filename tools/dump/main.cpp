@@ -215,23 +215,6 @@ namespace {
         return make_value (array);
     }
 
-    pstore::dump::value_ptr make_shared_memory (pstore::database const & db, bool no_times) {
-        (void) no_times;
-        using namespace pstore::dump;
-
-        // Shared memory is not used except on Windows.
-        object::container result;
-        result.emplace_back ("name", make_value (db.shared_memory_name ()));
-#ifdef _WIN32
-        pstore::shared const * const ptr = db.get_shared ();
-        result.emplace_back ("pid", make_number (ptr->pid.load ()));
-        result.emplace_back ("time", make_time (ptr->time.load (), no_times));
-        result.emplace_back ("open_tick", make_number (ptr->open_tick.load ()));
-#endif
-        return make_value (result);
-    }
-
-
     template <dump_error_code NotFoundError, typename IndexType, typename RecordFunction>
     pstore::dump::value_ptr add_specified (pstore::database const & db, IndexType const & index,
                                            std::list<pstore::index::digest> const & items_to_show,
@@ -418,9 +401,6 @@ int main (int argc, char * argv[]) {
             }
             if (opt.show_log) {
                 file.emplace_back ("log", make_log (parm));
-            }
-            if (opt.show_shared) {
-                file.emplace_back ("shared_memory", make_shared_memory (db, opt.no_times));
             }
 
             output.push_back (make_value (file));

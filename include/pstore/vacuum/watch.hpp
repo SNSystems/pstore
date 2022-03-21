@@ -25,7 +25,6 @@
 
 #include "pstore/core/vacuum_intf.hpp"
 #include "pstore/os/file.hpp"
-#include "pstore/os/shared_memory.hpp"
 
 namespace pstore {
     class database;

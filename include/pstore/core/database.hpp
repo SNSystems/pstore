@@ -18,12 +18,13 @@
 #ifndef PSTORE_CORE_DATABASE_HPP
 #define PSTORE_CORE_DATABASE_HPP
 
+#include <mutex>
+
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/storage.hpp"
 #include "pstore/core/vacuum_intf.hpp"
-#include "pstore/os/shared_memory.hpp"
 #include "pstore/support/head_revision.hpp"
 
 namespace pstore {
@@ -73,8 +74,6 @@ namespace pstore {
     //*  | (_| | (_| | || (_| | |_) | (_| \__ \  __/  *
     //*   \__,_|\__,_|\__\__,_|_.__/ \__,_|___/\___|  *
     //*                                               *
-
-    class heartbeat;
 
     class database {
     public:
@@ -149,13 +148,7 @@ namespace pstore {
         }
 
         std::unique_lock<file::range_lock> * upgrade_to_write_lock ();
-        std::time_t latest_time () const {
-            auto lt = this->file ()->latest_time ();
-#ifdef _WIN32
-            lt = std::max (lt, this->get_shared ()->time.load ());
-#endif
-            return lt;
-        }
+        std::time_t latest_time () const { return this->file ()->latest_time (); }
         bool is_writable () const noexcept { return storage_.file ()->is_writable (); }
 
         ///@{
@@ -343,8 +336,6 @@ namespace pstore {
             return sync_name_;
         }
 
-        std::string shared_memory_name () const { return this->get_sync_name () + ".pst"; }
-
         /// \brief Appends an amount of storage to the database.
         ///
         /// As an append-only system, this function provides the means by which data is recorded in
@@ -376,9 +367,6 @@ namespace pstore {
         static bool crc_checks_enabled ();
 
         void set_id (uuid const & id) noexcept { header_->set_id (id); }
-
-        shared const * get_shared () const;
-        shared * get_shared ();
 
         /// \brief Returns a pointer to an index base.
         ///
@@ -450,10 +438,6 @@ namespace pstore {
             indices_;
         std::string sync_name_;
         static constexpr auto const sync_name_length = std::size_t{20};
-
-
-        shared_memory<shared> shared_;
-        std::shared_ptr<heartbeat> heartbeat_;
 
         /// Clears the index cache: the next time that an index is requested it will be read from
         /// the disk. Used after a sync() operation has changed the current database view.

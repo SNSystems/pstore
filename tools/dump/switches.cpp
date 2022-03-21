@@ -103,10 +103,6 @@ namespace {
         cat (what_cat)};
     alias all2{"a", desc{"Alias for --all"}, aliasopt{all}};
 
-    opt<bool> shared_memory{"shared-memory", desc{"Dumps the shared-memory block"}, cat (what_cat)};
-    alias shared_memory2{"s", desc{"Alias for --shared-memory"}, aliasopt{shared_memory}};
-
-
     opt<pstore::command_line::revision_opt, parser<std::string>> revision{
         "revision", desc{"The starting revision number (or 'HEAD')"}};
     alias revision2{"r", desc{"Alias for --revision"}, aliasopt{revision}};
@@ -159,7 +155,6 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     result.show_header = header.get ();
     result.show_indices = indices.get ();
     result.show_log = log_opt.get ();
-    result.show_shared = shared_memory.get ();
 
     result.show_names = names_opt.get ();
     result.show_paths = paths_opt.get ();

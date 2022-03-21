@@ -21,7 +21,6 @@
 #include "pstore/os/path.hpp"
 
 #include "base32.hpp"
-#include "heartbeat.hpp"
 
 namespace {
 
@@ -35,7 +34,7 @@ namespace {
 
 namespace pstore {
 
-    // crc_checks_enabled
+    // crc checks enabled
     // ~~~~~~~~~~~~~~~~~~
     bool database::crc_checks_enabled () {
 #if PSTORE_CRC_CHECKS_ENABLED
@@ -43,17 +42,6 @@ namespace pstore {
 #else
         return false;
 #endif
-    }
-
-    // get_shared
-    // ~~~~~~~~~~
-    shared const * database::get_shared () const {
-        PSTORE_ASSERT (shared_.get () != nullptr);
-        return shared_.get ();
-    }
-    shared * database::get_shared () {
-        PSTORE_ASSERT (shared_.get () != nullptr);
-        return shared_.get ();
     }
 
     constexpr std::size_t const database::sync_name_length;
@@ -66,13 +54,13 @@ namespace pstore {
         this->finish_init (access_tick_enabled);
     }
 
-    // ~database
-    // ~~~~~~~~~
+    // (dtor)
+    // ~~~~~~
     database::~database () noexcept {
         no_ex_escape ([this] () { this->close (); });
     }
 
-    // finish_init
+    // finish init
     // ~~~~~~~~~~~
     void database::finish_init (bool const access_tick_enabled) {
         (void) access_tick_enabled;
@@ -88,33 +76,17 @@ namespace pstore {
         header_ = storage_.address_to_pointer (typed_address<header>::null ());
         sync_name_ = database::build_sync_name (*header_);
 
-#ifdef _WIN32
-        shared_ = pstore::shared_memory<pstore::shared> (this->shared_memory_name ());
-#endif
-
         // Put a shared-read lock on the lock_block strcut in the file. We're not going to modify
         // these bytes.
         range_lock_ =
             get_vacuum_range_lock (this->file (), file::file_handle::lock_kind::shared_read);
         lock_ = std::unique_lock<file::range_lock> (range_lock_);
-
-#ifdef _WIN32
-        if (access_tick_enabled) {
-            heartbeat_ = heartbeat::get ();
-            heartbeat_->attach (heartbeat::to_key_type (this), [this] (heartbeat::key_type) {
-                this->get_shared ()->time = std::time (nullptr);
-            });
-        }
-#endif
     }
 
     // close
     // ~~~~~
     void database::close () {
         if (!closed_) {
-            if (heartbeat_) {
-                heartbeat_->detach (heartbeat::to_key_type (this));
-            }
             if (modified_ && vacuum_mode_ != vacuum_mode::disabled) {
                 start_vacuum (*this);
             }

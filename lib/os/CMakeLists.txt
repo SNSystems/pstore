@@ -25,7 +25,6 @@ set (pstore_os_includes
     path.hpp
     process_file_name.hpp
     rotating_log.hpp
-    shared_memory.hpp
     signal_cv.hpp
     signal_helpers.hpp
     thread.hpp
@@ -45,7 +44,6 @@ set (pstore_os_lib_src
     path.cpp
     process_file_name_posix.cpp
     process_file_name_win32.cpp
-    shared_memory.cpp
     signal_cv_posix.cpp
     signal_cv_win32.cpp
     signal_helpers.cpp

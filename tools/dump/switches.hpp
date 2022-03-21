@@ -48,7 +48,6 @@ struct switches {
     bool show_header = false;
     bool show_indices = false;
     bool show_log = false;
-    bool show_shared = false;
 
     /// True if --names was specified.
     bool show_names = false;

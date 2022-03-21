@@ -20,7 +20,6 @@ set (PSTORE_OS_UNIT_TEST_SRC
     test_memory_mapper.cpp
     test_path.cpp
     test_process_file_name.cpp
-    test_shared_memory.cpp
 )
 add_pstore_unit_test (pstore-os-unit-tests ${PSTORE_OS_UNIT_TEST_SRC})
 target_link_libraries (pstore-os-unit-tests

@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <sstream>
 
 #include "pstore/config/config.hpp"
 #include "pstore/command_line/tchar.hpp"

@@ -18,6 +18,7 @@
 // Standard library
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 
 // pstore
 #include "pstore/command_line/command_line.hpp"

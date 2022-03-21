@@ -42,7 +42,6 @@
 #include "pstore/core/vacuum_intf.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/os/path.hpp"
-#include "pstore/os/shared_memory.hpp"
 #include "pstore/os/thread.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
