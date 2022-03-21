@@ -17,8 +17,12 @@
 /// \file bimap.hpp
 
 #include "pstore/broker/bimap.hpp"
+
+// Standard library includes
 #include <string>
-#include "gmock/gmock.h"
+
+// 3rd party includes
+#include <gmock/gmock.h>
 
 TEST (BiMap, Size) {
     pstore::broker::bimap<int, char> bm;

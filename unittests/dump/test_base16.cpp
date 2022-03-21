@@ -17,9 +17,13 @@
 /// \file test_base16.cpp
 
 #include "pstore/dump/value.hpp"
+
+// Standard library includes
 #include <cstdint>
 #include <vector>
-#include "gtest/gtest.h"
+
+// 3rd party includes
+#include <gtest/gtest.h>
 
 namespace {
     class Base16Fixture : public ::testing::Test {

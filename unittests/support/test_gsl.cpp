@@ -30,15 +30,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "pstore/support/gsl.hpp"
-#include "gtest/gtest.h"
 
-#include <iostream>
+// Standard library includes
 #include <list>
 #include <map>
 #include <memory>
+#include <regex>
 #include <string>
 #include <vector>
-#include <regex>
+
+// 3rd party includes
+#include <gtest/gtest.h>
 
 using namespace pstore::gsl;
 

@@ -15,9 +15,11 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/command_line/word_wrapper.hpp"
 
+// Standard library includes
 #include <vector>
 
-#include "gmock/gmock.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
 using namespace pstore::command_line;
 

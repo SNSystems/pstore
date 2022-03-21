@@ -15,7 +15,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/serialize/common.hpp"
-#include "gmock/gmock.h"
+
+// 3rd party includes
+#include <gmock/gmock.h>
 
 TEST (StickyAssign, Construction) {
     pstore::serialize::sticky_assign<int> default_init;

@@ -14,10 +14,14 @@
 //
 //===----------------------------------------------------------------------===//
 #include "pstore/support/pointee_adaptor.hpp"
+
+// Standard library includes
 #include <algorithm>
 #include <array>
 #include <vector>
-#include "gmock/gmock.h"
+
+// 3rd party includes
+#include <gmock/gmock.h>
 
 namespace {
 

@@ -15,9 +15,10 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/os/rotating_log.hpp"
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
+// pstore includes
 #include "pstore/os/file.hpp"
 #include "pstore/os/path.hpp"
 

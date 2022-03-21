@@ -14,11 +14,13 @@
 //
 //===----------------------------------------------------------------------===//
 #include "pstore/dump/value.hpp"
-// System includes
+
+// Standard library includes
 #include <sstream>
+
 // 3rd party includes
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
+
 // Local includes
 #include "split.hpp"
 #include "convert.hpp"

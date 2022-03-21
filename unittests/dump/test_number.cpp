@@ -21,7 +21,7 @@
 #include <sstream>
 
 // 3rd party includes
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 // Local includes
 #include "convert.hpp"

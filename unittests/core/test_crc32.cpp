@@ -14,8 +14,14 @@
 //
 //===----------------------------------------------------------------------===//
 #include "pstore/core/crc32.hpp"
+
+// Standard library includes
 #include <cstring>
-#include "gtest/gtest.h"
+
+// 3rd party includes
+#include <gtest/gtest.h>
+
+// pstore includes
 #include "pstore/support/gsl.hpp"
 
 TEST (Crc32, Empty) {

@@ -15,14 +15,20 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/serialize/archive.hpp"
 
+// Standard library includes
 #include <algorithm>
 #include <array>
 #include <cstring>
 #include <iterator>
 #include <type_traits>
 
-#include "gmock/gmock.h"
+// 3rd party includes
+#include <gmock/gmock.h>
+
+// pstore includes
 #include "pstore/support/gsl.hpp"
+
+// Local includes
 #include "check_for_error.hpp"
 
 TEST (SerializeArchiveVectorWriter, Write1Byte) {

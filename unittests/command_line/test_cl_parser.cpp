@@ -15,7 +15,8 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/command_line/command_line.hpp"
 
-#include "gtest/gtest.h"
+// 3rd party includes
+#include <gtest/gtest.h>
 
 TEST (ClParser, SimpleString) {
     using pstore::maybe;

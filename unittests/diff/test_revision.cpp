@@ -15,9 +15,11 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/diff_dump/revision.hpp"
 
-#include "pstore/support/head_revision.hpp"
+// 3rd party includes
+#include <gtest/gtest.h>
 
-#include "gtest/gtest.h"
+// pstore includes
+#include "pstore/support/head_revision.hpp"
 
 using namespace pstore;
 

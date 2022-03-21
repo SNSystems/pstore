@@ -15,12 +15,15 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/serialize/types.hpp"
 
+// Standard library includes
 #include <new>
 #include <type_traits>
 #include <vector>
 
-#include "gmock/gmock.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
+// pstore includes
 #include "pstore/serialize/archive.hpp"
 
 namespace {

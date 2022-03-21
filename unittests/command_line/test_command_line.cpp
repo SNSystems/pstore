@@ -15,13 +15,15 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/command_line/command_line.hpp"
 
+// Standard library includes
 #include <algorithm>
 #include <cstring>
 #include <iterator>
 #include <list>
 #include <vector>
 
-#include "gmock/gmock.h"
+// #rd party includes
+#include <gmock/gmock.h>
 
 using namespace pstore::command_line;
 

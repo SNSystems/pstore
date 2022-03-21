@@ -16,11 +16,14 @@
 
 #include "pstore/broker/command.hpp"
 
+// Standard library includes
 #include <chrono>
 #include <functional>
 
-#include "gmock/gmock.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
+// pstore includes
 #include "pstore/brokerface/fifo_path.hpp"
 #include "pstore/http/server_status.hpp"
 

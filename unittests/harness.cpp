@@ -13,8 +13,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 
 #include <cstring>
 #include <memory>
@@ -27,6 +25,8 @@
 #        include <crtdbg.h>
 #    endif
 #endif
+
+#include <gmock/gmock.h>
 
 #include "pstore/config/config.hpp"
 

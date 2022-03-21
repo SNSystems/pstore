@@ -14,7 +14,9 @@
 //
 //===----------------------------------------------------------------------===//
 #include "pstore/support/bit_count.hpp"
-#include "gmock/gmock.h"
+
+// 3rd party includes
+#include <gmock/gmock.h>
 
 TEST (BitCount, CountLeadingZeros) {
     EXPECT_EQ (127U, pstore::bit_count::clz (pstore::uint128{1U}));

@@ -17,7 +17,9 @@
 /// \brief Unit tests for the path.hpp (path management) interfaces.
 
 #include "pstore/os/path.hpp"
-#include "gtest/gtest.h"
+
+// 3rd party includes
+#include <gtest/gtest.h>
 
 TEST (Path, PosixDirName) {
     EXPECT_EQ ("", pstore::path::posix::dir_name (""));

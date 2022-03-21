@@ -16,12 +16,14 @@
 
 #include "pstore/support/parallel_for_each.hpp"
 
+// Standard library includes
 #include <algorithm>
 #include <array>
 #include <mutex>
 #include <vector>
 
-#include "gmock/gmock.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
 namespace {
 

@@ -16,11 +16,14 @@
 
 #include "pstore/dump/mcrepo_value.hpp"
 
+// Standard library includes
 #include <memory>
 #include <vector>
 
-#include "gmock/gmock.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
+// pstore includes
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/transaction.hpp"
@@ -28,6 +31,7 @@
 #include "pstore/serialize/standard_types.hpp"
 #include "pstore/support/pointee_adaptor.hpp"
 
+// Local includes
 #include "empty_store.hpp"
 #include "split.hpp"
 

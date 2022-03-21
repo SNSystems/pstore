@@ -14,10 +14,13 @@
 //
 //===----------------------------------------------------------------------===//
 #include "pstore/dump/line_splitter.hpp"
+
+// Standard library includes
 #include <iterator>
 #include <sstream>
 
-#include "gmock/gmock.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
 using namespace std::string_literals;
 

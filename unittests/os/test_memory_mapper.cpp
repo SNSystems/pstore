@@ -21,14 +21,14 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/os/memory_mapper.hpp"
 
-// Standard library
+// Standard library includes
 #include <algorithm>
 #include <numeric>
 
-// 3rd party
-#include "gmock/gmock.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
-// pstore
+// pstore includes
 #include "pstore/os/file.hpp"
 #include "pstore/support/error.hpp"
 

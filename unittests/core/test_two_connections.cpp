@@ -18,7 +18,7 @@
 #include <numeric>
 
 // 3rd party includes
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 // pstore includes
 #include "pstore/core/transaction.hpp"
@@ -26,8 +26,6 @@
 
 // Local private includes
 #include "empty_store.hpp"
-
-
 
 namespace {
 

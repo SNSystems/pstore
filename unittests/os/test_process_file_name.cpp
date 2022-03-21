@@ -18,15 +18,19 @@
 
 #include "pstore/os/process_file_name.hpp"
 
+// Standard library includes
 #include <algorithm>
 #include <cstring>
 #include <functional>
-// 3rd party
-#include "gmock/gmock.h"
 
+// 3rd party includes
+#include <gmock/gmock.h>
+
+// pstore includes
 #include "pstore/adt/small_vector.hpp"
 #include "pstore/support/gsl.hpp"
 
+// local includes
 #include "check_for_error.hpp"
 
 namespace {

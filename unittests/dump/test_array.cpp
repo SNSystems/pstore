@@ -14,8 +14,14 @@
 //
 //===----------------------------------------------------------------------===//
 #include "pstore/dump/value.hpp"
+
+// Standard library includes
 #include <memory>
-#include "gtest/gtest.h"
+
+// 3rd party includes
+#include <gtest/gtest.h>
+
+// Local includes
 #include "convert.hpp"
 
 namespace {

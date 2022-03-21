@@ -23,7 +23,7 @@
 #include <vector>
 
 // 3rd party includes
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 // Local includes
 #include "buffered_reader_mocks.hpp"

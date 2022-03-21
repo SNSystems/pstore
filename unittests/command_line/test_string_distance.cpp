@@ -15,7 +15,8 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/command_line/string_distance.hpp"
 
-#include "gtest/gtest.h"
+// 3rd party includes
+#include <gtest/gtest.h>
 
 using pstore::command_line::string_distance;
 using namespace std::string_literals;

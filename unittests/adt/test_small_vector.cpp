@@ -18,7 +18,7 @@
 
 #include <numeric>
 
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 TEST (SmallVector, DefaultCtor) {
     pstore::small_vector<int, 8> b;

@@ -15,9 +15,11 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/exchange/export_emit.hpp"
 
+// Standard library includes
 #include <sstream>
 
-#include "gtest/gtest.h"
+// 3rd party includes
+#include <gtest/gtest.h>
 
 TEST (ExportEmitString, SimpleString) {
     using namespace std::string_literals;

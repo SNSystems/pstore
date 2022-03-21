@@ -15,12 +15,12 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/os/file.hpp"
 
+// Standard library includes
 #include <array>
 #include <memory>
 
 // 3rd party includes
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
 
 namespace {
 

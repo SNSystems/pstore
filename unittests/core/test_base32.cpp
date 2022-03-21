@@ -15,7 +15,11 @@
 //===----------------------------------------------------------------------===//
 /// \file test_base32.cpp
 #include "base32.hpp"
-#include "gtest/gtest.h"
+
+// 3rd party includes
+#include <gtest/gtest.h>
+
+// pstore includes
 #include "pstore/support/uint128.hpp"
 
 TEST (Base32, Zero) {

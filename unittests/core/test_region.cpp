@@ -14,10 +14,14 @@
 //
 //===----------------------------------------------------------------------===//
 #include "pstore/core/region.hpp"
+
+// Standard library includes
 #include <vector>
 
-#include "gmock/gmock.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
+// pstore includes
 #include "pstore/os/file.hpp"
 
 namespace {

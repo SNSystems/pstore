@@ -17,10 +17,17 @@
 /// \file test_message_type.cpp
 
 #include "pstore/brokerface/message_type.hpp"
-#include <list>
-#include "gmock/gmock.h"
 
+// Standard library includes
+#include <list>
+
+// 3rd party includes
+#include <gmock/gmock.h>
+
+// pstore includes
 #include "pstore/support/error.hpp"
+
+// Local includes
 #include "check_for_error.hpp"
 
 TEST (BrokerMessageType, BadPartNo) {

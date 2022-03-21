@@ -22,8 +22,10 @@
 #include "pstore/adt/pointer_based_iterator.hpp"
 // Standard library
 #include <array>
+
 // 3rd party
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 // pstore library
 #include "pstore/support/array_elements.hpp"
 

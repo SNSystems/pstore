@@ -18,10 +18,15 @@
 /// \brief Unit tests for the YAML string output implementation.
 
 #include "pstore/dump/value.hpp"
+
+// Standard library includes
 #include <numeric>
-#include "gtest/gtest.h"
+
+// 3rd party includes
+#include <gtest/gtest.h>
 
 namespace {
+
     class StringFixture : public ::testing::Test {
     public:
         template <typename InputIterator>
@@ -45,7 +50,8 @@ namespace {
         s.write (out);
         return out.str ();
     }
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (StringFixture, Empty) {
     std::string const actual = this->convert ("");

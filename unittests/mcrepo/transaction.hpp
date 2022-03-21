@@ -16,10 +16,14 @@
 #ifndef MCREPO_TRANSACTION_HPP
 #define MCREPO_TRANSACTION_HPP
 
-#include "gmock/gmock.h"
+// Standard library includes
 #include <memory>
 #include <vector>
 
+// 3rd party includes
+#include <gmock/gmock.h>
+
+// pstore includes
 #include "pstore/core/address.hpp"
 
 class transaction {

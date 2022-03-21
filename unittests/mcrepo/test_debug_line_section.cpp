@@ -26,7 +26,7 @@
 #include <memory>
 
 // 3rd party includes
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 // pstore includes
 #include "pstore/support/pointee_adaptor.hpp"

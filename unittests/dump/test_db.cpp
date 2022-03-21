@@ -16,15 +16,17 @@
 
 #include "pstore/dump/db_value.hpp"
 
+// Standard library includes
 #include <cctype>
 #include <initializer_list>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+// 3rd party includes
+#include <gmock/gmock.h>
 
+// Local includes
 #include "split.hpp"
 
 namespace {

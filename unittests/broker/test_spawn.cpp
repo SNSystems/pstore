@@ -15,12 +15,16 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/broker/spawn.hpp"
 
+// Standard library includes
 #include <initializer_list>
 #include <iterator>
 #include <vector>
 
+// 3rd party includes
+#include <gmock/gmock.h>
+
+// pstore includes
 #include "pstore/support/portab.hpp"
-#include "gmock/gmock.h"
 
 using namespace pstore::broker;
 

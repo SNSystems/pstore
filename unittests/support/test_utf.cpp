@@ -16,10 +16,13 @@
 
 #include "pstore/support/utf.hpp"
 
-#include "gmock/gmock.h"
+// Standard library includes
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+
+// 3rd party includes
+#include <gmock/gmock.h>
 
 TEST (Utf, LengthOfEmptySequenceIsZero) {
     ASSERT_EQ (0U, pstore::utf::length (nullptr, 0));
