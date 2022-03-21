@@ -35,14 +35,14 @@ namespace {
     std::array<dirent, 3> const dir0_membs = {{
         {".", &dir0},
         {"..", &dir3},
-        {"f", file1, pstore::romfs::stat{sizeof (file1), 0, pstore::romfs::mode_t::file}},
+        {"f", file1, pstore::romfs::stat{sizeof (file1), pstore::romfs::mode_t::file, 0}},
     }};
     directory const dir0{dir0_membs};
     std::array<dirent, 4> const dir3_membs = {{
         {".", &dir3},
         {"..", &dir3},
         {"d", &dir0},
-        {"g", file1, pstore::romfs::stat{sizeof (file1), 0, pstore::romfs::mode_t::file}},
+        {"g", file1, pstore::romfs::stat{sizeof (file1), pstore::romfs::mode_t::file, 0}},
     }};
     directory const dir3{dir3_membs};
     directory const * const root = &dir3;
