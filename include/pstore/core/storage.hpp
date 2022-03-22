@@ -84,7 +84,15 @@ namespace pstore {
         file::file_base * file () noexcept { return file_.get (); }
         file::file_base const * file () const noexcept { return file_.get (); }
 
-        void map_bytes (std::uint64_t new_size);
+        /// Changes the number of physical allocated bytes so that they can accommodate the new
+        /// logical size requirement.
+        ///
+        /// \param old_logical_size  The existing logical size of the allocated storage in bytes.
+        /// \param new_logical_size  The requested logical size of the allocated storage in bytes.
+        void map_bytes (std::uint64_t old_logical_size, std::uint64_t new_logical_size);
+
+        /// Adjust the size of the underlying file to match that of the allocated regions.
+        void truncate_to_physical_size ();
 
         /// Called to add newly created memory-mapped regions to the segment address table. This
         /// happens when the file is initially opened, and when it is grown by calling allocate().

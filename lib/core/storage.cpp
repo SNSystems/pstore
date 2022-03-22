@@ -50,22 +50,30 @@ namespace pstore {
     constexpr std::uint64_t storage::full_region_size;
     constexpr std::uint64_t storage::min_region_size;
 
+    // truncate to physical size
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+    void storage::truncate_to_physical_size () {
+        file_->truncate (regions_.empty () ? 0 : regions_.back ()->end ());
+    }
+
     // map bytes
     // ~~~~~~~~~
-    void storage::map_bytes (std::uint64_t const new_size) {
+    void storage::map_bytes (std::uint64_t const old_logical_size,
+                             std::uint64_t const new_logical_size) {
         // Get the file offset of the end of the last memory mapped region.
-        std::uint64_t const old_size =
-            regions_.size () == 0 ? std::uint64_t{0} : regions_.back ()->end ();
-
-        if (new_size > old_size) {
+        std::uint64_t const old_physical_size =
+            regions_.empty () ? std::uint64_t{0} : regions_.back ()->end ();
+        if (new_logical_size > old_physical_size) {
             // if growing the storage
             auto const old_num_regions = regions_.size ();
             // Allocate new memory region(s) to accommodate the additional bytes requested.
-            region_factory_->add (&regions_, old_size, new_size);
+            region_factory_->add (&regions_, old_physical_size, new_logical_size);
             this->update_master_pointers (old_num_regions);
-        } else if (new_size < old_size) {
+            return;
+        }
+        if (new_logical_size < old_logical_size) {
             // if shrinking the storage
-            this->shrink (new_size);
+            this->shrink (new_logical_size);
         }
     }
 
@@ -76,13 +84,19 @@ namespace pstore {
         // by this transaction
         while (!regions_.empty ()) {
             region::memory_mapper_ptr const & region = regions_.back ();
-            if (region->offset () <= new_size) {
+            PSTORE_ASSERT (region->offset () % address::segment_size == 0 &&
+                           region->size () % address::segment_size == 0);
+            if (region->offset () < new_size) {
+                // Guarantee that segments beyond the mapped memory blocks are null.
+                PSTORE_ASSERT (
+                    std::all_of (std::begin (*sat_) + region->end () / address::segment_size,
+                                 std::end (*sat_), [] (sat_entry const & s) {
+                                     return s.value == nullptr && s.region == nullptr;
+                                 }));
                 return;
             }
 
             // Remove the entries in the segment address table.
-            PSTORE_ASSERT (region->offset () % address::segment_size == 0 &&
-                           region->size () % address::segment_size == 0);
             auto const sp = gsl::make_span (*sat_).subspan (
                 region->offset () / address::segment_size, region->size () / address::segment_size);
             std::for_each (std::begin (sp), std::end (sp), [&region] (sat_entry & segment) {
@@ -95,9 +109,14 @@ namespace pstore {
                 std::begin (*sat_), std::end (*sat_),
                 [&region] (sat_entry const & segment) { return segment.region != region; }));
 
-            // remove region
+            // Remove the region itself.
             regions_.pop_back ();
         }
+
+        // There are no mapped memory blocks. The segment address table should be all null.
+        PSTORE_ASSERT (std::all_of (std::begin (*sat_), std::end (*sat_), [] (sat_entry const & s) {
+            return s.value == nullptr && s.region == nullptr;
+        }));
     }
 
     // update master pointers
@@ -134,12 +153,10 @@ namespace pstore {
             segment_it = storage::slice_region_into_segments (*region_it, segment_it, segment_end);
         }
 
-#ifndef NDEBUG
         // Guarantee that segments beyond the mapped memory blocks are null.
-        for (; segment_it != segment_end; ++segment_it) {
-            PSTORE_ASSERT (segment_it->value == nullptr && segment_it->region == nullptr);
-        }
-#endif
+        PSTORE_ASSERT (std::all_of (segment_it, segment_end, [] (sat_entry const & s) {
+            return s.value == nullptr && s.region == nullptr;
+        }));
     }
 
     // slice region into segments

@@ -46,6 +46,8 @@ namespace pstore {
 
     constexpr std::size_t const database::sync_name_length;
 
+    // (ctor)
+    // ~~~~~~
     database::database (std::string const & path, access_mode const am,
                         bool const access_tick_enabled)
             : storage_{database::open (path, am)}
@@ -94,7 +96,7 @@ namespace pstore {
         }
     }
 
-    // upgrade_to_write_lock
+    // upgrade to write lock
     // ~~~~~~~~~~~~~~~~~~~~~
     std::unique_lock<file::range_lock> * database::upgrade_to_write_lock () {
         // TODO: look at exception-safety in this function.
@@ -106,7 +108,7 @@ namespace pstore {
         return &lock_;
     }
 
-    // clear_index_cache
+    // clear index cache
     // ~~~~~~~~~~~~~~~~~
     void database::clear_index_cache () {
         for (std::shared_ptr<index::index_base> & index : indices_) {
@@ -114,7 +116,7 @@ namespace pstore {
         }
     }
 
-    // older_revision_footer_pos
+    // older revision footer pos
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
     typed_address<trailer> database::older_revision_footer_pos (unsigned const revision) const {
         if (revision == pstore::head_revision || revision > this->get_current_revision ()) {
@@ -198,7 +200,7 @@ namespace pstore {
             // We may need to map additional data from the file. If another process has added
             // data to the store since we opened our connection, then a sync may want to access
             // that new data. Deal with that possibility here.
-            storage_.map_bytes (footer_pos.absolute () + sizeof (trailer));
+            storage_.map_bytes (size_.logical_size (), footer_pos.absolute () + sizeof (trailer));
 
             size_.update_footer_pos (footer_pos);
             trailer::validate (*this, footer_pos);
@@ -215,7 +217,7 @@ namespace pstore {
         size_.update_footer_pos (footer_pos);
     }
 
-    // build_new_store [static]
+    // build new store [static]
     // ~~~~~~~~~~~~~~~
     void database::build_new_store (file::file_base & file) {
         // Write the inital header, lock block, and footer to the file.
@@ -414,27 +416,28 @@ namespace pstore {
         }
         modified_ = true;
 
-        std::uint64_t const result = size_.logical_size ();
-        PSTORE_ASSERT (result >= size_.footer_pos ().absolute () + sizeof (trailer));
-
-        std::uint64_t const extra_for_alignment = calc_alignment (result, std::uint64_t{align});
+        std::uint64_t const old_logical_size = size_.logical_size ();
+        PSTORE_ASSERT (old_logical_size >= size_.footer_pos ().absolute () + sizeof (trailer));
+        std::uint64_t const extra_for_alignment =
+            calc_alignment (old_logical_size, std::uint64_t{align});
         PSTORE_ASSERT (extra_for_alignment < align);
+        // Bump 'result' up by the number of alignment bytes that we're adding to ensure
+        // that it's properly aligned.
+        std::uint64_t const result = old_logical_size + extra_for_alignment;
 
         // Increase the number of bytes being requested by enough to ensure that result is
         // properly aligned.
-        std::uint64_t const new_logical_size = result + bytes + extra_for_alignment;
+        std::uint64_t const new_logical_size = result + bytes;
 
         // Memory map additional space if necessary.
-        storage_.map_bytes (new_logical_size);
+        storage_.map_bytes (old_logical_size, new_logical_size);
 
         size_.update_logical_size (new_logical_size);
-        if (database::small_files_enabled ()) { //! OCLINT(PH - don't warn that this is a constant)
+        if /*constexpr*/ (
+            database::small_files_enabled ()) { //! OCLINT(PH - don't warn that this is a constant)
             this->file ()->truncate (new_logical_size);
         }
-
-        // Bump 'result' up by the number of alignment bytes that we're adding to ensure
-        // that it's properly aligned.
-        return address{result + extra_for_alignment};
+        return address{result};
     }
 
     // truncate
@@ -445,16 +448,20 @@ namespace pstore {
         }
         modified_ = true;
 
-        // Memory map space if necessary.
-        storage_.map_bytes (size);
+        // Adjust the memory mapped space if necessary.
+        storage_.map_bytes (size_.logical_size (), size);
 
         size_.truncate_logical_size (size);
-        if (database::small_files_enabled ()) { //! OCLINT(PH - don't warn that this is a constant)
+
+        if /*constexpr*/ (
+            database::small_files_enabled ()) { //! OCLINT(PH - don't warn that this is a constant)
             this->file ()->truncate (size);
+        } else {
+            storage_.truncate_to_physical_size ();
         }
     }
 
-    // set_new_footer
+    // set new footer
     // ~~~~~~~~~~~~~~
     void database::set_new_footer (typed_address<trailer> const new_footer_pos) {
         size_.update_footer_pos (new_footer_pos);

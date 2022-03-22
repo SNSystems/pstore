@@ -214,8 +214,7 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
 
     {
         mock_mutex mutex;
-        using guard_type = std::unique_lock<mock_mutex>;
-        auto transaction = begin (db, guard_type{mutex});
+        auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
 
         // Write an integer to the store.
         *(transaction.alloc_rw<int> ().first) = 42;
@@ -338,23 +337,56 @@ TEST_F (Transaction, CommitAfterAppendingAndWriting4Mb) {
     }
 }
 
-TEST_F (Transaction, RollbackAfterAppendingFile4mb) {
+TEST_F (Transaction, RollbackAfterAppending4mb) {
+    pstore::storage::region_container const & regions = db_.storage ().regions ();
+    pstore::file::file_base * const file = db_.storage ().file ();
+
     mock_mutex mutex;
-    using guard_type = std::unique_lock<mock_mutex>;
-    auto num_regions = db_.storage ().regions ().size ();
-    auto transaction = begin (db_, guard_type{mutex});
-    std::size_t const elements = (4U * 1024U * 1024U) / sizeof (int);
-    transaction.allocate (elements * sizeof (int), 1 /*align*/);
-    EXPECT_NE (db_.storage ().regions ().size (), num_regions) << "allocate did not create regions";
+    std::uint64_t const original_size = file->size ();
+    std::size_t const original_num_regions = regions.size ();
+    constexpr auto bytes_to_allocate = 4U * 1024U * 1024U;
+
+    auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
+
+    transaction.allocate (bytes_to_allocate, 1 /*align*/);
+    EXPECT_GT (regions.size (), original_num_regions) << "Allocate did not create regions";
+    EXPECT_GT (file->size (), original_size) << "The file did not grow!";
+
     // Abandon the transaction.
     transaction.rollback ();
+    EXPECT_EQ (regions.size (), original_num_regions) << "Rollback did not reclaim regions";
+    EXPECT_EQ (file->size (), original_size) << "The file was not restored to its original size";
+}
 
-    EXPECT_EQ (db_.storage ().regions ().size (), num_regions)
-        << "Rollback did not reclaim regions";
+TEST_F (Transaction, RollbackAfterFillingRegion) {
+    pstore::storage::region_container const & regions = db_.storage ().regions ();
+    pstore::file::file_base * const file = db_.storage ().file ();
+    std::size_t const original_num_regions = regions.size ();
+    constexpr auto align = 1U;
+
+    mock_mutex mutex;
+    using guard_type = std::unique_lock<mock_mutex>;
+
+    {
+        auto t1 = begin (db_, guard_type{mutex});
+        t1.allocate (regions.back ()->end () - db_.size () - sizeof (pstore::trailer), align);
+        t1.commit ();
+    }
+    EXPECT_EQ (regions.size (), original_num_regions)
+        << "Expected the first allocate to fill the initial region";
+
+    std::uint64_t const original_size = file->size ();
+    {
+        auto t2 = begin (db_, guard_type{mutex});
+        t2.allocate (sizeof (int), align);
+        t2.rollback ();
+    }
+    EXPECT_EQ (regions.size (), original_num_regions) << "Rollback did not reclaim regions";
+    EXPECT_EQ (file->size (), original_size) << "The file was not restored to its original size";
 }
 
 TEST_F (Transaction, CommitTwoSeparateTransactions) {
-    // Append to individual transactions, each containing a single int.
+    // Append two individual transactions, each containing a single int.
     {
         pstore::database db{store_.file ()};
         db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);

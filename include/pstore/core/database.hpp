@@ -315,6 +315,10 @@ namespace pstore {
         class storage const & storage () const noexcept {
             return storage_;
         }
+        /// For unit testing
+        class storage & storage () noexcept {
+            return storage_;
+        }
 
         void close ();
 
