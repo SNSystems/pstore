@@ -400,7 +400,7 @@ namespace {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /// Creates a pipe instance and connects to the client.
     /// \param pipe_name  The name of the pipe.
-    /// \param overlap  A OVERLAPPED instance which is used to track the state of the asynchronour
+    /// \param overlap  A OVERLAPPED instance which is used to track the state of the asynchronous
     ///   pipe creation.
     /// \return  A pair containing both the pipe handle and a boolean which will be true if the
     ///   connect operation is pending, and false if the connection has been completed.
