@@ -35,8 +35,8 @@ namespace pstore {
             /// internal-node can carry.
             constexpr auto const hash_size = sizeof (hash_type) * 8;
 
-            // TODO: Visual Studio won't allow pop_count to be constexpr. This forces us to have a
-            // second implementation that doesn't use the intrinsic.
+            // Visual Studio won't allow pop_count to be constexpr. This forces us to have a second
+            // implementation that doesn't use the intrinsic.
 
             /// A function to compute the number of set bits in a value. An alternative to the
             /// bit_count::pop_count() function that is normally used because some versions of that
