@@ -186,16 +186,17 @@ TEST_F (JsonNumber, IntegerMax) {
 
 namespace {
 
+    // Note that I hard-wire the numbers here rather than just using numeric_limits<> so that  we've got a reference for the string constants below.
     constexpr auto uint64_max = UINT64_C(18446744073709551615);
     static_assert (uint64_max == std::numeric_limits<std::uint64_t>::max (),
                    "Hard-wired unsigned 64-bit max value seems to be incorrect");
     constexpr auto uint64_max_str = "18446744073709551615"; // string equivalent of uint64_max.
     constexpr auto uint64_overflow = "18446744073709551616"; // uint64_max plus 1.
 
-// FIXME: talk about C++!
-    // The literal "most negative int" cannot be written in C. The rules in the standard (section
-    //  6.4.4.1 in C99) will give it an unsigned type.
-    constexpr auto int64_min = std::numeric_limits<std::int64_t>::min ();
+    // The literal "most negative int" cannot be written in C++. Integer constants are formed by
+    // building an unsigned integer and then applying unary minus.
+    constexpr auto int64_min =  -(INT64_C(9223372036854775807)) - 1;
+    static_assert (int64_min == std::numeric_limits<std::int64_t>::min (), "Hard-wired signed 64-bit min value seems to be incorrect");
     constexpr auto int64_min_str = "-9223372036854775808";
     constexpr auto int64_overflow = "-9223372036854775809"; // int64_min minus 1.
 

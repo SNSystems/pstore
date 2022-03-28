@@ -85,7 +85,7 @@ option (PSTORE_SIGNATURE_CHECKS_ENABLED "Perform internal structure signature ch
 option (PSTORE_POSIX_SMALL_FILES "On POSIX systems, keep pstore files as small as possible")
 option (PSTORE_ALWAYS_SPANNING "A debugging aid which forces all requests to behave as 'spanning' pointers")
 
-# FIXME: PSTORE_ENABLE_BROKER is only implemented to enable testing with the early prepo compiler that doesn't yet support exceptions.
+# TODO: PSTORE_ENABLE_BROKER is only implemented to enable testing with the early prepo compiler that doesn't yet support exceptions.
 option (PSTORE_ENABLE_BROKER "Build broker related libraries and tools and run broker system tests. Disable if the compiler does not support exceptions." Yes)
 option (PSTORE_VALGRIND "Run unit tests using Valgrind (if available).")
 option (PSTORE_COVERAGE "Enable generation of coverage reports.")

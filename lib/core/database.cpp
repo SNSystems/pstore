@@ -135,9 +135,8 @@ namespace pstore {
                 break;
             }
 
-            // TODO: check that footer_pos and generation number are be getting smaller; time must
+            // TODO: check that footer_pos and generation number are getting smaller; time must
             // not be getting larger.
-            // TODO: prev_generation should probably be atomic
             footer_pos = tail->a.prev_generation;
             trailer::validate (*this, footer_pos);
         }
